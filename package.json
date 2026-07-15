@@ -1,0 +1,24 @@
+{
+  "name": "silverwoods",
+  "version": "1.0.0",
+  "description": "A premium real estate website for the **Silverwoods Villa Community** — South Jagaddal, Kolkata. Built with Django + Tailwind CSS + Three.js.",
+  "main": "tailwind.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rajwada-Infotech/SILVERWOODS.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Rajwada-Infotech/SILVERWOODS/issues"
+  },
+  "homepage": "https://github.com/Rajwada-Infotech/SILVERWOODS#readme",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.2",
+    "tailwindcss": "^3.4.19"
+  }
+}

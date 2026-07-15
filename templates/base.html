@@ -5,26 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Silverwoods - Live the Villa Life{% endblock %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        cream: { 50:'#faf7f2', 100:'#f5f0e8', 200:'#ece5d9', 300:'#e0d5c5', 400:'#c9b99e' },
-                        brown: { 50:'#f9f5f0', 100:'#f0e8dc', 200:'#d4c4ac', 300:'#b09a7c', 400:'#8b6b4a', 500:'#6d4f32', 600:'#5c4a3a', 700:'#3d2b1f', 800:'#2a1f14', 900:'#1a130c' },
-                        gold: { 400:'#e8d48b', 500:'#c9a84c', 600:'#a08338', 700:'#8b6b4a' },
-                        dark: { 800:'#161616', 900:'#0d0d0d', 950:'#080808' },
-                    },
-                    fontFamily: {
-                        display: ['Playfair Display', 'Georgia', 'serif'],
-                        body: ['Inter', 'system-ui', 'sans-serif'],
-                    },
-                }
-            }
-        }
-    </script>
+    <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
@@ -131,7 +112,7 @@
                 <div class="flex flex-wrap justify-center gap-x-6 gap-y-2">
                     <a href="{% url 'brochure' %}" class="text-xs tracking-[0.15em] uppercase text-brown-400 dark:text-cream-400">Brochure</a>
                     <a href="{% url 'blueprint' %}" class="text-xs tracking-[0.15em] uppercase text-brown-400 dark:text-cream-400">Blueprint</a>
-                    <a href="{% url 'plots' %}" class="text-xs tracking-[0.15em] uppercase text-brown-400 dark:text-cream-400">Plot Metrics</a>
+                    <a href="{% url 'plots' %}" class="text-xs tracking-[0.15em] uppercase text-brown-400 dark:text-cream-400"><span class="sm:hidden">Plots</span><span class="hidden sm:inline">Plot Metrics</span></a>
                     <a href="{% url 'admin_login' %}" class="text-xs tracking-[0.15em] uppercase text-brown-400 dark:text-cream-400">Admin</a>
                 </div>
             </div>

@@ -39,6 +39,11 @@ ENV/
 *.swo
 .DS_Store
 
+# Node / Tailwind build
+node_modules/
+package-lock.json
+static/css/tailwind-input.css
+
 # Claude
 .claude/
 report_*.txt

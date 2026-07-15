@@ -115,4 +115,4 @@ Accessible at `/admin-panel/login/` using the superuser credentials created abov
 
 <div align="center">
   <sub>© Rajwada Infotech. All rights reserved.</sub>
-</div>s
+</div>

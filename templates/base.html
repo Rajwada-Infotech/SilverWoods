@@ -76,8 +76,19 @@
 
                     <!-- Mobile -->
                     <div class="flex items-center gap-3 lg:hidden">
-                        <button @click="mobileOpen = !mobileOpen" class="text-brown-700 dark:text-cream-100 text-sm font-semibold tracking-[0.15em] uppercase">
-                            <span x-text="mobileOpen ? 'Close' : 'Menu'"></span>
+                        <button @click="$dispatch('toggle-dark')"
+                                class="w-8 h-8 rounded-full border flex items-center justify-center transition-all border-brown-200 bg-cream-200 text-brown-600 dark:border-gold-500/20 dark:bg-dark-800 dark:text-gold-500">
+                            <i class="fas fa-sun text-xs" x-show="!darkMode"></i>
+                            <i class="fas fa-moon text-xs" x-show="darkMode"></i>
+                        </button>
+                        <button @click="mobileOpen = !mobileOpen" class="w-8 h-8 rounded-full border flex items-center justify-center transition-all border-brown-200 bg-cream-200 text-brown-600 dark:border-gold-500/20 dark:bg-dark-800 dark:text-gold-500">
+                            <svg x-show="mobileOpen" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                              <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                            <svg x-show="!mobileOpen" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                              <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                              <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+                            </svg>
                         </button>
                     </div>
                 </div>
@@ -86,14 +97,8 @@
 
         <!-- Mobile Menu -->
         <div x-show="mobileOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
-             class="lg:hidden fixed inset-0 top-[60px] bg-cream-100/98 dark:bg-dark-900/98 backdrop-blur-2xl z-40">
+             class="lg:hidden fixed inset-0 top-[60px] bg-cream-100 dark:bg-dark-900 z-40">
             <div class="flex flex-col items-center justify-center h-full gap-8">
-                <!-- Theme toggle -->
-                <button @click="$dispatch('toggle-dark')"
-                        class="w-9 h-9 rounded-full border flex items-center justify-center transition-all border-brown-200 bg-cream-200 text-brown-600 dark:border-gold-500/20 dark:bg-dark-800 dark:text-gold-500">
-                    <i class="fas fa-sun text-xs dark:hidden"></i>
-                    <i class="fas fa-moon text-xs hidden dark:block"></i>
-                </button>
                 {% if request.resolver_match.url_name == 'home' %}
                 <a href="#home" @click="mobileOpen=false" onclick="smoothScroll(event,'home')" class="font-display text-3xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Home</a>
                 <a href="#about" @click="mobileOpen=false" onclick="smoothScroll(event,'about')" class="font-display text-3xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">About</a>
@@ -386,5 +391,286 @@
 
     <script src="{% static 'js/main.js' %}?v=12"></script>
     {% block extra_js %}{% endblock %}
+
+    <!-- ═══ SILVERWOODS CONCIERGE CHATBOT ═══ -->
+    <style>
+    #sw-chat-wrap{position:fixed;bottom:24px;right:24px;z-index:9990;font-family:'Inter',sans-serif;}
+    #sw-chat-btn{width:54px;height:54px;border-radius:50%;background:#c9a84c;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(201,168,76,0.35);position:relative;transition:transform .2s;}
+    #sw-chat-btn:hover{transform:scale(1.08);}
+    #sw-chat-btn .pulse{position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(201,168,76,0.4);animation:sw-pulse 2s ease-in-out infinite;}
+    @keyframes sw-pulse{0%,100%{transform:scale(1);opacity:.6;}50%{transform:scale(1.15);opacity:0;}}
+    #sw-chat-btn svg{width:24px;height:24px;fill:#fff;transition:transform .3s;}
+    #sw-chat-btn.open svg{transform:rotate(90deg);}
+    #sw-chat-badge{position:absolute;top:-3px;right:-3px;width:18px;height:18px;background:#ef4444;border-radius:50%;border:2px solid #fff;font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;}
+    #sw-chat-panel{position:absolute;bottom:66px;right:0;width:320px;max-height:480px;background:#111118;border:1px solid rgba(201,168,76,0.22);border-radius:20px;overflow:hidden;display:none;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.5);}
+    #sw-chat-panel.open{display:flex;}
+    .sw-header{padding:14px 16px;background:linear-gradient(135deg,rgba(201,168,76,0.18),rgba(201,168,76,0.06));border-bottom:1px solid rgba(201,168,76,0.15);display:flex;align-items:center;gap:10px;}
+    .sw-avatar{width:36px;height:36px;border-radius:50%;background:rgba(201,168,76,0.15);border:1.5px solid rgba(201,168,76,0.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .sw-avatar svg{width:18px;height:18px;fill:#c9a84c;}
+    .sw-hinfo{flex:1;}
+    .sw-hname{font-size:13px;font-weight:600;color:#f5f0e8;letter-spacing:.3px;}
+    .sw-hstatus{font-size:10px;color:rgba(201,168,76,0.7);display:flex;align-items:center;gap:4px;margin-top:1px;}
+    .sw-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;display:inline-block;}
+    .sw-body{flex:1;overflow-y:auto;padding:14px 14px 10px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth;}
+    .sw-body::-webkit-scrollbar{width:3px;}
+    .sw-body::-webkit-scrollbar-track{background:transparent;}
+    .sw-body::-webkit-scrollbar-thumb{background:rgba(201,168,76,0.2);border-radius:10px;}
+    .sw-msg{max-width:85%;animation:sw-fadein .25s ease;}
+    @keyframes sw-fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+    .sw-bot-msg{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:4px 14px 14px 14px;padding:10px 13px;font-size:12.5px;color:rgba(245,240,232,0.9);line-height:1.5;align-self:flex-start;}
+    .sw-user-msg{background:rgba(201,168,76,0.18);border:1px solid rgba(201,168,76,0.25);border-radius:14px 4px 14px 14px;padding:10px 13px;font-size:12.5px;color:#f5f0e8;line-height:1.5;align-self:flex-end;}
+    .sw-suggestions{display:flex;flex-direction:column;gap:6px;margin-top:4px;}
+    .sw-suggestion{background:transparent;border:1px solid rgba(201,168,76,0.25);border-radius:10px;padding:8px 12px;font-size:11.5px;color:rgba(201,168,76,0.85);cursor:pointer;text-align:left;transition:all .15s;line-height:1.4;}
+    .sw-suggestion:hover{background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.5);color:#c9a84c;}
+    .sw-typing{display:flex;align-items:center;gap:4px;padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:4px 14px 14px 14px;width:fit-content;}
+    .sw-typing span{width:6px;height:6px;border-radius:50%;background:rgba(201,168,76,0.5);animation:sw-bounce 1.2s ease-in-out infinite;}
+    .sw-typing span:nth-child(2){animation-delay:.2s;}
+    .sw-typing span:nth-child(3){animation-delay:.4s;}
+    @keyframes sw-bounce{0%,80%,100%{transform:scale(0.6);opacity:.4;}40%{transform:scale(1);opacity:1;}}
+    .sw-contact-card{background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:12px;font-size:12px;color:rgba(245,240,232,0.8);line-height:1.8;}
+    .sw-contact-card a{color:#c9a84c;text-decoration:none;}
+    .sw-contact-card a:hover{text-decoration:underline;}
+    .sw-footer{padding:10px 12px;border-top:1px solid rgba(201,168,76,0.1);display:flex;gap:8px;align-items:center;}
+    #sw-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:9px 13px;font-size:12.5px;color:#f5f0e8;outline:none;font-family:'Inter',sans-serif;transition:border-color .2s;}
+    #sw-input::placeholder{color:rgba(255,255,255,0.2);}
+    #sw-input:focus{border-color:rgba(201,168,76,0.4);}
+    #sw-send{width:34px;height:34px;border-radius:50%;background:#c9a84c;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s;}
+    #sw-send:hover{background:#a8813a;}
+    #sw-send svg{width:14px;height:14px;fill:#fff;}
+    @media(max-width:400px){#sw-chat-panel{width:calc(100vw - 24px);right:-8px;}}
+    </style>
+
+    <div id="sw-chat-wrap">
+        <div id="sw-chat-panel">
+            <div class="sw-header">
+                <div class="sw-avatar">
+                    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                </div>
+                <div class="sw-hinfo">
+                    <div class="sw-hname">Silverwoods Concierge</div>
+                    <div class="sw-hstatus"><span class="sw-dot"></span> Online — Ask me anything</div>
+                </div>
+            </div>
+            <div class="sw-body" id="sw-body"></div>
+            <div class="sw-footer">
+                <input type="text" id="sw-input" placeholder="Type your question…" autocomplete="off">
+                <button id="sw-send">
+                    <svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                </button>
+            </div>
+        </div>
+        <button id="sw-chat-btn">
+            <span class="pulse"></span>
+            <svg id="sw-icon-chat" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            <svg id="sw-icon-close" viewBox="0 0 24 24" style="display:none;"><path d="M18 6L6 18M6 6l12 12" stroke="#fff" stroke-width="2.5" stroke-linecap="round" fill="none"/></svg>
+        </button>
+    </div>
+
+    <script>
+    (function(){
+        var btn=document.getElementById('sw-chat-btn');
+        var panel=document.getElementById('sw-chat-panel');
+        var body=document.getElementById('sw-body');
+        var input=document.getElementById('sw-input');
+        var send=document.getElementById('sw-send');
+        var iconChat=document.getElementById('sw-icon-chat');
+        var iconClose=document.getElementById('sw-icon-close');
+        var debTimer=null;
+        var isOpen=false;
+        var awaitingMore=false;
+
+        function togglePanel(){
+            isOpen=!isOpen;
+            panel.classList.toggle('open',isOpen);
+            btn.classList.toggle('open',isOpen);
+            iconChat.style.display=isOpen?'none':'block';
+            iconClose.style.display=isOpen?'block':'none';
+            if(isOpen && body.children.length===0) greet();
+        }
+
+        btn.addEventListener('click',togglePanel);
+
+        function scroll(){body.scrollTop=body.scrollHeight;}
+
+        function addMsg(text,cls){
+            var d=document.createElement('div');
+            d.className='sw-msg '+cls;
+            d.innerHTML=text;
+            body.appendChild(d);
+            scroll();
+            return d;
+        }
+
+        function typing(){
+            var d=document.createElement('div');
+            d.className='sw-typing';
+            d.innerHTML='<span></span><span></span><span></span>';
+            body.appendChild(d);
+            scroll();
+            return d;
+        }
+
+        function greet(){
+            var t=typing();
+            setTimeout(function(){
+                t.remove();
+                addMsg('Welcome to <strong style="color:#c9a84c">Silverwoods</strong>! 🏡<br>I\'m your virtual concierge. Type anything or pick a topic below.','sw-bot-msg');
+                showDefaultSuggestions();
+            },600);
+        }
+
+        function showDefaultSuggestions(){
+            fetch('/api/chatbot/search/?q=')
+            .then(function(r){return r.json();})
+            .then(function(data){
+                if(data.results && data.results.length){
+                    showSuggestions(data.results);
+                }
+            });
+        }
+
+        function showSuggestions(results){
+            var w=document.createElement('div');
+            w.className='sw-suggestions';
+            results.forEach(function(r){
+                var b=document.createElement('button');
+                b.className='sw-suggestion';
+                b.textContent=r.question;
+                b.addEventListener('click',function(){
+                    w.remove();
+                    addMsg(r.question,'sw-user-msg');
+                    fetchAnswer(r.id);
+                });
+                w.appendChild(b);
+            });
+            body.appendChild(w);
+            scroll();
+        }
+
+        function fetchAnswer(id){
+            awaitingMore=false;
+            var t=typing();
+            fetch('/api/chatbot/answer/'+id+'/')
+            .then(function(r){return r.json();})
+            .then(function(data){
+                t.remove();
+                addMsg(data.answer.replace(/\n/g,'<br>'),'sw-bot-msg');
+                setTimeout(askMore,400);
+            });
+        }
+
+        function askMore(){
+            awaitingMore=true;
+            var d=addMsg('Do you have another query?','sw-bot-msg');
+            var w=document.createElement('div');
+            w.className='sw-suggestions';
+            w.style.marginTop='6px';
+
+            var yes=document.createElement('button');
+            yes.className='sw-suggestion';
+            yes.textContent='Yes, I have more questions';
+            yes.addEventListener('click',function(){
+                awaitingMore=false;
+                w.remove();
+                d.remove();
+                addMsg('Sure! Type or pick another topic.','sw-bot-msg');
+                showDefaultSuggestions();
+            });
+
+            var no=document.createElement('button');
+            no.className='sw-suggestion';
+            no.textContent='No, show me contact details';
+            no.addEventListener('click',function(){
+                awaitingMore=false;
+                w.remove();
+                d.remove();
+                showContact();
+            });
+
+            w.appendChild(yes);
+            w.appendChild(no);
+            body.appendChild(w);
+            scroll();
+        }
+
+        function showContact(){
+            var t=typing();
+            fetch('/api/chatbot/contact/')
+            .then(function(r){return r.json();})
+            .then(function(c){
+                t.remove();
+                var lines=['<strong style="color:#c9a84c">Get in touch with us:</strong><br>'];
+                if(c.phone) lines.push('📞 <a href="tel:'+c.phone+'">'+c.phone+'</a>');
+                if(c.email) lines.push('✉️ <a href="mailto:'+c.email+'">'+c.email+'</a>');
+                if(c.address) lines.push('📍 '+c.address);
+                if(c.website) lines.push('🌐 <a href="'+c.website+'" target="_blank">Visit Website</a>');
+                var socials=[];
+                if(c.facebook) socials.push('<a href="'+c.facebook+'" target="_blank">Facebook</a>');
+                if(c.instagram) socials.push('<a href="'+c.instagram+'" target="_blank">Instagram</a>');
+                if(socials.length) lines.push('📱 '+socials.join(' · '));
+                var card=document.createElement('div');
+                card.className='sw-msg sw-bot-msg sw-contact-card';
+                card.innerHTML=lines.join('<br>');
+                body.appendChild(card);
+                scroll();
+                addMsg('Thank you for your interest in Silverwoods! We\'ll be happy to assist you. 🙏','sw-bot-msg');
+            });
+        }
+
+        function handleSearch(){
+            var q=input.value.trim();
+            if(q.length<2) return;
+            clearTimeout(debTimer);
+            debTimer=setTimeout(function(){
+                fetch('/api/chatbot/search/?q='+encodeURIComponent(q))
+                .then(function(r){return r.json();})
+                .then(function(data){
+                    var old=body.querySelector('.sw-live-sugg');
+                    if(old) old.remove();
+                    if(data.results && data.results.length){
+                        var w=document.createElement('div');
+                        w.className='sw-suggestions sw-live-sugg';
+                        data.results.forEach(function(r){
+                            var b=document.createElement('button');
+                            b.className='sw-suggestion';
+                            b.textContent=r.question;
+                            b.addEventListener('click',function(){
+                                w.remove();
+                                addMsg(r.question,'sw-user-msg');
+                                input.value='';
+                                fetchAnswer(r.id);
+                            });
+                            w.appendChild(b);
+                        });
+                        body.appendChild(w);
+                        scroll();
+                    }
+                });
+            },300);
+        }
+
+        input.addEventListener('input',handleSearch);
+
+        send.addEventListener('click',function(){
+            var q=input.value.trim();
+            if(!q) return;
+            var old=body.querySelector('.sw-live-sugg');
+            if(old) old.remove();
+            addMsg(q,'sw-user-msg');
+            input.value='';
+            var t=typing();
+            setTimeout(function(){
+                t.remove();
+                addMsg('I didn\'t find an exact match for that. Please pick from the suggestions below, or contact us directly!','sw-bot-msg');
+                showDefaultSuggestions();
+            },700);
+        });
+
+        input.addEventListener('keydown',function(e){
+            if(e.key==='Enter') send.click();
+        });
+    })();
+    </script>
+    <!-- ═══ END CHATBOT ═══ -->
 </body>
 </html>

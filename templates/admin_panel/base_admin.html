@@ -92,6 +92,10 @@
                     <i class="fas fa-vector-square w-5 text-center"></i><span x-show="mobileOpen || sideOpen">Plot Metrics</span>
                     <div x-show="!sideOpen && !mobileOpen" style="display:none;" class="absolute left-16 opacity-0 -translate-x-3 group-hover:opacity-100 group-hover:translate-x-0 bg-white/90 dark:bg-dark-900/90 backdrop-blur-md text-brown-800 dark:text-gold-400 text-[11px] uppercase tracking-[0.2em] font-bold px-4 py-2.5 rounded-xl whitespace-nowrap z-50 pointer-events-none transition-all duration-300 ease-out border border-brown-200/50 dark:border-gold-500/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">Plot Metrics</div>
                 </a>
+                <a href="{% url 'admin_chatbot' %}" @click="mobileOpen=false" class="relative group flex items-center text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_chatbot' %}bg-gold-500/20 text-gold-400{% else %}text-cream-400/50 hover:bg-white/5 hover:text-cream-100{% endif %}" :class="(mobileOpen || sideOpen) ? 'gap-3 px-3 py-2.5 rounded-xl' : 'justify-center w-10 h-10 rounded-full mx-auto'">
+                    <i class="fas fa-comments w-5 text-center"></i><span x-show="mobileOpen || sideOpen">Chatbot Q&A</span>
+                    <div x-show="!sideOpen && !mobileOpen" style="display:none;" class="absolute left-16 opacity-0 -translate-x-3 group-hover:opacity-100 group-hover:translate-x-0 bg-white/90 dark:bg-dark-900/90 backdrop-blur-md text-brown-800 dark:text-gold-400 text-[11px] uppercase tracking-[0.2em] font-bold px-4 py-2.5 rounded-xl whitespace-nowrap z-50 pointer-events-none transition-all duration-300 ease-out border border-brown-200/50 dark:border-gold-500/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">Chatbot Q&A</div>
+                </a>
             </nav>
             <div class="p-3 border-t border-brown-700/20 dark:border-white/[0.04]">
                 <a href="{% url 'admin_logout' %}" class="relative group flex items-center text-sm text-red-400/70 hover:bg-red-500/10 transition-colors" :class="(mobileOpen || sideOpen) ? 'gap-3 px-3 py-2.5 rounded-xl' : 'justify-center w-10 h-10 rounded-full mx-auto'">

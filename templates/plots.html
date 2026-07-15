@@ -4,14 +4,18 @@
 
 {% block extra_css %}
 <style>
-#canvas-wrap{position:relative;width:100%;background:#060606;overflow:hidden;height:350px}
+#canvas-wrap{position:relative;width:100%;background:#060606;overflow:hidden;height:480px}
 #canvas-wrap canvas{display:block;max-width:100%}
 @media(min-width:640px){#canvas-wrap{height:450px}}
 @media(min-width:1024px){#canvas-wrap{height:560px}}
 #ctrl-bar{position:absolute;top:12px;right:12px;z-index:30;display:flex;flex-direction:column;gap:8px}
 .cbtn{width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all .2s;border:1px solid rgba(255,255,255,.10);color:rgba(255,255,255,.55);background:rgba(0,0,0,.40);backdrop-filter:blur(8px);outline:none}
-@media(hover:hover){.cbtn:hover{background:rgba(255,255,255,.14);color:rgba(255,255,255,.9)}}
-.cbtn:active{background:inherit;color:inherit}
+.cbtn{outline:none;color:rgba(255,255,255,0.55);}
+.cbtn:focus{outline:none;box-shadow:none;}
+@media(hover:hover){
+  .cbtn:hover{background:rgba(201,168,76,0.18)!important;border-color:rgba(201,168,76,0.4)!important;color:#c9a84c!important;}
+  .cbtn:active{background:rgba(201,168,76,0.28)!important;border-color:rgba(201,168,76,0.55)!important;color:#c9a84c!important;}
+}
 #compass-wrap{position:absolute;bottom:16px;left:16px;z-index:30;pointer-events:none;width:56px;height:56px;border-radius:50%;background:rgba(0,0,0,.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center}
 #hud-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:25;overflow:visible}
 #hud-box{position:absolute;display:none;z-index:26;pointer-events:none;min-width:175px;padding:14px 20px 12px;background:rgba(5,4,2,.94);backdrop-filter:blur(20px);border:1px solid rgba(201,168,76,.35);border-radius:2px;box-shadow:0 8px 32px rgba(0,0,0,.6),inset 0 1px 0 rgba(201,168,76,.08)}
@@ -1777,7 +1781,7 @@ function init() {
   var container = document.getElementById('canvas-wrap');
   var W = container.clientWidth, H = container.clientHeight;
 
-  renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer = new THREE.WebGLRenderer({antialias:true, powerPreference:'high-performance'});
   renderer.setSize(W,H);
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));
   renderer.shadowMap.enabled=true;
@@ -1986,11 +1990,15 @@ function showHud(cx,cy,ud){
   var cRect=renderer.domElement.getBoundingClientRect();
   var px=cx-cRect.left, py=cy-cRect.top;
   var cW=cRect.width, cH=cRect.height;
+  var isMobileHud=cW<640;
   var goRight=px<cW*.58;
-  var kx=Math.max(50,Math.min(cW-50,goRight?px+48:px-48));
+  var kinkOff=isMobileHud?24:48;
+  var kx=Math.max(30,Math.min(cW-30,goRight?px+kinkOff:px-kinkOff));
   var ky=Math.max(40,py-32);
-  var rawPx=goRight?px+185:px-185;
-  var bx=goRight?Math.min(rawPx,cW-230):Math.max(rawPx,20);
+  var rawPx=goRight?px+(isMobileHud?80:185):px-(isMobileHud?80:185);
+  var bx=goRight?Math.min(rawPx,cW-(isMobileHud?160:230)):Math.max(rawPx,isMobileHud?10:20);
+  // on mobile ensure kx never crosses bx (no backwards line)
+  if(isMobileHud){ kx=goRight?Math.min(kx,bx):Math.max(kx,bx); }
 
   function aLine(x1,y1,x2,y2,delay){
     var ln=_hEl('line',{x1:x1,y1:y1,x2:x2,y2:y2,stroke:ac,'stroke-width':1.2});
@@ -2159,8 +2167,8 @@ document.getElementById('btn-reset').addEventListener('click',function(){
 document.getElementById('btn-rot').addEventListener('click',function(){
   _aRot=!_aRot; controls.autoRotate=_aRot;
   var b=document.getElementById('btn-rot');
-  b.style.color=_aRot?'rgba(255,255,255,.9)':'rgba(255,255,255,.55)';
-  b.style.background=_aRot?'rgba(255,255,255,.12)':'rgba(0,0,0,.40)';
+  b.style.color=_aRot?'#c9a84c':'rgba(255,255,255,0.7)';
+  b.style.background=_aRot?'rgba(201,168,76,0.25)':'rgba(0,0,0,0.4)';
 });
 
 function toggleFullscreen(){
@@ -2212,6 +2220,10 @@ if (document.readyState === 'complete') {
   setTimeout(safeInit, 0);
 } else {
   window.addEventListener('load', safeInit);
+}
+if(/iPhone|iPod/.test(navigator.userAgent) && !window.MSStream){
+  var _fsBtn=document.getElementById('btn-fs');
+  if(_fsBtn) _fsBtn.style.display='none';
 }
 </script>
 {% endblock %}

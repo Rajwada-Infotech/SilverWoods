@@ -1,0 +1,105 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% block title %}Chatbot Q&A{% endblock %}
+{% block page_title %}Chatbot Q&A Manager{% endblock %}
+
+{% block admin_content %}
+<div class="grid lg:grid-cols-5 gap-6">
+
+    <!-- Add New Q&A -->
+    <div class="lg:col-span-2">
+        <div class="bg-white dark:bg-white/[0.03] rounded-2xl border border-brown-700/[0.05] dark:border-white/[0.06] p-6">
+            <h2 class="text-lg font-bold text-brown-800 dark:text-cream-100 mb-5" style="font-family:'Playfair Display',serif">Add New Q&A</h2>
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add">
+                <div>
+                    <label class="block text-xs font-semibold text-brown-400 dark:text-cream-300/40 uppercase tracking-wider mb-1.5">Question</label>
+                    <input type="text" name="question" required placeholder="e.g. What is the price of 2BHK villa?"
+                           class="w-full px-4 py-2.5 rounded-xl border border-brown-200 dark:border-white/10 bg-cream-50 dark:bg-white/5 text-brown-800 dark:text-cream-100 text-sm focus:outline-none focus:border-gold-500 transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-brown-400 dark:text-cream-300/40 uppercase tracking-wider mb-1.5">Answer</label>
+                    <textarea name="answer" required rows="4" placeholder="The full answer the bot will display..."
+                              class="w-full px-4 py-2.5 rounded-xl border border-brown-200 dark:border-white/10 bg-cream-50 dark:bg-white/5 text-brown-800 dark:text-cream-100 text-sm focus:outline-none focus:border-gold-500 transition-colors resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-brown-400 dark:text-cream-300/40 uppercase tracking-wider mb-1.5">Keywords <span class="normal-case font-normal">(comma-separated)</span></label>
+                    <input type="text" name="keywords" required placeholder="price,cost,rate,2bhk,villa"
+                           class="w-full px-4 py-2.5 rounded-xl border border-brown-200 dark:border-white/10 bg-cream-50 dark:bg-white/5 text-brown-800 dark:text-cream-100 text-sm focus:outline-none focus:border-gold-500 transition-colors">
+                    <p class="text-[11px] text-brown-300 dark:text-cream-400/30 mt-1.5">User's message is matched against these keywords to suggest this question.</p>
+                </div>
+                <button type="submit" class="w-full py-2.5 bg-gold-500 hover:bg-gold-600 text-brown-900 font-semibold rounded-xl text-sm transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Add Q&A
+                </button>
+            </form>
+        </div>
+
+        <div class="mt-4 bg-amber-50 dark:bg-amber-500/10 rounded-2xl border border-amber-200 dark:border-amber-500/20 p-4">
+            <p class="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-1"><i class="fas fa-lightbulb mr-1"></i>Keyword tips</p>
+            <ul class="text-xs text-amber-600/80 dark:text-amber-400/70 space-y-1 list-disc list-inside">
+                <li>Use short, common words users type</li>
+                <li>Include synonyms: <code class="bg-amber-100 dark:bg-amber-500/20 px-1 rounded">price,cost,rate,budget</code></li>
+                <li>One keyword per concept works best</li>
+                <li>Avoid long phrases — single words match better</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Q&A List -->
+    <div class="lg:col-span-3">
+        <div class="bg-white dark:bg-white/[0.03] rounded-2xl border border-brown-700/[0.05] dark:border-white/[0.06]">
+            <div class="p-6 border-b border-brown-700/[0.05] dark:border-white/[0.05] flex items-center justify-between">
+                <h2 class="text-lg font-bold text-brown-800 dark:text-cream-100" style="font-family:'Playfair Display',serif">
+                    All Q&As <span class="text-sm font-normal text-brown-400 dark:text-cream-400/40 ml-2">{{ qas.count }}</span>
+                </h2>
+                <span class="text-[10px] font-bold text-gold-500 bg-gold-500/10 px-2 py-1 rounded-lg tracking-wider uppercase">Live on site</span>
+            </div>
+            {% if qas %}
+            <div class="divide-y divide-brown-700/[0.03] dark:divide-white/[0.03]">
+                {% for qa in qas %}
+                <div class="p-5 {% if not qa.is_active %}opacity-50{% endif %}">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold text-brown-800 dark:text-cream-100 mb-1">{{ qa.question }}</p>
+                            <p class="text-xs text-brown-400 dark:text-cream-400/50 line-clamp-2 mb-2">{{ qa.answer }}</p>
+                            <div class="flex flex-wrap gap-1">
+                                {% for kw in qa.keyword_list %}
+                                <span class="text-[10px] bg-gold-500/10 text-gold-600 dark:text-gold-400 px-2 py-0.5 rounded-full font-medium">{{ kw }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="toggle">
+                                <input type="hidden" name="pk" value="{{ qa.pk }}">
+                                <button type="submit" title="{% if qa.is_active %}Deactivate{% else %}Activate{% endif %}"
+                                        class="w-8 h-8 rounded-lg flex items-center justify-center text-xs transition-colors {% if qa.is_active %}bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-100{% else %}bg-brown-50 dark:bg-white/5 text-brown-400 hover:bg-brown-100{% endif %}">
+                                    <i class="fas {% if qa.is_active %}fa-toggle-on{% else %}fa-toggle-off{% endif %}"></i>
+                                </button>
+                            </form>
+                            <form method="post" onsubmit="return confirm('Delete this Q&A?')">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="pk" value="{{ qa.pk }}">
+                                <button type="submit" class="w-8 h-8 rounded-lg flex items-center justify-center text-xs bg-red-50 dark:bg-red-500/10 text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="p-12 text-center">
+                <div class="w-16 h-16 bg-gold-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-comments text-gold-500 text-2xl"></i>
+                </div>
+                <p class="text-brown-500 dark:text-cream-400/40 text-sm">No Q&As yet. Add your first one on the left.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

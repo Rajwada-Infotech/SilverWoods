@@ -6,8 +6,10 @@
 {% block extra_css %}
 <style>
 /* Blueprint page responsive styles */
-#blueprint-canvas { height: 350px !important; overflow: hidden !important; }
+#blueprint-canvas { height: 480px !important; overflow: hidden !important; }
 #blueprint-canvas canvas { max-width: 100% !important; display: block !important; }
+#blueprint-canvas.media-open #canvas-ctrl-btns,
+#blueprint-canvas.media-open #canvas-compass { display: none !important; visibility: hidden !important; }
 @media (min-width: 640px) { #blueprint-canvas { height: 450px !important; } }
 @media (min-width: 1024px) { #blueprint-canvas { height: 550px !important; } }
 .glass-warm { overflow: hidden; }
@@ -146,14 +148,14 @@
     </div>
 
     <!-- MEDIA MODAL (video / image) -->
-    <div id="media-jarvis-modal" style="display:none;position:absolute;inset:0;z-index:30;background:rgba(0,4,12,0.93);backdrop-filter:blur(12px);align-items:center;justify-content:center" onclick="closeMediaModal()">
+    <div id="media-jarvis-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,4,12,0.93);backdrop-filter:blur(12px);align-items:center;justify-content:center" onclick="closeMediaModal()">
       <div onclick="event.stopPropagation()" style="position:relative;width:680px;max-width:90%;background:rgba(0,8,20,0.96);border:1px solid rgba(0,212,255,0.45);border-radius:4px;box-shadow:0 0 0 1px rgba(0,212,255,0.07),0 0 48px rgba(0,212,255,0.2);padding:20px;font-family:'Courier New',monospace">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <div id="media-modal-title" style="font-size:10px;font-weight:700;color:#00d4ff;letter-spacing:.25em"></div>
           <button onclick="closeMediaModal()" style="background:none;border:none;color:rgba(0,212,255,0.6);cursor:pointer;font-size:18px;line-height:1;pointer-events:all">×</button>
         </div>
         <div style="height:1px;background:linear-gradient(90deg,rgba(0,212,255,0.4),transparent);margin-bottom:14px"></div>
-        <video id="media-video" controls style="width:100%;border-radius:2px;display:none;background:#000;max-height:400px"></video>
+        <video id="media-video" controls controlslist="nodownload" oncontextmenu="return false;" style="width:100%;border-radius:2px;display:none;background:#000;max-height:400px"></video>
         <img id="media-image" style="width:100%;border-radius:2px;display:none;max-height:400px;object-fit:contain" />
         <div id="media-placeholder" style="display:none;width:100%;height:180px;align-items:center;justify-content:center;color:rgba(0,212,255,0.28);font-size:9px;letter-spacing:.2em;border:1px dashed rgba(0,212,255,0.15);border-radius:2px">FILE NOT FOUND · ADD TO /STATIC/</div>
       </div>
@@ -368,8 +370,8 @@ function init() {
   const container = document.getElementById('blueprint-canvas');
   const W = container.clientWidth, H = container.clientHeight;
 
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(W, H, false); // false = don't set inline style, CSS handles display size
+  renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+  renderer.setSize(W, H, false);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.domElement.style.width = '100%';
   renderer.domElement.style.height = '100%';
@@ -1001,10 +1003,13 @@ function spawnTargetAnim(viewCx, viewCy, title, type) {
   });
 
   const goRight = cx < cW * 0.58;
-  const kinkX = Math.max(50, Math.min(cW-50, goRight ? cx+48 : cx-48));
+  const isMobileHud = cW < 640;
+  const kinkOff = isMobileHud ? 24 : 48;
+  let kinkX = Math.max(30, Math.min(cW-30, goRight ? cx+kinkOff : cx-kinkOff));
   const kinkY = Math.max(40, cy-32);
-  const rawPanelX = goRight ? cx+185 : cx-185;
-  const panelX = goRight ? Math.min(rawPanelX, cW-230) : Math.max(rawPanelX, 20);
+  const rawPanelX = goRight ? cx+(isMobileHud?80:185) : cx-(isMobileHud?80:185);
+  const panelX = goRight ? Math.min(rawPanelX, cW-(isMobileHud?160:230)) : Math.max(rawPanelX, isMobileHud?10:20);
+  if(isMobileHud){ kinkX = goRight ? Math.min(kinkX, panelX) : Math.max(kinkX, panelX); }
 
   _tgtTimers.push(setTimeout(() => {
     const dLen = Math.hypot(kinkX-cx, kinkY-cy);
@@ -1196,9 +1201,9 @@ function showZoneInfo(data) {
 // --------- Villa Jarvis Panel -------------------------------------------------------------------------------
 var _activeFloor = 0, _activeFloorName = 'GROUND FLOOR';
 const _floorFiles = [
-  { video:'/static/videos/floor_ground.mp4', layout:'/static/images/layout_ground.png', label:'GROUND FLOOR · WALKTHROUGH' },
-  { video:'/static/videos/floor_1st.mp4',    layout:'/static/images/layout_1st.png',    label:'1ST FLOOR · WALKTHROUGH' },
-  { video:'/static/videos/floor_2nd.mp4',    layout:'/static/images/layout_2nd.png',    label:'2ND FLOOR · WALKTHROUGH' },
+  { video:'/static/videos/interior.mp4', layout:'/static/images/layout_ground.png', label:'GROUND FLOOR · WALKTHROUGH' },
+  { video:'/static/videos/interior.mp4', layout:'/static/images/layout_1st.png',    label:'1ST FLOOR · WALKTHROUGH' },
+  { video:'/static/videos/interior.mp4', layout:'/static/images/layout_2nd.png',    label:'2ND FLOOR · WALKTHROUGH' },
 ];
 
 var _villaPanelTimer = null;
@@ -1306,22 +1311,18 @@ function openFloorLayout() {
 var _savedVpDisplay = 'none';
 var _savedFpDisplay = 'none';
 function _hideCanvasUI() {
-  var b = document.getElementById('canvas-ctrl-btns');
-  var c = document.getElementById('canvas-compass');
+  var canvas = document.getElementById('blueprint-canvas');
+  if (canvas) canvas.classList.add('media-open');
   var vp = document.getElementById('villa-jarvis-panel');
   var fp = document.getElementById('floor-jarvis-panel');
-  if (b) b.style.display = 'none';
-  if (c) c.style.display = 'none';
   if (vp) { _savedVpDisplay = vp.style.display || 'none'; vp.style.display = 'none'; }
   if (fp) { _savedFpDisplay = fp.style.display || 'none'; fp.style.display = 'none'; }
 }
 function _showCanvasUI() {
-  var b = document.getElementById('canvas-ctrl-btns');
-  var c = document.getElementById('canvas-compass');
+  var canvas = document.getElementById('blueprint-canvas');
+  if (canvas) canvas.classList.remove('media-open');
   var vp = document.getElementById('villa-jarvis-panel');
   var fp = document.getElementById('floor-jarvis-panel');
-  if (b) b.style.display = '';
-  if (c) c.style.display = '';
   if (vp) vp.style.display = _savedVpDisplay;
   if (fp) fp.style.display = _savedFpDisplay;
 }
@@ -1346,8 +1347,8 @@ function toggleAutoRot() {
 window.toggleAutoRot = toggleAutoRot;
 
 function resetCamera() {
-  camera.position.set(12, 135, 115);
-  controls.target.set(12, 0, 8);
+  camera.position.set(80, 190, 100);
+  controls.target.set(-10, 0, -120);
   controls.update();
 }
 window.resetCamera = resetCamera;
@@ -1355,16 +1356,19 @@ window.resetCamera = resetCamera;
 // Track manual (CSS) fullscreen for browsers without Fullscreen API (iOS Safari)
 var _manualFS = false;
 
+function _bpForceRender(){ renderer.clear(); renderer.render(scene, camera); }
+
 function _enterManualFS(c, btn) {
   _manualFS = true;
   c.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;z-index:9999;border-radius:0;';
   document.body.style.overflow = 'hidden';
   btn.innerHTML = '<i class="fas fa-compress text-xs"></i>';
-  setTimeout(() => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight, false);
-  }, 80);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight, false);
+  _bpForceRender();
+  setTimeout(_bpForceRender, 50);
+  setTimeout(_bpForceRender, 150);
 }
 
 function _exitManualFS(c, btn) {
@@ -1377,7 +1381,8 @@ function _exitManualFS(c, btn) {
     camera.aspect = c.clientWidth / c.clientHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(c.clientWidth, c.clientHeight, false);
-  }, 80);
+    _bpForceRender();
+  }, 100);
 }
 
 function toggleFullscreen() {
@@ -1410,6 +1415,8 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && _manualFS)
 
 document.addEventListener('fullscreenchange', () => {
   if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+    var mediaModal = document.getElementById('media-jarvis-modal');
+    if (mediaModal && mediaModal.style.display === 'flex') return;
     closeVillaPanel();
     closeFloorPanel();
     clearTargetAnim();
@@ -2637,5 +2644,9 @@ function vrOnResize() {
   vrRenderer.setSize(c.clientWidth,c.clientHeight);
 }
 VR_CLOSEANDWORLD_END */
+if(/iPhone|iPod/.test(navigator.userAgent) && !window.MSStream){
+  var _fsBtnBp=document.getElementById('btn-fullscreen');
+  if(_fsBtnBp) _fsBtnBp.style.display='none';
+}
 </script>
 {% endblock %}

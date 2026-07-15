@@ -31,4 +31,8 @@ urlpatterns = [
     path('admin-panel/profile/', views.admin_profile, name='admin_profile'),
     path('admin-panel/plots/', views.admin_plots, name='admin_plots'),
     path('admin-panel/plots/update/<int:villa_no>/', views.admin_plot_update, name='admin_plot_update'),
+    path('api/chatbot/search/', views.chatbot_search, name='chatbot_search'),
+    path('api/chatbot/answer/<int:qa_id>/', views.chatbot_answer, name='chatbot_answer'),
+    path('api/chatbot/contact/', views.chatbot_contact, name='chatbot_contact'),
+    path('admin-panel/chatbot/', views.admin_chatbot, name='admin_chatbot'),
 ]

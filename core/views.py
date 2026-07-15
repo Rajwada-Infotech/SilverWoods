@@ -13,7 +13,7 @@ from django.db import models
 from django.db.models import Max
 from .models import (
     ProjectInfo, FlatType, Amenity, Lead, SiteVisitor,
-    PopupAd, Review, BuildingFlat, BrochureImage, VillaPlot
+    PopupAd, Review, BuildingFlat, BrochureImage, VillaPlot, ChatbotQA
 )
 from .forms import LeadForm, PopupAdForm, FlatTypeForm, ReviewForm
 
@@ -716,3 +716,71 @@ def admin_plot_update(request, villa_no):
         'completion_pct': plot.completion_pct,
         'reserved_until': plot.reserved_until.isoformat() if plot.reserved_until else None,
     })
+
+
+# ─── Chatbot API ───
+
+def chatbot_search(request):
+    q = request.GET.get('q', '').strip().lower()
+    all_qa = ChatbotQA.objects.filter(is_active=True)
+    if not q:
+        results = list(all_qa[:8])
+    else:
+        words = [w for w in q.split() if len(w) >= 2]
+        matched = []
+        for qa in all_qa:
+            kws = qa.keyword_list()
+            score = sum(1 for w in words if any(w in kw or kw in w for kw in kws))
+            if score > 0:
+                matched.append((score, qa))
+        matched.sort(key=lambda x: -x[0])
+        results = [qa for _, qa in matched[:6]]
+    return JsonResponse({
+        'results': [{'id': qa.id, 'question': qa.question} for qa in results]
+    })
+
+
+def chatbot_answer(request, qa_id):
+    qa = get_object_or_404(ChatbotQA, pk=qa_id, is_active=True)
+    return JsonResponse({'question': qa.question, 'answer': qa.answer})
+
+
+def chatbot_contact(request):
+    project = ProjectInfo.load()
+    return JsonResponse({
+        'phone': project.phone,
+        'email': project.email,
+        'address': f"{project.address}, {project.city}, {project.state} - {project.pincode}".strip(', '),
+        'website': project.website,
+        'facebook': project.facebook,
+        'instagram': project.instagram,
+    })
+
+
+# ─── Chatbot Admin ───
+
+@login_required
+def admin_chatbot(request):
+    qas = ChatbotQA.objects.all()
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'add':
+            question = request.POST.get('question', '').strip()
+            answer = request.POST.get('answer', '').strip()
+            keywords = request.POST.get('keywords', '').strip()
+            if question and answer and keywords:
+                max_order = ChatbotQA.objects.aggregate(m=models.Max('order'))['m'] or 0
+                ChatbotQA.objects.create(
+                    question=question, answer=answer,
+                    keywords=keywords, order=max_order + 1
+                )
+        elif action == 'delete':
+            pk = request.POST.get('pk')
+            ChatbotQA.objects.filter(pk=pk).delete()
+        elif action == 'toggle':
+            pk = request.POST.get('pk')
+            qa = get_object_or_404(ChatbotQA, pk=pk)
+            qa.is_active = not qa.is_active
+            qa.save()
+        return redirect('admin_chatbot')
+    return render(request, 'admin_panel/chatbot.html', {'qas': qas})

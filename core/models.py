@@ -202,3 +202,26 @@ class BrochureImage(models.Model):
 
     def __str__(self):
         return f"Brochure Page {self.order}"
+
+
+class ChatbotQA(models.Model):
+    question = models.CharField(max_length=500)
+    answer = models.TextField()
+    keywords = models.CharField(
+        max_length=500,
+        help_text="Comma-separated keywords that trigger this question (e.g. price,cost,rate)"
+    )
+    is_active = models.BooleanField(default=True)
+    order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', 'created_at']
+        verbose_name = "Chatbot Q&A"
+        verbose_name_plural = "Chatbot Q&As"
+
+    def keyword_list(self):
+        return [k.strip().lower() for k in self.keywords.split(',') if k.strip()]
+
+    def __str__(self):
+        return self.question[:80]

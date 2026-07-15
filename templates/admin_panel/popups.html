@@ -1,0 +1,270 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% block title %}Popup Ads{% endblock %}
+{% block page_title %}Popup Ad Management{% endblock %}
+
+{% block admin_content %}
+<div class="grid lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 min-w-0 bg-white dark:bg-white/[0.03] rounded-2xl border border-brown-700/[0.05] dark:border-white/[0.06]">
+        <div class="p-6 border-b border-brown-700/[0.05] dark:border-white/[0.05]">
+            <h2 class="text-lg font-bold text-brown-800 dark:text-cream-100" style="font-family:'Playfair Display',serif">All Popup Ads</h2>
+            <p class="text-xs text-brown-400 dark:text-cream-300/30">Manage promotional popups shown on the website</p>
+        </div>
+        <div class="divide-y divide-brown-700/[0.03] dark:divide-white/[0.03]" id="popup-sortable" x-data="{openId: null}">
+            {% for popup in popups %}
+            <div class="p-4 sm:p-6 hover:bg-cream-200/30 dark:hover:bg-white/[0.02] transition-colors popup-row" data-id="{{ popup.pk }}">
+                <div x-show="openId !== {{ popup.pk }}" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <div class="drag-handle cursor-grab active:cursor-grabbing text-brown-300 dark:text-cream-300/20 hover:text-brown-500 dark:hover:text-cream-300/50 px-1 flex flex-col gap-0.5 select-none flex-shrink-0" title="Drag to reorder">
+                            <span class="block w-4 h-0.5 bg-current rounded"></span>
+                            <span class="block w-4 h-0.5 bg-current rounded"></span>
+                            <span class="block w-4 h-0.5 bg-current rounded"></span>
+                        </div>
+                        <span class="text-[10px] font-bold text-brown-300 dark:text-cream-300/20 w-5 text-center pos-label flex-shrink-0">{{ forloop.counter }}</span>
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl overflow-hidden bg-cream-200 dark:bg-white/[0.04] flex items-center justify-center flex-shrink-0">
+                            {% if popup.image %}<img src="{{ popup.image.url }}" class="w-full h-full object-cover" alt="">{% else %}<i class="fas fa-ad text-brown-300 dark:text-cream-300/20 text-xl"></i>{% endif %}
+                        </div>
+                        <div>
+                            <div class="font-bold text-brown-800 dark:text-cream-100 text-sm">{{ popup.title }}</div>
+                            <div class="text-xs text-brown-400 dark:text-cream-300/30">
+                                {% if popup.flat_type %}<span class="text-gold-600 dark:text-gold-400 font-medium">{{ popup.flat_type }}</span> · {% endif %}
+                                {% if popup.is_external %}<span class="text-orange-600 dark:text-orange-400">External</span>{% else %}<span class="text-blue-600 dark:text-blue-400">Internal</span>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 pl-[60px] sm:pl-0">
+                        <a href="{% url 'admin_toggle_popup' popup.pk %}" class="px-3 py-1.5 rounded-lg text-[10px] font-bold tracking-wider uppercase {% if popup.is_active %}bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400{% else %}bg-cream-200 dark:bg-white/[0.04] text-brown-400 dark:text-cream-300/30{% endif %} transition-colors">{% if popup.is_active %}Active{% else %}Inactive{% endif %}</a>
+                        <button @click="openId = {{ popup.pk }}" class="w-9 h-9 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center transition-colors"><i class="fas fa-edit text-sm"></i></button>
+                        <a href="{% url 'admin_delete_popup' popup.pk %}" onclick="return confirm('Delete?')" class="w-9 h-9 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl flex items-center justify-center transition-colors"><i class="fas fa-trash text-sm"></i></a>
+                    </div>
+                </div>
+                <form x-show="openId === {{ popup.pk }}" method="post" action="{% url 'admin_popups' %}" enctype="multipart/form-data" class="space-y-4 pt-2">
+                    {% csrf_token %}<input type="hidden" name="popup_id" value="{{ popup.pk }}">
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Project Logo</label>
+                            {% if popup.project_logo %}<img src="{{ popup.project_logo.url }}" class="h-24 w-24 object-contain rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" alt="Current logo">{% else %}<div class="h-24"></div>{% endif %}
+                            <input type="file" name="project_logo" accept="image/*" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm text-brown-500 dark:text-cream-300/40">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Image / Video</label>
+                            {% if popup.image %}
+                                {% with popup.image.name|lower as fname %}
+                                    {% if ".mp4" in fname or ".webm" in fname or ".mov" in fname %}
+                                        <video src="{{ popup.image.url }}" class="w-full h-24 object-cover rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" muted autoplay loop playsinline></video>
+                                    {% else %}
+                                        <img src="{{ popup.image.url }}" class="w-full h-24 object-cover rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" alt="">
+                                    {% endif %}
+                                {% endwith %}
+                            {% endif %}
+                            <input type="file" name="image" accept="image/*,video/mp4,video/webm,video/quicktime" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm text-brown-500 dark:text-cream-300/40">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Title</label>
+                            <input type="text" name="title" value="{{ popup.title }}" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Sub Title</label>
+                            <input type="text" name="flat_type" value="{{ popup.flat_type }}" placeholder="e.g. Live the Villa Life" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Description</label>
+                        <textarea name="description" rows="2" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100 resize-none">{{ popup.description }}</textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Start Date</label>
+                            <input type="date" name="start_date" value="{{ popup.start_date|date:'Y-m-d' }}" class="edit-start-date w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Duration (days)</label>
+                            <input type="number" min="1" placeholder="e.g. 10" class="edit-duration w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100 placeholder-brown-300">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">End Date</label>
+                            <input type="date" name="end_date" value="{{ popup.end_date|date:'Y-m-d' }}" class="edit-end-date w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                        <div>
+                            <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Link URL</label>
+                            <input type="url" name="link" value="{{ popup.link }}" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100">
+                        </div>
+                        <div class="flex gap-6 pb-2">
+                            <label class="flex items-center gap-2 text-sm text-brown-600 dark:text-cream-300/50 cursor-pointer"><input type="checkbox" name="is_active" {% if popup.is_active %}checked{% endif %} class="rounded text-gold-500"> Active</label>
+                            <label class="flex items-center gap-2 text-sm text-brown-600 dark:text-cream-300/50 cursor-pointer"><input type="checkbox" name="is_external" {% if popup.is_external %}checked{% endif %} class="rounded text-gold-500"> External</label>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 pt-1">
+                        <button type="submit" class="px-5 py-2 bg-brown-700 dark:bg-gold-500/20 text-cream-100 dark:text-gold-400 rounded-xl text-xs font-semibold tracking-wider uppercase">Save</button>
+                        <button type="button" @click="openId = null" class="px-5 py-2 bg-cream-200 dark:bg-white/[0.04] text-brown-600 dark:text-cream-300/50 rounded-xl text-xs font-semibold tracking-wider uppercase">Cancel</button>
+                    </div>
+                </form>
+            </div>
+            {% empty %}
+            <div class="p-12 text-center text-brown-300 dark:text-cream-300/20"><i class="fas fa-ad text-4xl mb-3 block"></i>No popup ads yet.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="min-w-0 bg-white dark:bg-white/[0.03] rounded-2xl border border-brown-700/[0.05] dark:border-white/[0.06] h-fit sticky top-28">
+        <div class="p-6 border-b border-brown-700/[0.05] dark:border-white/[0.05]">
+            <h2 class="text-lg font-bold text-brown-800 dark:text-cream-100" style="font-family:'Playfair Display',serif">Create Popup Ad</h2>
+        </div>
+        <form method="post" action="{% url 'admin_popups' %}" enctype="multipart/form-data" class="p-6 space-y-4">
+            {% csrf_token %}
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Title *</label>
+                    <input type="text" name="title" required placeholder="e.g. Rajwada Group" class="w-full px-3 py-2.5 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Sub Title</label>
+                    <input type="text" name="flat_type" placeholder="e.g. Live the Villa Life" class="w-full px-3 py-2.5 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Description</label>
+                <textarea name="description" rows="2" placeholder="Offer details..." class="w-full px-3 py-2.5 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20 resize-none"></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                    <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Start Date</label>
+                    <input type="date" name="start_date" id="create-start-date" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Duration (days)</label>
+                    <input type="number" min="1" id="create-duration" placeholder="e.g. 10" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100 placeholder-brown-300">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">End Date</label>
+                    <input type="date" name="end_date" id="create-end-date" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Image / Video</label>
+                    <input type="file" name="image" accept="image/*,video/mp4,video/webm,video/quicktime" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm text-brown-500 dark:text-cream-300/40">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Project Logo</label>
+                    <input type="file" name="project_logo" accept="image/*" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm text-brown-500 dark:text-cream-300/40">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+                <div>
+                    <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Link URL</label>
+                    <input type="url" name="link" placeholder="https://..." class="w-full px-3 py-2.5 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20">
+                </div>
+                <div class="flex gap-5 pb-2">
+                    <label class="flex items-center gap-2 text-sm text-brown-600 dark:text-cream-300/50 cursor-pointer"><input type="checkbox" name="is_active" checked class="rounded text-gold-500"> Active</label>
+                    <label class="flex items-center gap-2 text-sm text-brown-600 dark:text-cream-300/50 cursor-pointer"><input type="checkbox" name="is_external" class="rounded text-gold-500"> External</label>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full py-3 bg-brown-700 dark:bg-gold-500/20 text-cream-100 dark:text-gold-400 rounded-xl text-xs font-semibold hover:bg-brown-800 dark:hover:bg-gold-500/30 transition-colors tracking-wider uppercase">
+                <i class="fas fa-plus mr-2"></i> Create Popup
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+function calcEndDate(startInput, durationInput, endInput) {
+    function update() {
+        var start = startInput.value;
+        var days = parseInt(durationInput.value);
+        if (start && days > 0) {
+            var d = new Date(start);
+            d.setDate(d.getDate() + days);
+            endInput.value = d.toISOString().split('T')[0];
+        }
+    }
+    startInput.addEventListener('change', update);
+    durationInput.addEventListener('input', update);
+}
+
+// Create form
+calcEndDate(
+    document.getElementById('create-start-date'),
+    document.getElementById('create-duration'),
+    document.getElementById('create-end-date')
+);
+
+// Edit forms
+document.querySelectorAll('.edit-start-date').forEach(function(startEl) {
+    var row = startEl.closest('.grid');
+    var durationEl = row.querySelector('.edit-duration');
+    var endEl = row.querySelector('.edit-end-date');
+    if (durationEl && endEl) calcEndDate(startEl, durationEl, endEl);
+});
+
+// Drag-and-drop reorder
+(function() {
+    var list = document.getElementById('popup-sortable');
+    if (!list) return;
+    var dragging = null;
+
+    list.querySelectorAll('.popup-row').forEach(function(row) {
+        var handle = row.querySelector('.drag-handle');
+        handle.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            dragging = row;
+            row.style.opacity = '0.5';
+            row.style.boxShadow = '0 4px 24px rgba(0,0,0,0.12)';
+        });
+    });
+
+    document.addEventListener('mousemove', function(e) {
+        if (!dragging) return;
+        var rows = Array.from(list.querySelectorAll('.popup-row'));
+        rows.forEach(function(row) {
+            if (row === dragging) return;
+            var rect = row.getBoundingClientRect();
+            var mid = rect.top + rect.height / 2;
+            if (e.clientY < mid) {
+                list.insertBefore(dragging, row);
+            } else if (e.clientY > mid && row.nextSibling) {
+                list.insertBefore(dragging, row.nextSibling);
+            } else if (e.clientY > mid) {
+                list.appendChild(dragging);
+            }
+        });
+    });
+
+    document.addEventListener('mouseup', function() {
+        if (!dragging) return;
+        dragging.style.opacity = '';
+        dragging.style.boxShadow = '';
+        dragging = null;
+        // Save new order
+        var ids = Array.from(list.querySelectorAll('.popup-row')).map(function(r) {
+            return parseInt(r.dataset.id);
+        });
+        // Update position labels
+        list.querySelectorAll('.popup-row').forEach(function(row, i) {
+            var lbl = row.querySelector('.pos-label');
+            if (lbl) lbl.textContent = i + 1;
+        });
+        fetch('/admin-panel/popups/reorder/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+            body: JSON.stringify({ids: ids})
+        });
+    });
+})();
+</script>
+{% endblock %}

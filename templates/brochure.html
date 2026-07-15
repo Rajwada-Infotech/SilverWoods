@@ -1,0 +1,595 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Brochure - Silverwoods{% endblock %}
+
+{% block content %}
+<section class="min-h-screen pt-28 pb-20">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center mb-14">
+
+            <p class="text-[10px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/60 mb-4 mt-8">Portfolio</p>
+            <h1 class="font-display text-5xl md:text-6xl font-bold text-brown-800 dark:text-cream-100">
+                Project <span class="italic">Brochure</span>
+            </h1>
+            <p class="mt-4 text-sm text-brown-400 dark:text-cream-300/40 tracking-wide">Flip through the pages to explore Silverwoods</p>
+        </div>
+
+        <div class="flex flex-col items-center" x-data="dearflip()">
+            <!-- Book -->
+            <div class="df-scene">
+                <div class="df-shadow"></div>
+                <!-- Closed Book -->
+                <div class="df-closed" id="dfClosed">
+                    <div class="df-closed-cover" id="dfClosedCover">
+                        <div style="text-align:center;padding:24px;">
+                            <div style="width:40px;height:40px;margin:0 auto 12px;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                                <img src="{% static 'images/logo.png' %}" alt="Silverwoods Logo" style="width:100%;height:100%;object-fit:cover;">
+                            </div>
+                            <p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;letter-spacing:0.2em;color:#f5eedf;">SILVERWOODS</p>
+                            <div style="width:32px;height:1px;background:rgba(201,168,76,0.5);margin:10px auto;"></div>
+                            <p style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(201,168,76,0.75);font-style:italic;">Live the Villa Life</p>
+                            <p style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(245,238,223,0.5);margin-top:14px;">A Signature Landmark by Delta Realtech</p>
+                        </div>
+                    </div>
+                    <div class="df-closed-spine"></div>
+                    <div class="df-closed-pages"></div>
+                    <div class="df-closed-top"></div>
+                    <div class="df-closed-back"></div>
+                </div>
+                <!-- Open Book -->
+                <div class="df-book" id="dfBook" style="display:none;">
+                    <div class="df-left" id="dfLeft"><div class="df-hover-overlay df-hover-left"></div></div>
+                    <div class="df-spine"></div>
+                    <div class="df-right" id="dfRight"><div class="df-hover-overlay df-hover-right"></div></div>
+                    <div class="df-flip" id="dfFlip">
+                        <div class="df-flip-front" id="dfFlipFront"></div>
+                        <div class="df-flip-back" id="dfFlipBack"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Caption -->
+            <div class="mt-8 h-8 flex items-center justify-center">
+                <p class="text-sm font-display italic text-brown-700 dark:text-gold-400 tracking-wide" x-text="caption"></p>
+            </div>
+
+            <!-- Download -->
+            <div class="mt-12" x-data="{ showForm: false, submitted: false }">
+                <button @click="showForm = true" x-show="!submitted" class="btn-primary rounded-xl inline-flex items-center gap-3 px-8 py-4 cursor-pointer">
+                    <i class="fas fa-download"></i> Download Brochure PDF
+                </button>
+                <a x-show="submitted" href="/download-brochure/" download class="btn-primary rounded-xl inline-flex items-center gap-3 px-8 py-4">
+                    <i class="fas fa-download"></i> Download Brochure PDF
+                </a>
+                <div x-show="showForm && !submitted" x-transition class="fixed inset-0 z-[90] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div @click.away="showForm = false" x-transition class="relative glass-warm rounded-2xl p-8 max-w-md w-full border border-brown-700/[0.08] dark:border-white/[0.06] shadow-2xl">
+                        <button @click="showForm = false" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-brown-700/5 dark:bg-white/5 flex items-center justify-center text-brown-400"><i class="fas fa-times text-xs"></i></button>
+                        <div class="text-center mb-6">
+                            <div class="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center mx-auto mb-4"><img src="{% static 'images/logo.png' %}" alt="Silverwoods" class="w-full h-full object-contain"></div>
+                            <h3 class="font-display text-xl font-bold text-brown-800 dark:text-cream-100">Download Brochure</h3>
+                            <p class="text-xs text-brown-600 dark:text-cream-300/40 mt-2">Share your details to download</p>
+                        </div>
+                        <form @submit.prevent="const fd=new FormData($el);fd.append('source','brochure_download');fetch('/submit-lead/',{method:'POST',body:fd}).then(r=>r.json()).then(d=>{if(d.success){submitted=true;showForm=false;const a=document.createElement('a');a.href='/download-brochure/';a.download='Silverwoods-Brochure.pdf';a.click();}});" class="space-y-4">
+                            {% csrf_token %}
+                            <div><label class="block text-[10px] font-semibold text-brown-600 dark:text-cream-300/30 mb-1.5 tracking-[0.15em] uppercase">Full Name *</label><input type="text" name="name" required placeholder="Your name" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-white/[0.04] border border-brown-200 dark:border-white/[0.08] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20 text-sm"></div>
+                            <div><label class="block text-[10px] font-semibold text-brown-600 dark:text-cream-300/30 mb-1.5 tracking-[0.15em] uppercase">Phone *</label><input type="tel" name="phone" required placeholder="Your phone" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-white/[0.04] border border-brown-200 dark:border-white/[0.08] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20 text-sm"></div>
+                            <div><label class="block text-[10px] font-semibold text-brown-600 dark:text-cream-300/30 mb-1.5 tracking-[0.15em] uppercase">Email <span class="opacity-50">(Optional)</span></label><input type="email" name="email" placeholder="Your email" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-white/[0.04] border border-brown-200 dark:border-white/[0.08] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20 text-sm"></div>
+                            <input type="hidden" name="flat_preference" value="Brochure Download"><input type="hidden" name="message" value="Brochure download">
+                            <button type="submit" class="w-full py-3.5 btn-primary rounded-xl flex items-center justify-center gap-2"><i class="fas fa-download text-xs"></i> Submit & Download</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function dearflip() {
+    const P=[{% for url in image_urls %}{s:'{{ url }}',c:'Silverwoods'},{% endfor %}];
+    // Pages array: [cover-left, cover-right(=img0), img1, img2, ..., back-left, back-right]
+    // We pair them: spread 0 = cover, spread 1 = pages[0]+[1], etc.
+    // Simpler: just track which image index is showing on the right page.
+
+    // maxSpread: last spread where at least the left page has a real image
+    const maxSpread = Math.floor((P.length - 1) / 2);
+
+    return {
+        state: 'closed', // 'closed' | 'open' | 'closing'
+        spread: 0, // 0..maxSpread (which spread is showing)
+        busy: false,
+        caption: 'Silverwoods — Live the Villa Life',
+        total: P.length,
+        imgCount: P.length,
+        page: 0,
+
+        init() {
+            window.addEventListener('keydown', e => {
+                if (e.key === 'ArrowRight') this.next();
+                if (e.key === 'ArrowLeft') this.prev();
+            });
+            // Click right page → next, click left page → prev
+            this.$nextTick(() => {
+                const L = document.getElementById('dfLeft');
+                const R = document.getElementById('dfRight');
+                if (R) R.addEventListener('click', () => { if (this.state === 'open') this.next(); });
+                if (L) L.addEventListener('click', () => { if (this.state === 'open') this.prev(); });
+            });
+            // Click closed book → open
+            const closed = document.getElementById('dfClosed');
+            if (closed) closed.addEventListener('click', () => { if (this.state === 'closed') this.next(); });
+        },
+
+        showClosed() {
+            document.getElementById('dfClosed').style.display = '';
+            document.getElementById('dfBook').style.display = 'none';
+        },
+
+        showOpen() {
+            document.getElementById('dfClosed').style.display = 'none';
+            document.getElementById('dfBook').style.display = '';
+        },
+
+        coverHTML() {
+            return `<div style="width:100%;height:100%;background:linear-gradient(160deg,#4a3525,#2e1e10 60%,#1a0d06);display:flex;align-items:center;justify-content:center;border-radius:inherit;">
+                <div style="text-align:center;padding:24px;transform:rotateY(0deg);">
+                    <div style="width:40px;height:40px;margin:0 auto 12px;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                        <img src="{% static 'images/logo.png' %}" alt="Silverwoods Logo" style="width:100%;height:100%;object-fit:cover;">
+                    </div>
+                    <p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;letter-spacing:0.2em;color:#f5eedf;">SILVERWOODS</p>
+                    <div style="width:32px;height:1px;background:rgba(201,168,76,0.5);margin:10px auto;"></div>
+                    <p style="font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(201,168,76,0.75);font-style:italic;">Live the Villa Life</p>
+                    <p style="font-size:7px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(245,238,223,0.5);margin-top:14px;">A Signature Landmark by Delta Realtech</p>
+                </div>
+            </div>`;
+        },
+
+        insideCoverHTML() {
+            return `<div style="width:100%;height:100%;background:linear-gradient(160deg,#4a3525,#2e1e10 60%,#1a0d06);border-radius:inherit;"></div>`;
+        },
+
+        imgHTML(idx) {
+            if(idx<0||idx>=P.length) return this.blankHTML();
+            const img=P[idx];
+            return `<div style="width:100%;height:100%;padding:14px;display:flex;flex-direction:column;border-radius:inherit;" class="bg-[#f5eedf] dark:bg-dark-800 df-img-page">
+                <div style="flex:1;border-radius:5px;overflow:hidden;border-width:1px;border-style:solid;" class="border-[#2a1f14]/[0.06] dark:border-white/5 shadow-[0_1px_6px_rgba(42,31,20,0.06)] dark:shadow-[0_1px_6px_rgba(0,0,0,0.2)]">
+                    <img src="${img.s}" alt="${img.c}" style="width:100%;height:100%;object-fit:cover;display:block;" draggable="false">
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:7px 3px 0;font-size:10px;">
+                    <span style="font-family:'Playfair Display',serif;font-style:italic;letter-spacing:0.05em;" class="text-[#2a1f14]/40 dark:text-[#f5eedf]/30">${img.c}</span>
+                    <span style="font-weight:600;letter-spacing:0.1em;font-size:9px;" class="text-[#2a1f14]/20 dark:text-[#f5eedf]/15">${idx+1}/${P.length}</span>
+                </div>
+            </div>`;
+        },
+
+        blankHTML() {
+            return `<div style="width:100%;height:100%;border-radius:inherit;" class="bg-[#f5eedf] dark:bg-dark-800"></div>`;
+        },
+
+        backCoverHTML() {
+            return `<div style="width:100%;height:100%;background:linear-gradient(160deg,#3d2b1f,#1a0d06);display:flex;align-items:center;justify-content:center;border-radius:inherit;">
+                <div style="text-align:center;padding:24px;">
+                    <p style="font-family:'Playfair Display',serif;font-size:26px;font-style:italic;color:#f5eedf;letter-spacing:0.05em;">Thank You</p>
+                    <div style="width:40px;height:1px;background:rgba(201,168,76,0.5);margin:16px auto 0;"></div>
+                </div>
+            </div>`;
+        },
+
+        getLeftContent(pg) {
+            if(pg<=0) return this.insideCoverHTML();
+            if(pg>this.total) return this.imgHTML(this.total-1);
+            const idx=(pg-1)*2-1;
+            return idx<0 ? this.insideCoverHTML() : (idx<P.length ? this.imgHTML(idx) : this.backCoverHTML());
+        },
+
+        getRightContent(pg) {
+            if(pg<=0) return this.coverHTML();
+            if(pg>this.total) return this.backCoverHTML();
+            const idx=(pg-1)*2;
+            return idx<P.length ? this.imgHTML(idx) : this.backCoverHTML();
+        },
+
+        renderSpread() {
+            const L = document.getElementById('dfLeft');
+            const R = document.getElementById('dfRight');
+            if (this.spread <= 0) {
+                L.innerHTML = this.insideCoverHTML();
+                R.innerHTML = this.imgHTML(0);
+                this.caption = 'Silverwoods — Live the Villa Life';
+            } else {
+                const li = this.spread * 2 - 1;
+                const ri = this.spread * 2;
+                L.innerHTML = li < P.length ? this.imgHTML(li) : this.backCoverHTML();
+                R.innerHTML = ri < P.length ? this.imgHTML(ri) : this.backCoverHTML();
+                this.caption = 'Silverwoods — Live the Villa Life';
+            }
+        },
+
+        openBook() {
+            if (this.busy) return;
+            this.busy = true;
+            this.state = 'open';
+            this.spread = 0;
+            this.renderSpread();
+            this.showOpen();
+            this.caption = 'Silverwoods — Live the Villa Life';
+            this.page = 1;
+            setTimeout(() => { this.busy = false; }, 400);
+        },
+
+        closeBook(andReset) {
+            if (this.busy) return;
+            this.busy = true;
+            this.state = 'closing';
+            this.showClosed();
+            this.caption = 'Silverwoods — Live the Villa Life';
+            this.page = 0;
+
+            if (andReset) {
+                // Rotate closed book: show back then flip to front
+                const book = document.getElementById('dfClosed');
+                const cover = document.getElementById('dfClosedCover');
+                cover.style.opacity = '0';
+                book.style.transition = 'transform 1s ease';
+                book.style.transform = 'rotateY(160deg) rotateX(4deg)';
+
+                setTimeout(() => {
+                    book.style.transform = 'rotateY(-18deg) rotateX(4deg)';
+                    cover.style.transition = 'opacity 0.4s';
+                    cover.style.opacity = '1';
+                }, 500);
+
+                setTimeout(() => {
+                    book.style.transition = '';
+                    book.style.transform = '';
+                    cover.style.transition = '';
+                    this.state = 'closed';
+                    this.spread = 0;
+                    this.busy = false;
+                }, 1600);
+            } else {
+                this.state = 'closed';
+                this.spread = 0;
+                setTimeout(() => { this.busy = false; }, 300);
+            }
+        },
+
+        next() {
+            if (this.busy) return;
+
+            // Closed → Open
+            if (this.state === 'closed') {
+                this.openBook();
+                return;
+            }
+
+            // Last spread → close and reset
+            if (this.spread >= maxSpread) {
+                this.closeBook(true);
+                return;
+            }
+
+            // Flip to next spread
+            this.busy = true;
+            const flip = document.getElementById('dfFlip');
+            const front = document.getElementById('dfFlipFront');
+            const back = document.getElementById('dfFlipBack');
+
+            // Front = current right page
+            const curRi = this.spread * 2;
+            front.innerHTML = curRi < P.length ? this.imgHTML(curRi) : this.backCoverHTML();
+
+            // Back = new left page
+            const newLi = (this.spread + 1) * 2 - 1;
+            back.innerHTML = newLi < P.length ? this.imgHTML(newLi) : this.backCoverHTML();
+
+            // Background right page becomes new right page instantly
+            const newRi = (this.spread + 1) * 2;
+            const R = document.getElementById('dfRight');
+            R.innerHTML = newRi < P.length ? this.imgHTML(newRi) : this.backCoverHTML();
+
+            // Background left page remains unchanged until flip completes
+
+            flip.className = 'df-flip df-flip-next';
+            flip.style.transform = 'rotateY(0deg)';
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                flip.style.transition = 'transform 0.8s cubic-bezier(0.645,0.045,0.355,1)';
+                flip.style.transform = 'rotateY(-180deg)';
+            }));
+            setTimeout(() => {
+                this.spread++;
+                this.page = this.spread + 1;
+                this.renderSpread(); // Now update the background left page to the new spread
+
+                flip.className = 'df-flip';
+                flip.style.transition = '';
+                flip.style.transform = '';
+                front.innerHTML = '';
+                back.innerHTML = '';
+                this.busy = false;
+
+            }, 850);
+        },
+
+        prev() {
+            if (this.busy) return;
+
+            // If closed, do nothing
+            if (this.state === 'closed') return;
+
+            // If at first spread, close the book
+            if (this.spread <= 0) {
+                this.closeBook(false);
+                return;
+            }
+
+            this.busy = true;
+            const flip = document.getElementById('dfFlip');
+            const front = document.getElementById('dfFlipFront');
+            const back = document.getElementById('dfFlipBack');
+            const L = document.getElementById('dfLeft');
+
+            // Use same df-flip-next CSS path but in reverse (-180 → 0)
+            // Back face (visible at start in left half) = current left page
+            const curLi = this.spread * 2 - 1;
+            back.innerHTML = curLi >= 0 && curLi < P.length ? this.imgHTML(curLi) : this.insideCoverHTML();
+
+            // Front face (revealed at end in right half) = new right page
+            const newRi = (this.spread - 1) * 2;
+            front.innerHTML = newRi >= 0 && newRi < P.length ? this.imgHTML(newRi) : this.insideCoverHTML();
+
+            // Left background = new left page (appears as back face clears)
+            const newLi = (this.spread - 1) * 2 - 1;
+            L.innerHTML = newLi < 0 ? this.insideCoverHTML() : (newLi < P.length ? this.imgHTML(newLi) : this.insideCoverHTML());
+
+            // Right background stays as old right page (front face will cover it at end)
+
+            flip.className = 'df-flip df-flip-next';
+            flip.style.transform = 'rotateY(-180deg)'; // Start already flipped to left
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                flip.style.transition = 'transform 0.8s cubic-bezier(0.645,0.045,0.355,1)';
+                flip.style.transform = 'rotateY(0deg)'; // Unfold back to right
+            }));
+            setTimeout(() => {
+                this.spread--;
+                this.page = this.spread + 1;
+                this.renderSpread();
+                flip.className = 'df-flip';
+                flip.style.transition = '';
+                flip.style.transform = '';
+                front.innerHTML = '';
+                back.innerHTML = '';
+                this.busy = false;
+            }, 850);
+        }
+    };
+}
+</script>
+
+<style>
+.df-scene {
+    perspective: 2000px;
+    perspective-origin: 50% 50%;
+    position: relative;
+    padding-bottom: 40px;
+    display: flex; align-items: center; justify-content: center;
+}
+.df-shadow {
+    position: absolute;
+    bottom: 5px; left: 50%;
+    transform: translateX(-50%);
+    width: min(920px, 94vw); height: 50px;
+    background: radial-gradient(ellipse, rgba(42,31,20,0.28) 0%, transparent 70%);
+    pointer-events: none;
+}
+.dark .df-shadow { background: radial-gradient(ellipse, rgba(0,0,0,0.55) 0%, transparent 70%); }
+
+.df-book {
+    position: relative;
+    display: flex;
+    width: min(1300px, 95vw);
+    height: min(520px, 44vw);
+    transform: rotateX(4deg);
+    transform-style: preserve-3d;
+    border-radius: 6px 12px 12px 6px;
+    box-shadow: 0 25px 60px rgba(42,31,20,0.18), 0 5px 15px rgba(42,31,20,0.1);
+}
+.dark .df-book { box-shadow: 0 25px 60px rgba(0,0,0,0.5), 0 5px 15px rgba(0,0,0,0.3); }
+
+.df-left, .df-right {
+    flex: 1; height: 100%;
+    overflow: hidden; position: relative;
+    background: #f5eedf;
+    cursor: pointer;
+}
+.dark .df-left, .dark .df-right { background: #1a1410; }
+.df-left { border-radius: 6px 0 0 6px; }
+.df-right { border-radius: 0 12px 12px 0; }
+
+/* Hover curl hint overlay */
+.df-hover-overlay {
+    position: absolute; top: 0; bottom: 0; width: 80px;
+    opacity: 0; pointer-events: none; z-index: 30;
+    transition: opacity 0.3s ease;
+}
+.df-hover-left  { right: 0; background: linear-gradient(to left,  rgba(42,31,20,0.18) 0%, transparent 100%); }
+.df-hover-right { left: 0;  background: linear-gradient(to right, rgba(42,31,20,0.18) 0%, transparent 100%); }
+.df-left:hover  .df-hover-overlay,
+.df-right:hover .df-hover-overlay { opacity: 1; }
+.dark .df-hover-left  { background: linear-gradient(to left,  rgba(201,168,76,0.15) 0%, transparent 100%); }
+.dark .df-hover-right { background: linear-gradient(to right, rgba(201,168,76,0.15) 0%, transparent 100%); }
+
+.df-spine {
+    width: 14px; flex-shrink: 0; height: 100%; position: relative; z-index: 10;
+    background: linear-gradient(to right, #3d2b1f 0%, #6d4f32 40%, #8b6b4a 50%, #6d4f32 60%, #3d2b1f 100%);
+    box-shadow: inset -1px 0 4px rgba(0,0,0,0.2), inset 1px 0 4px rgba(0,0,0,0.2);
+}
+.dark .df-spine { background: linear-gradient(to right, #140f0c 0%, #2a1f14 40%, #3a2b1c 50%, #2a1f14 60%, #140f0c 100%); }
+
+/* ── Flip layer ──────────────────────────────────────────────────── */
+.df-flip {
+    position: absolute; top: 0; height: 100%;
+    width: calc(50% - 5px);
+    transform-style: preserve-3d;
+    z-index: 20; pointer-events: none;
+    display: none;
+}
+.df-flip-next { display: block; right: 0; transform-origin: left center; }
+.df-flip-prev { display: block; left: 0; transform-origin: right center; }
+
+.df-flip-front, .df-flip-back {
+    position: absolute; inset: 0;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    overflow: hidden;
+    background: #f5eedf;
+}
+.dark .df-flip-front, .dark .df-flip-back { background: #1a1410; }
+
+.df-flip-back {
+    transform: rotateY(180deg);
+}
+
+.df-flip-next .df-flip-front { border-radius: 0 12px 12px 0; }
+.df-flip-next .df-flip-back { border-radius: 6px 0 0 6px; }
+
+.df-flip-prev .df-flip-front { border-radius: 6px 0 0 6px; }
+.df-flip-prev .df-flip-back { border-radius: 0 12px 12px 0; }
+
+/* Dark mode image pages */
+.dark .df-img-page { background: #1a1410 !important; }
+.dark .df-img-page div:first-child { border-color: rgba(255,255,255,0.05) !important; box-shadow: 0 1px 6px rgba(0,0,0,0.2) !important; }
+.dark .df-img-page span:first-child { color: rgba(245,238,223,0.3) !important; }
+.dark .df-img-page span:last-child { color: rgba(245,238,223,0.15) !important; }
+
+/* ── Closed Book ─────────────────────────────────────────────────── */
+.df-closed {
+    position: relative;
+    width: min(580px, 65vw);
+    height: min(460px, 50vw);
+    transform: rotateY(-28deg) rotateX(6deg);
+    transform-style: preserve-3d;
+    z-index: 2;
+    cursor: pointer;
+    transition: transform 0.4s ease, filter 0.4s ease;
+    filter: drop-shadow(0 30px 60px rgba(42,31,20,0.35)) drop-shadow(0 8px 20px rgba(42,31,20,0.2));
+}
+.df-closed:hover {
+    transform: rotateY(-22deg) rotateX(5deg) translateY(-6px);
+    filter: drop-shadow(0 40px 70px rgba(42,31,20,0.4)) drop-shadow(0 12px 28px rgba(42,31,20,0.25));
+}
+.dark .df-closed { filter: drop-shadow(0 30px 60px rgba(0,0,0,0.7)) drop-shadow(0 8px 20px rgba(0,0,0,0.4)); }
+.dark .df-closed:hover { filter: drop-shadow(0 40px 70px rgba(0,0,0,0.8)) drop-shadow(0 12px 30px rgba(201,168,76,0.15)); }
+
+/* Front cover */
+.df-closed-cover {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, #5a4030 0%, #3d2b1f 40%, #2e1e10 75%, #1a0d06 100%);
+    border-radius: 3px 10px 10px 3px;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 3;
+    /* Lighting: bright top-left, dark bottom-right */
+    box-shadow: inset 3px 3px 20px rgba(255,255,255,0.06), inset -3px -3px 20px rgba(0,0,0,0.4);
+}
+/* Cover sheen */
+.df-closed-cover::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(120deg, rgba(255,255,255,0.07) 0%, transparent 50%);
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+/* Spine — left side face */
+.df-closed-spine {
+    position: absolute; top: 0; left: 0;
+    width: 28px; height: 100%;
+    background: linear-gradient(to right, #0e0805 0%, #2a1a0e 25%, #4a3020 55%, #2a1a0e 80%, #0e0805 100%);
+    border-radius: 3px 0 0 3px;
+    transform: rotateY(-90deg);
+    transform-origin: left center;
+    z-index: 4;
+}
+
+/* Page edges — right side face */
+.df-closed-pages {
+    position: absolute; top: 0; right: 0;
+    width: 28px; height: 100%;
+    background: repeating-linear-gradient(
+        to bottom,
+        #f0e8da 0px, #f0e8da 1.5px,
+        #ddd3c0 1.5px, #ddd3c0 2.5px,
+        #ece4d5 2.5px, #ece4d5 3.5px,
+        #d8cebc 3.5px, #d8cebc 4px
+    );
+    border-radius: 0 3px 3px 0;
+    transform: rotateY(90deg);
+    transform-origin: right center;
+    /* subtle shadow to give page depth */
+    box-shadow: inset -4px 0 10px rgba(0,0,0,0.15), inset 4px 0 6px rgba(255,255,255,0.3);
+}
+.dark .df-closed-pages {
+    background: repeating-linear-gradient(
+        to bottom,
+        #2e2218 0px, #2e2218 1.5px,
+        #1e160e 1.5px, #1e160e 2.5px,
+        #281c12 2.5px, #281c12 3.5px,
+        #181008 3.5px, #181008 4px
+    );
+}
+
+/* Top face */
+.df-closed-top {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 28px;
+    background: linear-gradient(to bottom, #3a2a1a, #2a1e10);
+    transform: rotateX(90deg);
+    transform-origin: top center;
+    z-index: 2;
+}
+
+/* Back cover */
+.df-closed-back {
+    position: absolute; inset: 0;
+    background: linear-gradient(160deg, #2a1e10, #0e0805);
+    border-radius: 3px 10px 10px 3px;
+    transform: translateZ(-28px);
+    z-index: 1;
+}
+
+/* ── Controls ────────────────────────────────────────────────────── */
+.flip-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--text-body); padding: 10px 22px;
+    border: 1px solid var(--border-light); border-radius: 50px;
+    background: var(--bg-card); backdrop-filter: blur(12px);
+    transition: all 0.3s; cursor: pointer;
+}
+.flip-btn:not(:disabled):hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+.flip-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+@media (max-width: 640px) {
+    .df-book { transform: rotateX(2deg); }
+    .df-spine { width: 6px; }
+
+    /* Tighter padding inside each image page */
+    .df-img-page { padding: 6px !important; }
+    /* Show full image without side-cropping on mobile */
+    .df-img-page img { object-fit: contain !important; background: #f5eedf; }
+    .dark .df-img-page img { background: #161616; }
+    /* Smaller caption row so image gets more height */
+    .df-img-page > div:last-child { padding: 3px 2px 0 !important; font-size: 5.5px !important; }
+    .df-img-page > div:last-child span { font-size: 5.5px !important; }
+
+    /* Scale down cover text to fit the smaller cover width on mobile */
+    .df-closed-cover p:first-of-type { font-size: 12px !important; letter-spacing: 0.12em !important; }
+    .df-closed-cover p:nth-of-type(2) { font-size: 6.5px !important; letter-spacing: 0.14em !important; }
+    .df-closed-cover p:nth-of-type(3) { font-size: 5.5px !important; letter-spacing: 0.08em !important; }
+    .df-closed-cover div[style*="width:40px"] { width: 30px !important; height: 30px !important; margin-bottom: 8px !important; }
+    /* Also target open-book left cover (JS-generated) */
+    .df-left p { font-size: 12px !important; letter-spacing: 0.12em !important; }
+}
+</style>
+{% endblock %}

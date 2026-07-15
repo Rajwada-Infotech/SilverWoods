@@ -1,0 +1,87 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% block title %}Pricing{% endblock %}
+{% block page_title %}Pricing Management{% endblock %}
+
+{% block admin_content %}
+<div class="grid lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 min-w-0 bg-white dark:bg-white/[0.03] rounded-2xl border border-brown-700/[0.05] dark:border-white/[0.06]">
+        <div class="p-6 border-b border-brown-700/[0.05] dark:border-white/[0.05]">
+            <h2 class="text-lg font-bold text-brown-800 dark:text-cream-100" style="font-family:'Playfair Display',serif">Flat Types & Pricing</h2>
+            <p class="text-xs text-brown-400 dark:text-cream-300/30">Update prices to reflect on the website instantly</p>
+        </div>
+        <div class="divide-y divide-brown-700/[0.03] dark:divide-white/[0.03]">
+            {% for flat in flat_types %}
+            <div class="p-6 hover:bg-cream-200/30 dark:hover:bg-white/[0.02] transition-colors" x-data="{editing:false}">
+                <div x-show="!editing" class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 bg-gradient-to-br {% if flat.bhk == 2 %}from-blue-100 to-blue-200 dark:from-blue-500/20 dark:to-blue-600/10{% elif flat.bhk == 3 %}from-gold-400/20 to-gold-500/10 dark:from-gold-500/20 dark:to-gold-600/10{% else %}from-amber-100 to-amber-200 dark:from-amber-500/20 dark:to-amber-600/10{% endif %} rounded-2xl flex items-center justify-center text-brown-700 dark:text-cream-100 font-bold text-xl" style="font-family:'Playfair Display',serif">{{ flat.bhk }}</div>
+                        <div>
+                            <div class="font-bold text-brown-800 dark:text-cream-100 text-sm">{{ flat.bhk }} BHK - {{ flat.name }}</div>
+                            <div class="text-xs text-brown-400 dark:text-cream-300/30">{{ flat.carpet_area }}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="text-right">
+                            <div class="text-xl font-bold text-brown-800 dark:text-cream-100" style="font-family:'Playfair Display',serif">&#8377;{{ flat.price|floatformat:0 }}</div>
+                            <span class="text-[10px] tracking-wider uppercase {% if flat.is_available %}text-green-600 dark:text-green-400{% else %}text-red-500 dark:text-red-400{% endif %}">{% if flat.is_available %}Available{% else %}Unavailable{% endif %}</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button @click="editing=true" class="w-9 h-9 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center transition-colors"><i class="fas fa-edit text-sm"></i></button>
+                            <a href="{% url 'admin_delete_flat_type' flat.pk %}" onclick="return confirm('Delete this flat type?')" class="w-9 h-9 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl flex items-center justify-center transition-colors"><i class="fas fa-trash text-sm"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <form x-show="editing" method="post" action="{% url 'admin_pricing' %}" class="space-y-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="flat_id" value="{{ flat.pk }}">
+                    <input type="hidden" name="price_per_sqft" value="{{ flat.price_per_sqft }}">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Name</label><input type="text" name="name" value="{{ flat.name }}" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100 focus:border-gold-500"></div>
+                        <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">BHK</label><input type="number" name="bhk" value="{{ flat.bhk }}" step="0.5" min="0.5" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100"></div>
+                        <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Starting From (&#8377;)</label><input type="number" name="price" value="{{ flat.price }}" step="0.01" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100"></div>
+                        <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Buildup Area (sq.ft)</label><input type="text" name="buildup_area" value="{{ flat.buildup_area }}" placeholder="e.g. 2,400.36" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100"></div>
+                        <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Terrace Area (sq.ft)</label><input type="text" name="terrace_area" value="{{ flat.terrace_area }}" placeholder="e.g. 637.06" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100"></div>
+                        <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Super Buildup (sq.ft)</label><input type="text" name="super_buildup_area" value="{{ flat.super_buildup_area }}" placeholder="e.g. 3,689.52" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100"></div>
+                        <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Order</label><input type="number" name="order" value="{{ flat.order }}" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100"></div>
+                        <input type="hidden" name="carpet_area" value="{{ flat.carpet_area }}">
+                    </div>
+                    <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Description</label><textarea name="description" rows="2" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100 resize-none">{{ flat.description }}</textarea></div>
+                    <label class="flex items-center gap-2 text-sm text-brown-600 dark:text-cream-300/50"><input type="checkbox" name="is_available" {% if flat.is_available %}checked{% endif %} class="rounded text-gold-500"> Available</label>
+                    <div class="flex gap-3">
+                        <button type="submit" class="px-5 py-2 bg-brown-700 dark:bg-gold-500/20 text-cream-100 dark:text-gold-400 rounded-xl text-xs font-semibold hover:bg-brown-800 dark:hover:bg-gold-500/30 transition-colors tracking-wider uppercase">Save</button>
+                        <button type="button" @click="editing=false" class="px-5 py-2 bg-cream-200 dark:bg-white/[0.04] text-brown-600 dark:text-cream-300/50 rounded-xl text-xs font-semibold hover:bg-cream-300 dark:hover:bg-white/[0.06] transition-colors tracking-wider uppercase">Cancel</button>
+                    </div>
+                </form>
+            </div>
+            {% empty %}
+            <div class="p-12 text-center text-brown-300 dark:text-cream-300/20">No flat types yet.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-white/[0.03] rounded-2xl border border-brown-700/[0.05] dark:border-white/[0.06] h-fit sticky top-28">
+        <div class="p-6 border-b border-brown-700/[0.05] dark:border-white/[0.05]">
+            <h2 class="text-lg font-bold text-brown-800 dark:text-cream-100" style="font-family:'Playfair Display',serif">Add Flat Type</h2>
+        </div>
+        <form method="post" action="{% url 'admin_pricing' %}" class="p-6 space-y-4">
+            {% csrf_token %}
+            <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Name</label><input type="text" name="name" required placeholder="e.g. Premium Suite" class="w-full px-3 py-2.5 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20"></div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">BHK</label><input type="number" name="bhk" required value="1" min="0.5" max="6" step="0.5" class="w-full px-3 py-2.5 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100"></div>
+                <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Starting From (&#8377;)</label><input type="number" name="price" required step="0.01" placeholder="3500000" class="w-full px-3 py-2.5 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20"></div>
+                <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Buildup Area (sq.ft)</label><input type="text" name="buildup_area" placeholder="e.g. 2,400.36" class="w-full px-3 py-2.5 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20"></div>
+                <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Terrace Area (sq.ft)</label><input type="text" name="terrace_area" placeholder="e.g. 637.06" class="w-full px-3 py-2.5 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20"></div>
+                <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Super Buildup (sq.ft)</label><input type="text" name="super_buildup_area" placeholder="e.g. 3,689.52" class="w-full px-3 py-2.5 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20"></div>
+            </div>
+            <input type="hidden" name="carpet_area" value="">
+            <input type="hidden" name="price_per_sqft" value="0">
+            <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Description</label><textarea name="description" rows="2" placeholder="Brief description..." class="w-full px-3 py-2.5 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20 resize-none"></textarea></div>
+            <input type="hidden" name="order" value="0">
+            <label class="flex items-center gap-2 text-sm text-brown-600 dark:text-cream-300/50"><input type="checkbox" name="is_available" checked class="rounded text-gold-500"> Available</label>
+            <button type="submit" class="w-full py-3 bg-brown-700 dark:bg-gold-500/20 text-cream-100 dark:text-gold-400 rounded-xl text-xs font-semibold hover:bg-brown-800 dark:hover:bg-gold-500/30 transition-colors tracking-wider uppercase">
+                <i class="fas fa-plus mr-2"></i> Add Flat Type
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

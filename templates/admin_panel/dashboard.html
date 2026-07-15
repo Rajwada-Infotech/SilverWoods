@@ -1,0 +1,108 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block admin_content %}
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white dark:bg-white/[0.03] rounded-2xl p-6 border border-brown-700/[0.05] dark:border-white/[0.06] hover:shadow-lg dark:hover:shadow-gold-500/5 transition-all">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 rounded-2xl flex items-center justify-center"><i class="fas fa-users text-blue-600 dark:text-blue-400 text-xl"></i></div>
+            <span class="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-2 py-1 rounded-lg tracking-wider uppercase">Total</span>
+        </div>
+        <div class="text-3xl font-bold text-brown-800 dark:text-cream-100">{{ total_leads }}</div>
+        <div class="text-xs text-brown-400 dark:text-cream-300/30 mt-1">Total Leads</div>
+    </div>
+    <div class="bg-white dark:bg-white/[0.03] rounded-2xl p-6 border border-brown-700/[0.05] dark:border-white/[0.06] hover:shadow-lg dark:hover:shadow-gold-500/5 transition-all">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-green-50 dark:bg-green-500/10 rounded-2xl flex items-center justify-center"><i class="fas fa-user-plus text-green-600 dark:text-green-400 text-xl"></i></div>
+            <span class="text-[10px] font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-2 py-1 rounded-lg tracking-wider uppercase">New</span>
+        </div>
+        <div class="text-3xl font-bold text-brown-800 dark:text-cream-100">{{ new_leads }}</div>
+        <div class="text-xs text-brown-400 dark:text-cream-300/30 mt-1">New Enquiries</div>
+    </div>
+    <div class="bg-white dark:bg-white/[0.03] rounded-2xl p-6 border border-brown-700/[0.05] dark:border-white/[0.06] hover:shadow-lg dark:hover:shadow-gold-500/5 transition-all">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-purple-50 dark:bg-purple-500/10 rounded-2xl flex items-center justify-center"><i class="fas fa-eye text-purple-600 dark:text-purple-400 text-xl"></i></div>
+            <span class="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 px-2 py-1 rounded-lg tracking-wider uppercase">Views</span>
+        </div>
+        <div class="text-3xl font-bold text-brown-800 dark:text-cream-100">{{ total_visitors }}</div>
+        <div class="text-xs text-brown-400 dark:text-cream-300/30 mt-1">Site Visitors</div>
+    </div>
+    <div class="bg-white dark:bg-white/[0.03] rounded-2xl p-6 border border-brown-700/[0.05] dark:border-white/[0.06] hover:shadow-lg dark:hover:shadow-gold-500/5 transition-all">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-amber-50 dark:bg-amber-500/10 rounded-2xl flex items-center justify-center"><i class="fas fa-home text-amber-600 dark:text-amber-400 text-xl"></i></div>
+            <span class="text-[10px] font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-2 py-1 rounded-lg tracking-wider uppercase">{{ sold_plots }} Sold</span>
+        </div>
+        <div class="text-3xl font-bold text-brown-800 dark:text-cream-100">{{ total_plots }}</div>
+        <div class="text-xs text-brown-400 dark:text-cream-300/30 mt-1">
+            Total Plots &nbsp;·&nbsp;
+            <span class="text-green-500">{{ available_plots }} Avail</span> &nbsp;·&nbsp;
+            <span class="text-amber-500">{{ reserved_plots }} Res</span>        </div>
+    </div>
+</div>
+
+<div class="grid lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 min-w-0 bg-white dark:bg-white/[0.03] rounded-2xl border border-brown-700/[0.05] dark:border-white/[0.06]">
+        <div class="p-6 border-b border-brown-700/[0.05] dark:border-white/[0.05] flex items-center justify-between">
+            <h2 class="text-lg font-bold text-brown-800 dark:text-cream-100" style="font-family:'Playfair Display',serif">Recent Leads</h2>
+            <a href="{% url 'admin_leads' %}" class="text-xs text-gold-500 hover:underline font-medium tracking-wider uppercase">View All <i class="fas fa-arrow-right ml-1"></i></a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="text-left text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 uppercase tracking-wider">
+                        <th class="px-6 py-3">Name</th><th class="px-6 py-3">Phone</th><th class="px-6 py-3">Preference</th><th class="px-6 py-3">Date</th><th class="px-6 py-3">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-brown-700/[0.03] dark:divide-white/[0.03]">
+                    {% for lead in recent_leads %}
+                    <tr class="hover:bg-brown-50/50 dark:hover:bg-white/[0.02] transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-gold-500/10 rounded-full flex items-center justify-center text-gold-600 dark:text-gold-400 font-bold text-xs">{{ lead.name|first|upper }}</div>
+                                <div>
+                                    <div class="font-medium text-brown-800 dark:text-cream-100 text-sm">{{ lead.name }}</div>
+                                    <div class="text-brown-400 dark:text-cream-300/30 text-xs">{{ lead.email }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-brown-600 dark:text-cream-300/50">{{ lead.phone }}</td>
+                        <td class="px-6 py-4"><span class="px-2.5 py-1 bg-gold-500/10 text-gold-700 dark:text-gold-400 text-xs font-semibold rounded-lg">{{ lead.flat_preference|default:"N/A" }}</span></td>
+                        <td class="px-6 py-4 text-sm text-brown-400 dark:text-cream-300/30">{{ lead.created_at|date:"M d, Y" }}</td>
+                        <td class="px-6 py-4">
+                            {% if lead.is_contacted %}<span class="px-2.5 py-1 bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 text-xs font-semibold rounded-lg">Contacted</span>
+                            {% else %}<span class="px-2.5 py-1 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 text-xs font-semibold rounded-lg">Pending</span>{% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="px-6 py-12 text-center text-brown-300 dark:text-cream-300/20">No leads yet</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="space-y-6 min-w-0">
+        <div class="bg-white dark:bg-white/[0.03] rounded-2xl p-6 border border-brown-700/[0.05] dark:border-white/[0.06]">
+            <h3 class="font-bold text-brown-800 dark:text-cream-100 mb-4 text-sm">Quick Actions</h3>
+            <div class="space-y-3">
+                <a href="{% url 'admin_pricing' %}" class="flex items-center gap-3 p-3 rounded-xl bg-cream-200/50 dark:bg-white/[0.03] hover:bg-gold-500/10 dark:hover:bg-gold-500/10 text-brown-600 dark:text-cream-300/50 hover:text-gold-700 dark:hover:text-gold-400 transition-colors">
+                    <i class="fas fa-tags w-5 text-center"></i><span class="text-sm font-medium">Update Pricing</span>
+                </a>
+                <a href="{% url 'admin_popups' %}" class="flex items-center gap-3 p-3 rounded-xl bg-cream-200/50 dark:bg-white/[0.03] hover:bg-gold-500/10 dark:hover:bg-gold-500/10 text-brown-600 dark:text-cream-300/50 hover:text-gold-700 dark:hover:text-gold-400 transition-colors">
+                    <i class="fas fa-ad w-5 text-center"></i><span class="text-sm font-medium">Manage Popup Ads</span>
+                </a>
+                <a href="{% url 'export_leads' format='excel' %}" class="flex items-center gap-3 p-3 rounded-xl bg-cream-200/50 dark:bg-white/[0.03] hover:bg-gold-500/10 dark:hover:bg-gold-500/10 text-brown-600 dark:text-cream-300/50 hover:text-gold-700 dark:hover:text-gold-400 transition-colors">
+                    <i class="fas fa-file-excel w-5 text-center"></i><span class="text-sm font-medium">Export Leads</span>
+                </a>
+            </div>
+        </div>
+        <div class="bg-gradient-to-br from-brown-700 to-brown-800 dark:from-gold-500/20 dark:to-brown-700/20 rounded-2xl p-6 text-cream-100 border border-brown-700/20 dark:border-gold-500/20">
+            <h3 class="font-bold mb-2 text-sm">Active Popups</h3>
+            <div class="text-4xl font-bold mb-1" style="font-family:'Playfair Display',serif">{{ active_popups }}</div>
+            <p class="text-cream-300/60 dark:text-cream-300/40 text-sm">popup ads currently running</p>
+            <a href="{% url 'admin_popups' %}" class="inline-block mt-4 px-4 py-2 bg-white/10 dark:bg-gold-500/20 rounded-xl text-xs font-medium hover:bg-white/20 dark:hover:bg-gold-500/30 transition-colors tracking-wider uppercase">Manage <i class="fas fa-arrow-right ml-1"></i></a>
+        </div>
+    </div>
+</div>
+{% endblock %}

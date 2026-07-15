@@ -1,0 +1,34 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% block title %}Visitors{% endblock %}
+{% block page_title %}Site Visitors{% endblock %}
+
+{% block admin_content %}
+<div class="bg-white dark:bg-white/[0.03] rounded-2xl border border-brown-700/[0.05] dark:border-white/[0.06]">
+    <div class="p-6 border-b border-brown-700/[0.05] dark:border-white/[0.05]">
+        <h2 class="text-lg font-bold text-brown-800 dark:text-cream-100" style="font-family:'Playfair Display',serif">Recent Visitors</h2>
+        <p class="text-xs text-brown-400 dark:text-cream-300/30">Last 100 page visits tracked</p>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead>
+                <tr class="text-left text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 uppercase tracking-wider bg-cream-200/30 dark:bg-white/[0.02]">
+                    <th class="px-6 py-3">#</th><th class="px-6 py-3">IP Address</th><th class="px-6 py-3">Page Visited</th><th class="px-6 py-3">User Agent</th><th class="px-6 py-3">Date & Time</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-brown-700/[0.03] dark:divide-white/[0.03]">
+                {% for v in visitors %}
+                <tr class="hover:bg-cream-200/30 dark:hover:bg-white/[0.02] transition-colors">
+                    <td class="px-6 py-4 text-sm text-brown-300 dark:text-cream-300/20">{{ forloop.counter }}</td>
+                    <td class="px-6 py-4 text-sm font-mono text-brown-600 dark:text-cream-200">{{ v.ip_address }}</td>
+                    <td class="px-6 py-4"><span class="px-2.5 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-xs font-semibold rounded-lg">{{ v.page_visited }}</span></td>
+                    <td class="px-6 py-4 text-[11px] text-brown-400 dark:text-cream-300/30 max-w-[300px] truncate">{{ v.user_agent|truncatechars:80 }}</td>
+                    <td class="px-6 py-4 text-sm text-brown-400 dark:text-cream-300/30 whitespace-nowrap">{{ v.visited_at|date:"M d, Y H:i:s" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="px-6 py-16 text-center text-brown-300 dark:text-cream-300/20"><i class="fas fa-chart-line text-4xl mb-3 block"></i>No visitors tracked yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

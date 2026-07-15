@@ -1,0 +1,142 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" x-data="{darkMode: localStorage.getItem('adminDark')==='true'}" :class="darkMode ? 'dark' : ''">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin{% endblock %} - Silverwoods</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cream: { 50:'#faf7f2', 100:'#f5f0e8', 200:'#ece5d9', 300:'#e0d5c5', 400:'#c9b99e' },
+                        brown: { 50:'#f9f5f0', 100:'#f0e8dc', 200:'#d4c4ac', 300:'#b09a7c', 400:'#8b6b4a', 500:'#6d4f32', 600:'#5c4a3a', 700:'#3d2b1f', 800:'#2a1f14', 900:'#1a130c' },
+                        gold: { 400:'#e8d48b', 500:'#c9a84c', 600:'#a08338', 700:'#8b6b4a' },
+                        dark: { 700:'#2a2a2a', 800:'#161616', 900:'#0d0d0d', 950:'#080808' },
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        html, body { overflow-x: hidden; }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-cream-100 dark:bg-dark-900 min-h-screen transition-colors duration-500">
+    <div class="flex" x-data="{sideOpen: localStorage.getItem('adminSideOpen') !== 'false', mobileOpen: false}">
+
+        <!-- Mobile backdrop -->
+        <div
+            x-show="mobileOpen"
+            x-transition:enter="transition-opacity duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition-opacity duration-300"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            @click="mobileOpen=false"
+            class="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 lg:hidden"
+            style="display:none"
+        ></div>
+
+        <!-- Sidebar -->
+        <aside
+            :class="[
+                'fixed top-0 left-0 bottom-0 bg-brown-800 dark:bg-dark-950 text-white transition-all duration-300 z-40 flex flex-col border-r border-brown-700/20 dark:border-white/[0.04]',
+                /* mobile: slide in/out as drawer, always full-width 256px */
+                'lg:translate-x-0',
+                mobileOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64 lg:translate-x-0',
+                /* desktop: collapse to w-20 */
+                sideOpen ? 'lg:w-64' : 'lg:w-20'
+            ]"
+        >
+            <div class="p-5 flex items-center gap-3 border-b border-brown-700/20 dark:border-white/[0.04]">
+                <img src="{% static 'images/logo.png' %}" alt="Silverwoods" class="w-10 h-10 rounded-xl object-cover flex-shrink-0" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="w-10 h-10 bg-gradient-to-br from-gold-500 to-brown-400 rounded-xl items-center justify-center flex-shrink-0 hidden">
+                    <svg class="w-6 h-6 text-brown-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg>
+                </div>
+                <div x-show="mobileOpen || sideOpen">
+                    <span class="font-bold text-lg whitespace-nowrap tracking-wide block" style="font-family:'Playfair Display',serif">SILVER<span class="text-gold-500">WOODS</span></span>
+                    <span class="italic text-[9px] tracking-[0.1em] text-gold-500/50 block -mt-0.5">Live the Villa Life</span>
+                </div>
+            </div>
+            <nav class="flex-1 py-4 space-y-1 px-3">
+                <a href="{% url 'admin_dashboard' %}" @click="mobileOpen=false" class="relative group flex items-center text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_dashboard' %}bg-gold-500/20 text-gold-400{% else %}text-cream-400/50 hover:bg-white/5 hover:text-cream-100{% endif %}" :class="(mobileOpen || sideOpen) ? 'gap-3 px-3 py-2.5 rounded-xl' : 'justify-center w-10 h-10 rounded-full mx-auto'">
+                    <i class="fas fa-th-large w-5 text-center"></i><span x-show="mobileOpen || sideOpen">Dashboard</span>
+                    <div x-show="!sideOpen && !mobileOpen" style="display:none;" class="absolute left-16 opacity-0 -translate-x-3 group-hover:opacity-100 group-hover:translate-x-0 bg-white/90 dark:bg-dark-900/90 backdrop-blur-md text-brown-800 dark:text-gold-400 text-[11px] uppercase tracking-[0.2em] font-bold px-4 py-2.5 rounded-xl whitespace-nowrap z-50 pointer-events-none transition-all duration-300 ease-out border border-brown-200/50 dark:border-gold-500/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">Dashboard</div>
+                </a>
+                <a href="{% url 'admin_leads' %}" @click="mobileOpen=false" class="relative group flex items-center text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_leads' %}bg-gold-500/20 text-gold-400{% else %}text-cream-400/50 hover:bg-white/5 hover:text-cream-100{% endif %}" :class="(mobileOpen || sideOpen) ? 'gap-3 px-3 py-2.5 rounded-xl' : 'justify-center w-10 h-10 rounded-full mx-auto'">
+                    <i class="fas fa-users w-5 text-center"></i><span x-show="mobileOpen || sideOpen">Leads</span>
+                    <div x-show="!sideOpen && !mobileOpen" style="display:none;" class="absolute left-16 opacity-0 -translate-x-3 group-hover:opacity-100 group-hover:translate-x-0 bg-white/90 dark:bg-dark-900/90 backdrop-blur-md text-brown-800 dark:text-gold-400 text-[11px] uppercase tracking-[0.2em] font-bold px-4 py-2.5 rounded-xl whitespace-nowrap z-50 pointer-events-none transition-all duration-300 ease-out border border-brown-200/50 dark:border-gold-500/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">Leads</div>
+                </a>
+                <a href="{% url 'admin_pricing' %}" @click="mobileOpen=false" class="relative group flex items-center text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_pricing' %}bg-gold-500/20 text-gold-400{% else %}text-cream-400/50 hover:bg-white/5 hover:text-cream-100{% endif %}" :class="(mobileOpen || sideOpen) ? 'gap-3 px-3 py-2.5 rounded-xl' : 'justify-center w-10 h-10 rounded-full mx-auto'">
+                    <i class="fas fa-tags w-5 text-center"></i><span x-show="mobileOpen || sideOpen">Pricing</span>
+                    <div x-show="!sideOpen && !mobileOpen" style="display:none;" class="absolute left-16 opacity-0 -translate-x-3 group-hover:opacity-100 group-hover:translate-x-0 bg-white/90 dark:bg-dark-900/90 backdrop-blur-md text-brown-800 dark:text-gold-400 text-[11px] uppercase tracking-[0.2em] font-bold px-4 py-2.5 rounded-xl whitespace-nowrap z-50 pointer-events-none transition-all duration-300 ease-out border border-brown-200/50 dark:border-gold-500/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">Pricing</div>
+                </a>
+                <a href="{% url 'admin_popups' %}" @click="mobileOpen=false" class="relative group flex items-center text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_popups' %}bg-gold-500/20 text-gold-400{% else %}text-cream-400/50 hover:bg-white/5 hover:text-cream-100{% endif %}" :class="(mobileOpen || sideOpen) ? 'gap-3 px-3 py-2.5 rounded-xl' : 'justify-center w-10 h-10 rounded-full mx-auto'">
+                    <i class="fas fa-ad w-5 text-center"></i><span x-show="mobileOpen || sideOpen">Popup Ads</span>
+                    <div x-show="!sideOpen && !mobileOpen" style="display:none;" class="absolute left-16 opacity-0 -translate-x-3 group-hover:opacity-100 group-hover:translate-x-0 bg-white/90 dark:bg-dark-900/90 backdrop-blur-md text-brown-800 dark:text-gold-400 text-[11px] uppercase tracking-[0.2em] font-bold px-4 py-2.5 rounded-xl whitespace-nowrap z-50 pointer-events-none transition-all duration-300 ease-out border border-brown-200/50 dark:border-gold-500/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">Popup Ads</div>
+                </a>
+                <a href="{% url 'admin_visitors' %}" @click="mobileOpen=false" class="relative group flex items-center text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_visitors' %}bg-gold-500/20 text-gold-400{% else %}text-cream-400/50 hover:bg-white/5 hover:text-cream-100{% endif %}" :class="(mobileOpen || sideOpen) ? 'gap-3 px-3 py-2.5 rounded-xl' : 'justify-center w-10 h-10 rounded-full mx-auto'">
+                    <i class="fas fa-chart-line w-5 text-center"></i><span x-show="mobileOpen || sideOpen">Visitors</span>
+                    <div x-show="!sideOpen && !mobileOpen" style="display:none;" class="absolute left-16 opacity-0 -translate-x-3 group-hover:opacity-100 group-hover:translate-x-0 bg-white/90 dark:bg-dark-900/90 backdrop-blur-md text-brown-800 dark:text-gold-400 text-[11px] uppercase tracking-[0.2em] font-bold px-4 py-2.5 rounded-xl whitespace-nowrap z-50 pointer-events-none transition-all duration-300 ease-out border border-brown-200/50 dark:border-gold-500/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">Visitors</div>
+                </a>
+                <a href="{% url 'admin_plots' %}" @click="mobileOpen=false" class="relative group flex items-center text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_plots' %}bg-gold-500/20 text-gold-400{% else %}text-cream-400/50 hover:bg-white/5 hover:text-cream-100{% endif %}" :class="(mobileOpen || sideOpen) ? 'gap-3 px-3 py-2.5 rounded-xl' : 'justify-center w-10 h-10 rounded-full mx-auto'">
+                    <i class="fas fa-vector-square w-5 text-center"></i><span x-show="mobileOpen || sideOpen">Plot Metrics</span>
+                    <div x-show="!sideOpen && !mobileOpen" style="display:none;" class="absolute left-16 opacity-0 -translate-x-3 group-hover:opacity-100 group-hover:translate-x-0 bg-white/90 dark:bg-dark-900/90 backdrop-blur-md text-brown-800 dark:text-gold-400 text-[11px] uppercase tracking-[0.2em] font-bold px-4 py-2.5 rounded-xl whitespace-nowrap z-50 pointer-events-none transition-all duration-300 ease-out border border-brown-200/50 dark:border-gold-500/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">Plot Metrics</div>
+                </a>
+            </nav>
+            <div class="p-3 border-t border-brown-700/20 dark:border-white/[0.04]">
+                <a href="{% url 'admin_logout' %}" class="relative group flex items-center text-sm text-red-400/70 hover:bg-red-500/10 transition-colors" :class="(mobileOpen || sideOpen) ? 'gap-3 px-3 py-2.5 rounded-xl' : 'justify-center w-10 h-10 rounded-full mx-auto'">
+                    <i class="fas fa-sign-out-alt w-5 text-center"></i><span x-show="mobileOpen || sideOpen">Logout</span>
+                    <div x-show="!sideOpen && !mobileOpen" style="display:none;" class="absolute left-16 opacity-0 -translate-x-3 group-hover:opacity-100 group-hover:translate-x-0 bg-red-50/90 dark:bg-red-900/90 backdrop-blur-md text-red-600 dark:text-red-300 text-[11px] uppercase tracking-[0.2em] font-bold px-4 py-2.5 rounded-xl whitespace-nowrap z-50 pointer-events-none transition-all duration-300 ease-out border border-red-200/50 dark:border-red-500/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">Logout</div>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main
+            :class="sideOpen ? 'lg:ml-64' : 'lg:ml-20'"
+            class="flex-1 transition-all duration-300 min-h-screen ml-0 min-w-0"
+        >
+            <!-- Top Bar -->
+            <header class="sticky top-0 bg-cream-100/80 dark:bg-dark-900/80 backdrop-blur-2xl border-b border-brown-700/[0.05] dark:border-white/[0.05] px-4 sm:px-6 py-4 z-30 flex items-center justify-between transition-colors duration-500">
+                <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+                    <!-- Desktop toggle -->
+                    <button @click="sideOpen=!sideOpen; localStorage.setItem('adminSideOpen', sideOpen)" class="hidden lg:block text-brown-400 dark:text-cream-400/40 hover:text-brown-700 dark:hover:text-cream-100 transition-colors flex-shrink-0"><i class="fas fa-bars text-lg"></i></button>
+                    <!-- Mobile toggle -->
+                    <button @click="mobileOpen=!mobileOpen" class="lg:hidden text-brown-400 dark:text-cream-400/40 hover:text-brown-700 dark:hover:text-cream-100 transition-colors flex-shrink-0"><i class="fas fa-bars text-lg"></i></button>
+                    <h1 class="text-base sm:text-xl font-bold text-brown-800 dark:text-cream-100 truncate" style="font-family:'Playfair Display',serif">{% block page_title %}Dashboard{% endblock %}</h1>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+                    <!-- Dark/Light Toggle -->
+                    <button @click="darkMode=!darkMode; localStorage.setItem('adminDark', darkMode)"
+                            class="w-9 h-9 rounded-full border flex items-center justify-center transition-all flex-shrink-0"
+                            :class="darkMode ? 'border-gold-500/20 bg-dark-800 text-gold-500' : 'border-brown-200 bg-cream-200 text-brown-600'">
+                        <i :class="darkMode ? 'fas fa-moon text-xs' : 'fas fa-sun text-xs'"></i>
+                    </button>
+                    <span class="hidden sm:inline text-sm text-brown-400 dark:text-cream-400/40">Welcome, <strong class="text-brown-700 dark:text-cream-100">{% if request.user.first_name %}{{ request.user.first_name }}{% else %}{{ request.user.username }}{% endif %}</strong></span>
+                    <a href="{% url 'admin_profile' %}" class="block flex-shrink-0">
+                        <img src="{{ MEDIA_URL }}admin_photos/{{ request.user.username }}.jpg?v={% now 'U' %}" alt=""
+                             class="w-9 h-9 rounded-full object-cover border border-gold-500/20"
+                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                        <div class="w-9 h-9 bg-gold-500/10 dark:bg-gold-500/20 rounded-full items-center justify-center text-gold-700 dark:text-gold-400 font-bold text-sm border border-gold-500/20 hidden">{{ request.user.username|first|upper }}</div>
+                    </a>
+                </div>
+            </header>
+            <div class="p-4 sm:p-6">
+                {% block admin_content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    {% block admin_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,330 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% block title %}Leads{% endblock %}
+{% block page_title %}Lead Management{% endblock %}
+
+{% block extra_head %}
+<style>
+@media print {
+    @page { size: A4 landscape; margin: 8mm; }
+
+    /* Hide sidebar, header, all buttons/dropdowns */
+    aside, header, #export-wrap, #leads-filter-form,
+    #source-filter-wrap, #project-filter-wrap, #date-filter-wrap,
+    #source-drop, #project-drop, #date-drop,
+    button { display: none !important; }
+
+    /* Reset main layout — remove sidebar offset */
+    body, html { margin: 0 !important; padding: 0 !important; background: white !important; }
+    main { margin-left: 0 !important; padding: 0 !important; width: 100% !important; }
+    .p-6 { padding: 6px !important; }
+
+    /* Strip all colors/shadows */
+    * { color: #000 !important; background: transparent !important;
+        box-shadow: none !important; border-radius: 0 !important; }
+
+    /* Table */
+    table { width: 100% !important; font-size: 8pt !important;
+            border-collapse: collapse !important; table-layout: fixed !important; }
+    th, td { padding: 4px 5px !important; border: 1px solid #999 !important;
+              word-break: break-word !important; white-space: normal !important;
+              overflow: visible !important; text-overflow: unset !important; }
+    thead tr { background: #3d2b1f !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    thead th, thead th * { color: white !important; font-size: 7pt !important; text-transform: uppercase !important; }
+
+    /* Show print labels, hide dropdown buttons */
+    .th-print-label { display: inline !important; }
+    .th-btn { display: none !important; }
+
+    /* Hide avatar circles */
+    .w-8.h-8 { display: none !important; }
+
+    /* Column widths */
+    th:nth-child(1),  td:nth-child(1)  { width: 3%; }
+    th:nth-child(2),  td:nth-child(2)  { width: 11%; }
+    th:nth-child(3),  td:nth-child(3)  { width: 10%; }
+    th:nth-child(4),  td:nth-child(4)  { width: 15%; }
+    th:nth-child(5),  td:nth-child(5)  { width: 8%; }
+    th:nth-child(6),  td:nth-child(6)  { width: 13%; }
+    th:nth-child(7),  td:nth-child(7)  { width: 9%; }
+    th:nth-child(8),  td:nth-child(8)  { width: 11%; }
+    th:nth-child(9),  td:nth-child(9)  { width: 11%; }
+    th:nth-child(10), td:nth-child(10) { width: 9%; }
+}
+.th-print-label { display: none; }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="bg-white dark:bg-white/[0.03] rounded-2xl border border-brown-700/[0.05] dark:border-white/[0.06]">
+    <div class="p-6 border-b border-brown-700/[0.05] dark:border-white/[0.05] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-lg font-bold text-brown-800 dark:text-cream-100" style="font-family:'Playfair Display',serif">All Leads</h2>
+            <p class="text-xs text-brown-400 dark:text-cream-300/30">{{ leads|length }} total enquiries</p>
+        </div>
+        <div class="flex flex-wrap gap-2 items-center">
+            {% if selected_sources or selected_projects or date_from or date_to %}
+            <button type="button" onclick="clearAllFilters()" class="inline-flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl text-xs font-medium transition-colors border border-red-200/50 dark:border-red-500/20">
+                <i class="fas fa-times-circle"></i> Clear Filters
+            </button>
+            {% endif %}
+            <!-- Export dropdown -->
+            <div class="relative" id="export-wrap">
+                <button type="button" onclick="toggleExportDrop(this)" class="inline-flex items-center gap-2 px-4 py-2 bg-brown-700 dark:bg-gold-500/20 hover:bg-brown-800 dark:hover:bg-gold-500/30 text-cream-100 dark:text-gold-400 rounded-xl text-xs font-medium transition-colors tracking-wider uppercase">
+                    <i class="fas fa-download"></i> Export <i class="fas fa-chevron-down text-[8px]"></i>
+                </button>
+                <div id="export-drop" class="hidden absolute right-0 top-full mt-1 z-[9999] bg-white dark:bg-dark-900 border border-brown-700/10 dark:border-white/10 rounded-xl shadow-xl p-2 min-w-[150px] space-y-1">
+                    <a id="export-csv" href="#" class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-brown-600 dark:text-cream-300/60 hover:bg-cream-200/60 dark:hover:bg-white/[0.05] transition-colors whitespace-nowrap">
+                        <i class="fas fa-file-csv text-green-600 dark:text-green-400"></i> CSV
+                    </a>
+                    <a id="export-excel" href="#" class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-brown-600 dark:text-cream-300/60 hover:bg-cream-200/60 dark:hover:bg-white/[0.05] transition-colors whitespace-nowrap">
+                        <i class="fas fa-file-excel text-green-700 dark:text-green-400"></i> Excel
+                    </a>
+                    <a id="export-pdf" href="#" class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-brown-600 dark:text-cream-300/60 hover:bg-cream-200/60 dark:hover:bg-white/[0.05] transition-colors whitespace-nowrap">
+                        <i class="fas fa-file-pdf text-red-600 dark:text-red-400"></i> PDF
+                    </a>
+                    <hr class="border-brown-700/[0.06] dark:border-white/[0.06]">
+                    <button onclick="window.print()" class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-brown-600 dark:text-cream-300/60 hover:bg-cream-200/60 dark:hover:bg-white/[0.05] transition-colors w-full whitespace-nowrap">
+                        <i class="fas fa-print text-brown-500"></i> Print
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <form method="get" id="leads-filter-form">
+        {# hidden inputs so date values persist when dropdowns apply #}
+        <input type="hidden" name="date_from" value="{{ date_from|default:'' }}">
+        <input type="hidden" name="date_to" value="{{ date_to|default:'' }}">
+        {% for src in selected_sources %}<input type="hidden" name="source" value="{{ src }}">{% endfor %}
+        {% for proj in selected_projects %}<input type="hidden" name="project" value="{{ proj }}">{% endfor %}
+    </form>
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead>
+                <tr class="text-left text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 uppercase tracking-wider bg-cream-200/30 dark:bg-white/[0.02]">
+                    <th class="px-6 py-3">#</th><th class="px-6 py-3">Name</th><th class="px-6 py-3">Phone</th><th class="px-6 py-3">Email</th><th class="px-6 py-3">Flat Pref</th><th class="px-6 py-3">Message</th>
+                    <th class="px-6 py-3">
+                        <span class="th-print-label">Source</span>
+                        <div class="relative inline-block th-btn" id="source-filter-wrap">
+                            <button type="button" onclick="toggleDrop('source-drop',this)" class="flex items-center gap-1 hover:text-brown-600 dark:hover:text-cream-100 transition-colors {% if selected_sources %}text-brown-700 dark:text-gold-400{% endif %}">
+                                Source <i class="fas fa-chevron-down text-[8px]"></i>
+                            </button>
+                            <div id="source-drop" class="hidden z-[9999] bg-white dark:bg-dark-900 border border-brown-700/10 dark:border-white/10 rounded-xl shadow-xl p-3 min-w-[160px] space-y-2">
+                                {% for src in all_sources %}
+                                <label class="flex items-center gap-2 text-xs text-brown-600 dark:text-cream-300/60 cursor-pointer whitespace-nowrap">
+                                    <input type="checkbox" class="source-cb rounded" value="{{ src }}" {% if src in selected_sources %}checked{% endif %}>
+                                    {% if src == 'website' %}Website{% elif src == 'brochure' %}Brochure{% elif src == 'popup_ad' %}Popup Ad{% elif src == 'brochure_download' %}Brochure Download{% else %}{{ src|title }}{% endif %}
+                                </label>
+                                {% endfor %}
+                                <div class="flex gap-2 pt-1">
+                                    <button type="button" onclick="applyFilter('source','source-cb')" class="flex-1 py-1 bg-brown-700 dark:bg-gold-500/20 text-cream-100 dark:text-gold-400 rounded-lg text-[10px] font-semibold uppercase">Apply</button>
+                                    <button type="button" onclick="clearFilter('source')" class="flex-1 py-1 bg-cream-200 dark:bg-white/[0.04] text-brown-600 dark:text-cream-300/50 rounded-lg text-[10px] font-semibold uppercase">Clear</button>
+                                </div>
+                            </div>
+                        </div>
+                    </th>
+                    <th class="px-6 py-3">
+                        <span class="th-print-label">Project</span>
+                        <div class="relative inline-block th-btn" id="project-filter-wrap">
+                            <button type="button" onclick="toggleDrop('project-drop',this)" class="flex items-center gap-1 hover:text-brown-600 dark:hover:text-cream-100 transition-colors {% if selected_projects %}text-brown-700 dark:text-gold-400{% endif %}">
+                                Project <i class="fas fa-chevron-down text-[8px]"></i>
+                            </button>
+                            <div id="project-drop" class="hidden z-[9999] bg-white dark:bg-dark-900 border border-brown-700/10 dark:border-white/10 rounded-xl shadow-xl p-3 min-w-[160px] space-y-2">
+                                {% for proj in all_projects %}
+                                <label class="flex items-center gap-2 text-xs text-brown-600 dark:text-cream-300/60 cursor-pointer whitespace-nowrap">
+                                    <input type="checkbox" class="project-cb rounded" value="{{ proj }}" {% if proj in selected_projects %}checked{% endif %}>
+                                    {{ proj }}
+                                </label>
+                                {% endfor %}
+                                <div class="flex gap-2 pt-1">
+                                    <button type="button" onclick="applyFilter('project','project-cb')" class="flex-1 py-1 bg-brown-700 dark:bg-gold-500/20 text-cream-100 dark:text-gold-400 rounded-lg text-[10px] font-semibold uppercase">Apply</button>
+                                    <button type="button" onclick="clearFilter('project')" class="flex-1 py-1 bg-cream-200 dark:bg-white/[0.04] text-brown-600 dark:text-cream-300/50 rounded-lg text-[10px] font-semibold uppercase">Clear</button>
+                                </div>
+                            </div>
+                        </div>
+                    </th>
+                    <th class="px-6 py-3">
+                        <span class="th-print-label">Date</span>
+                        <div class="relative inline-block th-btn" id="date-filter-wrap">
+                            <button type="button" onclick="toggleDrop('date-drop',this)" class="flex items-center gap-1 hover:text-brown-600 dark:hover:text-cream-100 transition-colors {% if date_from or date_to %}text-brown-700 dark:text-gold-400{% endif %}">
+                                Date <i class="fas fa-chevron-down text-[8px]"></i>
+                            </button>
+                            <div id="date-drop" class="hidden z-[9999] bg-white dark:bg-dark-900 border border-brown-700/10 dark:border-white/10 rounded-xl shadow-xl p-3 w-[160px] space-y-1">
+                                <label class="flex items-center gap-2 text-xs text-brown-600 dark:text-cream-300/60 cursor-pointer whitespace-nowrap hover:bg-cream-200/60 dark:hover:bg-white/[0.05] px-1 py-0.5 rounded" onclick="applyQuickDate('week')">Last 7 Days</label>
+                                <label class="flex items-center gap-2 text-xs text-brown-600 dark:text-cream-300/60 cursor-pointer whitespace-nowrap hover:bg-cream-200/60 dark:hover:bg-white/[0.05] px-1 py-0.5 rounded" onclick="applyQuickDate('month')">Last Month</label>
+                                <label class="flex items-center gap-2 text-xs text-brown-600 dark:text-cream-300/60 cursor-pointer whitespace-nowrap hover:bg-cream-200/60 dark:hover:bg-white/[0.05] px-1 py-0.5 rounded" onclick="applyQuickDate('quarter')">Last Quarter</label>
+                                <label class="flex items-center gap-2 text-xs text-brown-600 dark:text-cream-300/60 cursor-pointer whitespace-nowrap hover:bg-cream-200/60 dark:hover:bg-white/[0.05] px-1 py-0.5 rounded" onclick="applyQuickDate('year')">Last Year</label>
+                                <hr class="border-brown-700/[0.06] dark:border-white/[0.06]">
+                                <input type="date" id="date-from-input" value="{{ date_from }}" class="w-full px-1.5 py-1 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-lg text-[10px] bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100">
+                                <input type="date" id="date-to-input" value="{{ date_to }}" class="w-full px-1.5 py-1 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-lg text-[10px] bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100">
+                                <div class="flex gap-2 pt-1">
+                                    <button type="button" onclick="applyDate()" class="flex-1 py-1 bg-brown-700 dark:bg-gold-500/20 text-cream-100 dark:text-gold-400 rounded-lg text-[10px] font-semibold uppercase">Apply</button>
+                                    <button type="button" onclick="clearFilter('date')" class="flex-1 py-1 bg-cream-200 dark:bg-white/[0.04] text-brown-600 dark:text-cream-300/50 rounded-lg text-[10px] font-semibold uppercase">Clear</button>
+                                </div>
+                            </div>
+                        </div>
+                    </th>
+                    <th class="px-6 py-3">Status</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-brown-700/[0.03] dark:divide-white/[0.03]">
+                {% for lead in leads %}
+                <tr class="hover:bg-cream-200/30 dark:hover:bg-white/[0.02] transition-colors">
+                    <td class="px-6 py-4 text-sm text-brown-300 dark:text-cream-300/20">{{ forloop.counter }}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-gold-500/10 rounded-full flex items-center justify-center text-gold-600 dark:text-gold-400 font-bold text-xs">{{ lead.name|first|upper }}</div>
+                            <span class="font-medium text-brown-800 dark:text-cream-100 text-sm whitespace-nowrap">{{ lead.name }}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-brown-500 dark:text-cream-300/50">{{ lead.phone }}</td>
+                    <td class="px-6 py-4 text-sm text-brown-500 dark:text-cream-300/50">{{ lead.email }}</td>
+                    <td class="px-6 py-4 max-w-[120px]"><span class="block truncate px-2.5 py-1 bg-gold-500/10 text-gold-700 dark:text-gold-400 text-xs font-semibold rounded-lg" title="{{ lead.flat_preference }}">{{ lead.flat_preference|default:"—" }}</span></td>
+                    <td class="px-6 py-4 text-sm text-brown-400 dark:text-cream-300/30 max-w-[160px] truncate" title="{{ lead.message }}">{{ lead.message|default:"—" }}</td>
+                    <td class="px-6 py-4 text-sm text-brown-400 dark:text-cream-300/30 whitespace-nowrap">{{ lead.get_source_display_label }}</td>
+                    <td class="px-6 py-4 text-sm text-brown-400 dark:text-cream-300/30">{% if lead.popup_ad %}<span class="px-2.5 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-xs font-semibold rounded-lg">{{ lead.popup_ad.title }}</span>{% else %}—{% endif %}</td>
+                    <td class="px-6 py-4 text-sm text-brown-400 dark:text-cream-300/30 whitespace-nowrap">{{ lead.created_at|date:"M d, Y H:i" }}</td>
+                    <td class="px-6 py-4">
+                        {% if lead.is_contacted %}<span class="px-2.5 py-1 bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 text-xs font-semibold rounded-lg">Contacted</span>
+                        {% else %}<span class="px-2.5 py-1 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 text-xs font-semibold rounded-lg">Pending</span>{% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="9" class="px-6 py-16 text-center text-brown-300 dark:text-cream-300/20"><i class="fas fa-inbox text-4xl mb-3 block"></i>No leads yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function toggleExportDrop(btn) {
+    var drop = document.getElementById('export-drop');
+    var isHidden = drop.classList.contains('hidden');
+    drop.classList.toggle('hidden');
+    if (!isHidden) return;
+    var rect = btn.getBoundingClientRect();
+    drop.style.position = 'fixed';
+    drop.style.top = (rect.bottom + 4) + 'px';
+    drop.style.left = 'auto';
+    drop.style.right = (window.innerWidth - rect.right) + 'px';
+}
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('#export-wrap')) {
+        document.getElementById('export-drop').classList.add('hidden');
+    }
+});
+
+function clearAllFilters() {
+    window.location.href = '/admin-panel/leads/';
+}
+
+function buildExportUrl(format) {
+    var form = document.getElementById('leads-filter-form');
+    var params = new URLSearchParams();
+    params.set('format', format);
+    var dateFrom = form.querySelector('input[name="date_from"]').value;
+    var dateTo = form.querySelector('input[name="date_to"]').value;
+    if (dateFrom) params.set('date_from', dateFrom);
+    if (dateTo) params.set('date_to', dateTo);
+    form.querySelectorAll('input[name="source"]').forEach(function(el) { params.append('source', el.value); });
+    form.querySelectorAll('input[name="project"]').forEach(function(el) { params.append('project', el.value); });
+    return '/admin-panel/leads/export/' + format + '/?' + params.toString();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    function updateExportLinks() {
+        document.getElementById('export-csv').href   = buildExportUrl('csv');
+        document.getElementById('export-excel').href = buildExportUrl('excel');
+        document.getElementById('export-pdf').href   = buildExportUrl('pdf');
+    }
+    updateExportLinks();
+});
+
+function toggleDrop(id, btnEl) {
+    var drop = document.getElementById(id);
+    var isHidden = drop.classList.contains('hidden');
+    ['source-drop','project-drop','date-drop'].forEach(function(d) {
+        document.getElementById(d).classList.add('hidden');
+    });
+    if (!isHidden) return;
+    drop.classList.remove('hidden');
+    // Position fixed relative to button
+    var btn = btnEl || drop.previousElementSibling;
+    var rect = btn.getBoundingClientRect();
+    drop.style.position = 'fixed';
+    drop.style.top = (rect.bottom + 4) + 'px';
+    // Align right edge of dropdown to right edge of button
+    var dropW = drop.offsetWidth || 200;
+    var left = rect.right - dropW;
+    if (left < 8) left = 8;
+    drop.style.left = left + 'px';
+    drop.style.right = 'auto';
+}
+
+function closeAllDrops() {
+    ['source-drop','project-drop','date-drop'].forEach(function(d) {
+        document.getElementById(d).classList.add('hidden');
+    });
+}
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('#source-filter-wrap') && !e.target.closest('#project-filter-wrap') && !e.target.closest('#date-filter-wrap')) {
+        closeAllDrops();
+    }
+});
+
+window.addEventListener('scroll', function() {
+    closeAllDrops();
+    document.getElementById('export-drop').classList.add('hidden');
+}, true);
+
+function applyFilter(name, cbClass) {
+    var form = document.getElementById('leads-filter-form');
+    form.querySelectorAll('input[name="' + name + '"]').forEach(function(el) { el.remove(); });
+    document.querySelectorAll('.' + cbClass + ':checked').forEach(function(cb) {
+        var inp = document.createElement('input');
+        inp.type = 'hidden'; inp.name = name; inp.value = cb.value;
+        form.appendChild(inp);
+    });
+    form.submit();
+}
+
+function applyQuickDate(range) {
+    var now = new Date();
+    var from = new Date();
+    if (range === 'week') {
+        from.setDate(now.getDate() - 7);
+    } else if (range === 'month') {
+        from.setMonth(now.getMonth() - 1);
+    } else if (range === 'quarter') {
+        from.setMonth(now.getMonth() - 3);
+    } else if (range === 'year') {
+        from.setFullYear(now.getFullYear() - 1);
+    }
+    function fmt(d) { return d.toISOString().split('T')[0]; }
+    var form = document.getElementById('leads-filter-form');
+    form.querySelector('input[name="date_from"]').value = fmt(from);
+    form.querySelector('input[name="date_to"]').value = fmt(now);
+    form.submit();
+}
+
+function applyDate() {
+    var form = document.getElementById('leads-filter-form');
+    form.querySelector('input[name="date_from"]').value = document.getElementById('date-from-input').value;
+    form.querySelector('input[name="date_to"]').value = document.getElementById('date-to-input').value;
+    form.submit();
+}
+
+function clearFilter(name) {
+    var form = document.getElementById('leads-filter-form');
+    if (name === 'date') {
+        form.querySelector('input[name="date_from"]').value = '';
+        form.querySelector('input[name="date_to"]').value = '';
+    } else {
+        form.querySelectorAll('input[name="' + name + '"]').forEach(function(el) { el.remove(); });
+    }
+    form.submit();
+}
+</script>
+{% endblock %}

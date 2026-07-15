@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Daily Dev Report · Silverwoods</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f4f4f2;color:#1a1a1a;padding:32px 24px;max-width:860px;margin:auto}
+  .header-bar{background:#111;color:#fff;border-radius:12px;padding:28px 28px 22px;margin-bottom:28px}
+  .header-bar .label{font-size:12px;letter-spacing:.08em;color:#999;margin-bottom:4px}
+  .header-bar h1{font-size:42px;font-weight:700;color:#fff;line-height:1}
+  .header-bar .meta{margin-top:10px;font-size:13px;color:#888}
+  .header-bar .meta span{color:#bbb}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+  .stat{background:#111;color:#fff;border-radius:10px;padding:20px 18px}
+  .stat .num{font-size:32px;font-weight:700;line-height:1}
+  .stat .lbl{font-size:12px;color:#888;margin-top:4px}
+  .legend{display:flex;gap:18px;margin-bottom:24px;font-size:13px;align-items:center}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:5px}
+  .dot-fix{background:#e63;} .dot-feat{background:#3a3;} .dot-infra{background:#44b;}
+  .section-title{font-size:11px;letter-spacing:.12em;color:#888;font-weight:600;margin:28px 0 14px;border-top:1px solid #e0e0de;padding-top:18px}
+  .entry{display:flex;gap:12px;margin-bottom:20px;align-items:flex-start}
+  .entry-dot{margin-top:3px;flex-shrink:0}
+  .entry-body{}
+  .tag{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.06em;border:1px solid currentColor;border-radius:20px;padding:1px 9px;margin-bottom:6px}
+  .tag-fix{color:#e63;border-color:#e63}
+  .tag-feat{color:#3a3;border-color:#3a3}
+  .tag-infra{color:#44b;border-color:#44b}
+  .entry-title{font-size:14px;font-weight:600;color:#222;margin-bottom:4px}
+  .entry-desc{font-size:13px;color:#555;line-height:1.55}
+  .entry-file{font-size:11px;font-family:'SF Mono',monospace;color:#888;margin-top:6px}
+  .footer{margin-top:36px;padding-top:16px;border-top:1px solid #e0e0de;display:flex;justify-content:space-between;font-size:12px;color:#999}
+</style>
+</head>
+<body>
+
+<div class="header-bar">
+  <div class="label">Daily development report · Silverwoods</div>
+  <h1>5 July 2026</h1>
+  <div class="meta"><span>Blueprint:</span> 3D + VR sync &nbsp;·&nbsp; <span>7 changes applied</span></div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="num">7</div><div class="lbl">Changes</div></div>
+  <div class="stat"><div class="num">4</div><div class="lbl">Villa moves</div></div>
+  <div class="stat"><div class="num">1</div><div class="lbl">VR sync</div></div>
+  <div class="stat"><div class="num">2</div><div class="lbl">Roads removed</div></div>
+</div>
+
+<div class="legend">
+  <span><span class="dot dot-fix"></span>Villa position fix</span>
+  <span><span class="dot dot-feat"></span>Feature</span>
+  <span><span class="dot dot-infra"></span>Infrastructure</span>
+</div>
+
+<!-- RIGHT WING VILLAS -->
+<div class="section-title">RIGHT WING — VILLAS (z = -143 / -157 / -122)</div>
+
+<div class="entry">
+  <div class="entry-dot"><span class="dot dot-fix"></span></div>
+  <div class="entry-body">
+    <span class="tag tag-fix">fix</span>
+    <div class="entry-title">Shift right wing 12 villas (z=-143 &amp; z=-157) eastward</div>
+    <div class="entry-desc">Moved all 6+6 villas in the right wing rows from <code>x = 90+i×12</code> to <code>x = 98+i×12</code> (+8 units east) to create proper spacing from the divider road and align with the updated layout.</div>
+    <div class="entry-file">templates/blueprint.html — mkVilla lines z=-143 &amp; z=-157 right wing</div>
+  </div>
+</div>
+
+<div class="entry">
+  <div class="entry-dot"><span class="dot dot-fix"></span></div>
+  <div class="entry-body">
+    <span class="tag tag-fix">fix</span>
+    <div class="entry-title">Shift right wing z=-122 row (4 villas) eastward</div>
+    <div class="entry-desc">The 4-villa row at z=-122 in the right wing also shifted from <code>x = 90+i×12</code> to <code>x = 98+i×12</code> to keep consistent east-side spacing.</div>
+    <div class="entry-file">templates/blueprint.html — mkVilla line z=-122 right group</div>
+  </div>
+</div>
+
+<div class="entry">
+  <div class="entry-dot"><span class="dot dot-fix"></span></div>
+  <div class="entry-body">
+    <span class="tag tag-fix">fix</span>
+    <div class="entry-title">Extra eastward shift on right wing bottom row (z=-157)</div>
+    <div class="entry-desc">The bottom row of the right wing (z=-157, 6 villas) shifted an additional +8 units east — now at <code>x = 106+i×12</code> — to visually separate it from the top row and give the pair a staggered offset.</div>
+    <div class="entry-file">templates/blueprint.html — mkVilla line z=-157 right wing</div>
+  </div>
+</div>
+
+<!-- LEFT WING VILLAS -->
+<div class="section-title">LEFT WING — VILLAS (z = -157)</div>
+
+<div class="entry">
+  <div class="entry-dot"><span class="dot dot-fix"></span></div>
+  <div class="entry-body">
+    <span class="tag tag-fix">fix</span>
+    <div class="entry-title">Shift left wing bottom row (z=-157) eastward</div>
+    <div class="entry-desc">Left wing bottom row (4 villas) shifted from <code>x = 30+i×12</code> to <code>x = 38+i×12</code> (+8 units) to match spacing intent of the right wing bottom row change.</div>
+    <div class="entry-file">templates/blueprint.html — mkVilla line z=-157 left wing</div>
+  </div>
+</div>
+
+<!-- ROADS -->
+<div class="section-title">ROADS</div>
+
+<div class="entry">
+  <div class="entry-dot"><span class="dot dot-infra"></span></div>
+  <div class="entry-body">
+    <span class="tag tag-infra">infra</span>
+    <div class="entry-title">Removed 2 small vertical (N-S) roads in wing zone</div>
+    <div class="entry-desc">Deleted the N-S divider road between left and right wing (<code>x=78, z=-150</code>) and the bridge connector road (<code>x=48, z=-132</code>) which were visually cluttering the wing layout with no functional purpose after the villa repositioning.</div>
+    <div class="entry-file">templates/blueprint.html — mkFlat roads x=78,z=-150 and x=48,z=-132</div>
+  </div>
+</div>
+
+<!-- VR SYNC -->
+<div class="section-title">VR WALKTHROUGH</div>
+
+<div class="entry">
+  <div class="entry-dot"><span class="dot dot-feat"></span></div>
+  <div class="entry-body">
+    <span class="tag tag-feat">feat</span>
+    <div class="entry-title">VR villa layout rebuilt to exactly mirror 3D blueprint</div>
+    <div class="entry-desc">
+      Replaced all fictional VR villa clusters (West Block 56, North Cluster 36, Entry columns) with exact blueprint positions using VR_z = blueprint_z + 91 offset. Villa groups now match:<br><br>
+      — 12 entry/bottom villas (z=-91, z=-108)<br>
+      — 9 mid-zone villas (z=-122 left + right groups)<br>
+      — 10 north wing villas (z=-143 left 4 + right 6)<br>
+      — 10 bottom row villas (z=-157 left 4 + right 6, with correct shifts)<br>
+      — 24-villa section (6×4 rows, z=-240 to -282)<br>
+      — 25-villa section (5×5 rows + z=-296 row, z=-296 to -368)<br><br>
+      All VR roads (E-W main, E-W wing, N-S dividers, connector road, east side road) added to match blueprint geometry. Ground plane extended from 360→420 units to cover full blueprint depth. All existing VR theme &amp; graphics (clubhouse, pool, canopies, gate, trees, lighting) kept unchanged.
+    </div>
+    <div class="entry-file">templates/blueprint.html — vrBuildWorld() villa &amp; road section</div>
+  </div>
+</div>
+
+<div class="footer">
+  <span>Blueprint: 3D &amp; VR scenes synced · No render errors</span>
+  <span>Silverwoods Real Estate · blueprint.html</span>
+</div>
+
+</body>
+</html>

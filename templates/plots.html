@@ -1,0 +1,2217 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Plot Metrics — Silverwoods{% endblock %}
+
+{% block extra_css %}
+<style>
+#canvas-wrap{position:relative;width:100%;background:#060606;overflow:hidden;height:350px}
+#canvas-wrap canvas{display:block;max-width:100%}
+@media(min-width:640px){#canvas-wrap{height:450px}}
+@media(min-width:1024px){#canvas-wrap{height:560px}}
+#ctrl-bar{position:absolute;top:12px;right:12px;z-index:30;display:flex;flex-direction:column;gap:8px}
+.cbtn{width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all .2s;border:1px solid rgba(255,255,255,.10);color:rgba(255,255,255,.55);background:rgba(0,0,0,.40);backdrop-filter:blur(8px);outline:none}
+.cbtn:hover{background:rgba(255,255,255,.14);color:rgba(255,255,255,.9)}
+#compass-wrap{position:absolute;bottom:16px;left:16px;z-index:30;pointer-events:none;width:56px;height:56px;border-radius:50%;background:rgba(0,0,0,.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center}
+#hud-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:25;overflow:visible}
+#hud-box{position:absolute;display:none;z-index:26;pointer-events:none;min-width:175px;padding:14px 20px 12px;background:rgba(5,4,2,.94);backdrop-filter:blur(20px);border:1px solid rgba(201,168,76,.35);border-radius:2px;box-shadow:0 8px 32px rgba(0,0,0,.6),inset 0 1px 0 rgba(201,168,76,.08)}
+.hud-pre{font-size:9px;letter-spacing:.22em;color:rgba(201,168,76,.45);text-transform:uppercase;margin-bottom:4px;font-family:'Inter',sans-serif}
+.hud-title{font-family:'Playfair Display',serif;font-size:16px;color:#c9a84c;letter-spacing:.04em}
+.hud-st{font-size:9px;letter-spacing:.18em;margin-top:6px;text-transform:uppercase;font-family:'Inter',sans-serif}
+.hud-st.avail{color:#7fc47f}.hud-st.sold{color:#e07070}.hud-st.res{color:#c9a84c}.hud-st.nfs{color:#00d4ff}
+.hud-owner{font-size:11px;color:rgba(255,255,255,.7);margin-top:4px;font-family:'Inter',sans-serif}
+#hud-cur{animation:blk .55s step-end infinite;color:rgba(201,168,76,.5)}
+@keyframes blk{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes ringSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="min-h-screen pt-28 pb-16">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="text-center mb-8">
+      <p class="text-[10px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/60 mb-4 mt-8">Silverwoods · Site Availability</p>
+      <h1 class="font-display text-5xl md:text-6xl font-bold text-brown-800 dark:text-cream-100">Plot <span class="italic">Metrics</span></h1>
+      <p class="text-brown-400 dark:text-cream-300/30 text-sm mt-3">Click any plot on the 3D map to view its status and details</p>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-6 items-start">
+      <!-- 3D Canvas (left 2/3) -->
+      <div class="lg:col-span-2 min-w-0">
+        <div class="glass-warm rounded-2xl overflow-hidden">
+          <!-- Legend bar -->
+          <div class="px-4 py-3 border-b border-brown-700/[0.08] dark:border-white/[0.05] flex items-center gap-x-5 gap-y-2 overflow-x-auto" style="-webkit-overflow-scrolling:touch;flex-wrap:nowrap;scrollbar-width:none">
+            <span class="text-[10px] font-semibold text-brown-400 dark:text-cream-300/40 tracking-widest uppercase whitespace-nowrap">Status:</span>
+            <span class="inline-flex items-center gap-1.5 text-[10px] font-medium text-brown-600 dark:text-cream-300/60 whitespace-nowrap"><span style="width:10px;height:10px;border-radius:2px;background:#7fc47f;display:inline-block;flex-shrink:0"></span>Available</span>
+            <span class="inline-flex items-center gap-1.5 text-[10px] font-medium text-brown-600 dark:text-cream-300/60 whitespace-nowrap"><span style="width:10px;height:10px;border-radius:2px;background:#e07070;display:inline-block;flex-shrink:0"></span>Sold</span>
+            <span class="inline-flex items-center gap-1.5 text-[10px] font-medium text-brown-600 dark:text-cream-300/60 whitespace-nowrap"><span style="width:10px;height:10px;border-radius:2px;background:#c9a84c;display:inline-block;flex-shrink:0"></span>Reserved</span>
+            <span class="inline-flex items-center gap-1.5 text-[10px] font-medium text-brown-600 dark:text-cream-300/60 whitespace-nowrap"><span style="width:10px;height:10px;border-radius:2px;background:#00d4ff;display:inline-block;flex-shrink:0"></span>Not for Sale</span>
+          </div>
+          <!-- Canvas -->
+          <div id="canvas-wrap">
+            <div id="ctrl-bar">
+              <button class="cbtn" id="btn-fs" onclick="toggleFullscreen()" title="Fullscreen"><i class="fas fa-expand text-xs"></i></button>
+              <button class="cbtn" id="btn-reset" title="Reset View"><i class="fas fa-compress-arrows-alt text-xs"></i></button>
+              <button class="cbtn" id="btn-rot" title="Auto Rotate"><i class="fas fa-sync-alt text-xs"></i></button>
+            </div>
+            <svg id="hud-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+            <div id="hud-box">
+              <div class="hud-pre" id="hud-pre">Silverwoods · Plot</div>
+              <div class="hud-title" id="hud-title"><span id="hud-cur" style="display:none">|</span></div>
+              <div class="hud-st" id="hud-st"></div>
+              <div id="hud-desc" style="display:none;font-size:10px;color:rgba(255,255,255,0.75);margin-top:8px;line-height:1.6;font-family:'Inter',sans-serif"></div>
+              <div class="hud-owner" id="hud-owner" style="display:none"></div>
+              <div id="hud-completion" style="display:none;margin-top:8px;">
+                <div style="display:flex;justify-content:space-between;font-size:8px;letter-spacing:.14em;margin-bottom:4px;">
+                  <span style="color:rgba(201,168,76,.45)">COMPLETION</span>
+                  <span id="hud-completion-pct" style="color:#c9a84c;font-weight:700">0%</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.1);border-radius:4px;height:5px;overflow:hidden;">
+                  <div id="hud-completion-bar" style="height:100%;background:linear-gradient(90deg,#c9a84c,#e8d48b);border-radius:4px;transition:width 0.6s ease;width:0%"></div>
+                </div>
+              </div>
+              <div id="hud-countdown" style="display:none;font-size:9px;letter-spacing:.12em;color:rgba(255,255,255,.7);margin-top:4px;font-family:'Inter',sans-serif;font-variant-numeric:tabular-nums"></div>
+              <div id="hud-details" style="display:none;margin-top:6px;border-top:1px solid rgba(201,168,76,0.2);padding-top:6px">
+                <div style="display:flex;justify-content:space-between;font-size:8px;letter-spacing:.14em;margin-bottom:3px"><span style="color:rgba(201,168,76,.45)">TYPE</span><span id="hud-type" style="color:#c9a84c;font-weight:700"></span></div>
+                <div style="display:flex;justify-content:space-between;font-size:8px;letter-spacing:.14em;margin-bottom:3px"><span style="color:rgba(201,168,76,.45)">BUILDUP</span><span id="hud-buildup" style="color:#c9a84c;font-weight:700"></span></div>
+                <div style="display:flex;justify-content:space-between;font-size:8px;letter-spacing:.14em"><span style="color:rgba(201,168,76,.45)">STARTING PRICE</span><span id="hud-price" style="color:#c9a84c;font-weight:700"></span></div>
+              </div>
+            </div>
+            <div id="compass-wrap">
+              <svg id="compass-svg" viewBox="0 0 64 64" width="48" height="48" style="transition:transform 0.3s ease">
+                <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+                <line x1="32" y1="5" x2="32" y2="10" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+                <line x1="32" y1="54" x2="32" y2="59" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+                <line x1="5" y1="32" x2="10" y2="32" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+                <line x1="54" y1="32" x2="59" y2="32" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+                <polygon points="32,8 28,32 32,28 36,32" fill="#c9a84c" opacity="0.9"/>
+                <polygon points="32,56 28,32 32,36 36,32" fill="rgba(255,255,255,0.25)"/>
+                <circle cx="32" cy="32" r="2.5" fill="rgba(255,255,255,0.5)"/>
+                <text x="32" y="18" text-anchor="middle" font-size="7" font-weight="700" fill="#c9a84c" font-family="Inter,sans-serif">N</text>
+                <text x="32" y="52" text-anchor="middle" font-size="6" fill="rgba(255,255,255,0.3)" font-family="Inter,sans-serif">S</text>
+                <text x="50" y="34" text-anchor="middle" font-size="6" fill="rgba(255,255,255,0.3)" font-family="Inter,sans-serif">E</text>
+                <text x="14" y="34" text-anchor="middle" font-size="6" fill="rgba(255,255,255,0.3)" font-family="Inter,sans-serif">W</text>
+              </svg>
+            </div>
+          </div>
+          <!-- Bottom hint -->
+          <div class="px-4 py-2.5 border-t border-brown-700/[0.08] dark:border-white/[0.05] flex flex-wrap items-center justify-center gap-3 text-[10px] tracking-wide text-brown-500 dark:text-cream-300/50">
+            <span class="inline-flex items-center gap-1.5 whitespace-nowrap"><i class="fas fa-hand-pointer text-brown-400 dark:text-gold-500/60"></i> Click plot to explore</span>
+            <span class="text-brown-300 dark:text-white/20 sm:inline hidden">·</span>
+            <span class="inline-flex items-center gap-1.5 whitespace-nowrap"><i class="fas fa-arrows-alt text-brown-400 dark:text-gold-500/60"></i> Drag to orbit</span>
+            <span class="text-brown-300 dark:text-white/20 sm:inline hidden">·</span>
+            <span class="inline-flex items-center gap-1.5 whitespace-nowrap"><i class="fas fa-search-plus text-brown-400 dark:text-gold-500/60"></i> Scroll to zoom</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info Panel (right 1/3) -->
+      <div>
+        <div class="glass-warm rounded-2xl p-6 sticky top-28">
+          <!-- Plot availability stats -->
+          <div class="grid grid-cols-2 gap-3 mb-6">
+            <div class="bg-brown-700/[0.04] dark:bg-white/[0.03] rounded-xl p-3 text-center">
+              <div class="font-display text-2xl font-bold" style="color:#3d9c40">{{ available }}</div>
+              <div class="text-[10px] text-brown-400 dark:text-cream-300/40 uppercase tracking-wider mt-0.5">Available</div>
+            </div>
+            <div class="bg-brown-700/[0.04] dark:bg-white/[0.03] rounded-xl p-3 text-center">
+              <div class="font-display text-2xl font-bold" style="color:#e07070">{{ sold }}</div>
+              <div class="text-[10px] text-brown-400 dark:text-cream-300/40 uppercase tracking-wider mt-0.5">Sold</div>
+            </div>
+            <div class="bg-brown-700/[0.04] dark:bg-white/[0.03] rounded-xl p-3 text-center">
+              <div class="font-display text-2xl font-bold text-gold-500">{{ reserved }}</div>
+              <div class="text-[10px] text-brown-400 dark:text-cream-300/40 uppercase tracking-wider mt-0.5">Reserved</div>
+            </div>
+            <div class="bg-brown-700/[0.04] dark:bg-white/[0.03] rounded-xl p-3 text-center">
+              <div class="font-display text-2xl font-bold text-brown-800 dark:text-cream-100">119</div>
+              <div class="text-[10px] text-brown-400 dark:text-cream-300/40 uppercase tracking-wider mt-0.5">Total Units</div>
+            </div>
+          </div>
+
+          <div class="divider mb-6"></div>
+
+          <!-- Plot placeholder -->
+          <div id="plot-placeholder" class="text-center py-8">
+            <div class="w-14 h-14 bg-gold-500/10 border border-gold-500/15 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-map-marked-alt text-gold-500/60 text-xl"></i>
+            </div>
+            <h3 class="font-display text-sm font-bold text-brown-800 dark:text-cream-100 mb-2">Explore the Site</h3>
+            <p class="text-brown-400 dark:text-cream-300/30 text-xs leading-relaxed">Click on any plot in the 3D view to see details about that plot</p>
+          </div>
+
+          <!-- Plot details (shown on click) -->
+          <div id="plot-details" class="hidden">
+            <div class="flex items-start gap-3 mb-4">
+              <div class="w-10 h-10 bg-gold-500/10 border border-gold-500/20 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                <i id="plot-icon" class="fas fa-home text-gold-500/70 text-sm"></i>
+              </div>
+              <div>
+                <h3 id="plot-title" class="font-display text-sm font-bold text-brown-800 dark:text-cream-100 leading-snug"></h3>
+                <div id="plot-tag" class="text-[9px] tracking-widest uppercase text-gold-600 dark:text-gold-500/70 mt-1 font-semibold"></div>
+                <div id="plot-owner" class="hidden text-[10px] text-brown-500 dark:text-cream-300/40 mt-1">—</div>
+              </div>
+            </div>
+            <div id="plot-completion" class="hidden mb-3">
+              <div class="flex justify-between text-[9px] tracking-widest uppercase mb-1.5">
+                <span class="text-brown-400 dark:text-cream-300/30">Construction</span>
+                <span id="plot-completion-pct" class="font-bold text-gold-600 dark:text-gold-500">0%</span>
+              </div>
+              <div class="bg-brown-200/40 dark:bg-white/[0.06] rounded-full h-1.5 overflow-hidden">
+                <div id="plot-completion-bar" class="h-full bg-gradient-to-r from-gold-500 to-yellow-400 rounded-full transition-all duration-700" style="width:0%"></div>
+              </div>
+            </div>
+            <div id="plot-reserved-timer" class="hidden mt-2 mb-1 text-[10px] font-mono tracking-wide text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg px-3 py-2">
+              <span id="pei-countdown"></span>
+            </div>
+            <div id="plot-extra-info" class="hidden">
+              <div class="bg-brown-100/60 dark:bg-white/[0.03] border border-brown-200 dark:border-white/[0.07] rounded-lg p-3 mb-3 text-xs space-y-1.5">
+                <div class="flex justify-between">
+                  <span class="text-brown-400 dark:text-cream-300/40 tracking-wide">Buildup Area</span>
+                  <span id="pei-buildup" class="font-semibold text-brown-700 dark:text-cream-200">—</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-brown-400 dark:text-cream-300/40 tracking-wide">Terrace Area</span>
+                  <span id="pei-terrace" class="font-semibold text-brown-700 dark:text-cream-200">—</span>
+                </div>
+                <div class="border-t border-brown-200 dark:border-white/[0.06] pt-1.5 flex justify-between">
+                  <span class="font-bold text-brown-700 dark:text-cream-100 tracking-wide">Total Buildup</span>
+                  <span id="pei-total" class="font-bold text-brown-800 dark:text-cream-100">—</span>
+                </div>
+                <div class="border-t border-brown-200 dark:border-white/[0.06] pt-1.5 flex justify-between">
+                  <span class="font-bold text-brown-700 dark:text-cream-100 tracking-wide">Starting Price</span>
+                  <span id="pei-price" class="font-bold text-gold-600 dark:text-gold-500">—</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <a href="{% url 'home' %}#contact" class="btn-primary block text-center mt-6 rounded-xl">
+            <i class="fas fa-phone-alt mr-2"></i> Enquire Now
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────
+const PLOT_DATA = {{ plots_json|safe }};
+const VILLA_TYPE_PRICES = {{ villa_prices_json|safe }};
+const VILLA_TYPE_AREAS = {{ villa_areas_json|safe }};;
+var UNDEFINED_PLOTS=[65,66,67,106,116,117,118,119,120,121];
+function getVillaType(n){
+  if(UNDEFINED_PLOTS.indexOf(n)!==-1) return null;
+  if(n===18) return 7;
+  if(n===8||(n>=25&&n<=28)) return 3;
+  if((n>=1&&n<=11&&n!==8)||n===23||n===24||n===29) return 4;
+  if(n>=19&&n<=22) return 6;
+  if(n>=12&&n<=17) return 2;
+  if(n>=32&&n<=36) return 5;
+  return 1;
+}
+
+// ── GLOBALS ───────────────────────────────────────────────────────────
+var scene, camera, renderer, controls;
+var interactables = [];
+var _tgt = [], _hudLines = [], _si = null, _cdTimer = null, _hudGen = 0;
+
+// =====================================================================
+// HELPERS  (must come before init() call so let flatSeq is initialized)
+// =====================================================================
+function mkBox(w, h, d, col, x, y, z, meta) {
+  const m = new THREE.Mesh(
+    new THREE.BoxGeometry(w, h, d),
+    new THREE.MeshLambertMaterial({ color: col })
+  );
+  m.position.set(x, y + h / 2, z);
+  m.castShadow = m.receiveShadow = true;
+  scene.add(m);
+  if (meta) { m.userData = meta; interactables.push(m); }
+  return m;
+}
+
+let flatSeq = 0;
+function mkFlat(w, d, col, x, z, yo, op, meta) {
+  yo = (yo === undefined) ? 0 : yo;
+  op = (op === undefined) ? 1 : op;
+  const mat = new THREE.MeshLambertMaterial({ color: col, transparent: op < 1, opacity: op });
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.22, d), mat);
+  // Each flat gets a tiny unique elevation so no two coplanar surfaces z-fight
+  flatSeq++;
+  m.position.set(x, yo + 0.11 + flatSeq * 0.003, z);
+  m.receiveShadow = true;
+  scene.add(m);
+  if (meta) { m.userData = meta; interactables.push(m); }
+  return m;
+}
+
+function mkZone(w, d, x, z, meta) {
+  const m = new THREE.Mesh(
+    new THREE.BoxGeometry(w, 0.1, d),
+    new THREE.MeshBasicMaterial({ visible: false })
+  );
+  m.position.set(x, 1.5, z);
+  m.userData = meta;
+  scene.add(m);
+  interactables.push(m);
+}
+
+function mkTree(x, z, h, r, col) {
+  h = (h === undefined) ? 5 : h;
+  r = (r === undefined) ? 1.8 : r;
+  col = (col === undefined) ? 0x2d6a3f : col;
+  const g = new THREE.Group();
+  const trunk = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.22, 0.32, h * 0.38, 6),
+    new THREE.MeshLambertMaterial({ color: 0x5c3a1e })
+  );
+  trunk.position.y = h * 0.19; trunk.castShadow = true; g.add(trunk);
+  const can = new THREE.Mesh(
+    new THREE.SphereGeometry(r, 8, 6),
+    new THREE.MeshLambertMaterial({ color: col })
+  );
+  can.position.y = h * 0.52; can.castShadow = true; g.add(can);
+  g.position.set(x, 0, z);
+  scene.add(g);
+}
+
+function mkPalm(x, z) {
+  const g = new THREE.Group();
+  const trunk = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.15, 0.25, 9, 6),
+    new THREE.MeshLambertMaterial({ color: 0x8a6a3a })
+  );
+  trunk.position.y = 4.5; g.add(trunk);
+  for (let f = 0; f < 8; f++) {
+    const fr = new THREE.Mesh(
+      new THREE.ConeGeometry(1.6, 0.25, 5),
+      new THREE.MeshLambertMaterial({ color: 0x2a8c3a })
+    );
+    const ang = (f / 8) * Math.PI * 2;
+    fr.position.set(Math.cos(ang) * 0.6, 9.2, Math.sin(ang) * 0.6);
+    fr.rotation.z = Math.PI / 2.2; fr.rotation.y = ang; g.add(fr);
+  }
+  g.position.set(x, 0, z);
+  scene.add(g);
+}
+
+// G+2 villa — Bungalow Type 1 layout: splash pool + deck at back, side service deck, garden strips, entry steps
+function mkVilla(x, z, poolSide, meta) {
+  poolSide = (poolSide === undefined) ? 'back' : poolSide;
+  const g = new THREE.Group();
+
+  if (meta) {
+    const hitbox = new THREE.Mesh(
+      new THREE.BoxGeometry(10, 12, 10),
+      new THREE.MeshBasicMaterial({ visible: false })
+    );
+    hitbox.position.set(0, 6, 0);
+    hitbox.userData = meta;
+    interactables.push(hitbox);
+    g.add(hitbox);
+  }
+
+  // ── Materials ──────────────────────────────────────────────────
+  const stoneMat  = new THREE.MeshLambertMaterial({ color: 0xede8df });
+  const teraMat   = new THREE.MeshLambertMaterial({ color: 0xbe4530 });
+  const roofMat   = new THREE.MeshLambertMaterial({ color: 0xcac4ba });
+  const glassMat  = new THREE.MeshLambertMaterial({ color: 0x3a7aaa, transparent: true, opacity: 0.72 });
+  const poolMat   = new THREE.MeshLambertMaterial({ color: 0x1a9ad4, transparent: true, opacity: 0.90 });
+  const poolFloor = new THREE.MeshLambertMaterial({ color: 0x0d6fa8, transparent: true, opacity: 0.85 });
+  const copingMat = new THREE.MeshLambertMaterial({ color: 0xddd8d0 }); // light stone coping
+  const deckMat   = new THREE.MeshLambertMaterial({ color: 0x7a5828 }); // dark teak deck
+  const deckLight = new THREE.MeshLambertMaterial({ color: 0xa07840 }); // lighter deck plank
+  const wallMat   = new THREE.MeshLambertMaterial({ color: 0xe8e4de });
+  const darkMat   = new THREE.MeshLambertMaterial({ color: 0x1e1e1c });
+  const paveMat   = new THREE.MeshLambertMaterial({ color: 0xccc8c0 }); // entry paving
+  const gardenMat = new THREE.MeshLambertMaterial({ color: 0x2e6620 }); // lawn
+  const soilMat   = new THREE.MeshLambertMaterial({ color: 0x3d2a18 }); // planting bed soil
+
+  // ── Ground floor main body ──────────────────────────────────────
+  const gf = new THREE.Mesh(new THREE.BoxGeometry(5.8, 3.4, 5.2), stoneMat);
+  gf.position.y = 1.7; gf.castShadow = gf.receiveShadow = true; g.add(gf);
+  for (let ls = 0; ls < 4; ls++) {
+    const lv = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.14, 0.1), darkMat);
+    lv.position.set(-1.2, 0.5 + ls * 0.7, 2.76); g.add(lv);
+  }
+  const gw = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.8, 0.1), glassMat);
+  gw.position.set(1.4, 1.6, 2.76); g.add(gw);
+
+  // ── First floor ─────────────────────────────────────────────────
+  const f1 = new THREE.Mesh(new THREE.BoxGeometry(5.8, 3.2, 5.2), stoneMat);
+  f1.position.y = 5.0; f1.castShadow = true; g.add(f1);
+  const a1 = new THREE.Mesh(new THREE.BoxGeometry(2.2, 3.2, 2.15), teraMat);
+  a1.position.set(-1.5, 5.0, 3.675); a1.castShadow = true; g.add(a1);
+  for (let ls = 0; ls < 6; ls++) {
+    const lv = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.12, 1.7), darkMat);
+    lv.position.set(-1.5, 3.5 + ls * 0.52, 3.92); g.add(lv);
+  }
+  const bal = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.2, 1.21), roofMat);
+  bal.position.set(1.5, 3.42, 3.205); g.add(bal);
+  const bGlass = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.8, 0.08), glassMat);
+  bGlass.position.set(1.5, 3.85, 3.72); g.add(bGlass);
+
+  // ── Second floor ────────────────────────────────────────────────
+  const f2 = new THREE.Mesh(new THREE.BoxGeometry(4.4, 4.1, 4.0), stoneMat);
+  f2.position.y = 8.55; f2.castShadow = true; g.add(f2);
+  const a2 = new THREE.Mesh(new THREE.BoxGeometry(1.8, 4.1, 2.0), teraMat);
+  a2.position.set(1.4, 8.55, 2.9); a2.castShadow = true; g.add(a2);
+  const rf = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.35, 4.0), roofMat);
+  rf.position.y = 10.75; g.add(rf);
+  const pg = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.14, 1.8), deckMat);
+  pg.position.set(-0.8, 11.0, -1.1); g.add(pg);
+  for (let ps = 0; ps < 4; ps++) {
+    const psl = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.9, 1.8), deckMat);
+    psl.position.set(-1.5 + ps * 0.6, 11.55, -1.1); g.add(psl);
+  }
+  const rfGl = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.8, 0.08), glassMat);
+  rfGl.position.set(-0.8, 11.325, -0.15); g.add(rfGl);
+
+  // ── Compound walls — all 4 sides ────────────────────────────────
+  // Front wall (road side)
+  const cwF = new THREE.Mesh(new THREE.BoxGeometry(8.8, 1.4, 0.22), wallMat);
+  cwF.position.set(0, 0.7, 3.5); g.add(cwF);
+  // Back wall (pool side)
+  const cwB = new THREE.Mesh(new THREE.BoxGeometry(8.8, 1.4, 0.22), wallMat);
+  cwB.position.set(0, 0.7, -7.0); g.add(cwB);
+  // Left wall (service deck side)
+  const cwL = new THREE.Mesh(new THREE.BoxGeometry(0.22, 1.4, 10.7), wallMat);
+  cwL.position.set(-4.4, 0.7, -1.75); g.add(cwL);
+  // Right wall (garden side)
+  const cwR = new THREE.Mesh(new THREE.BoxGeometry(0.22, 1.4, 10.7), wallMat);
+  cwR.position.set(4.4, 0.7, -1.75); g.add(cwR);
+  // Front wall spike rail
+  for (let sp = 0; sp < 10; sp++) {
+    const spk = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.42, 4), darkMat);
+    spk.position.set(-4.2 + sp * 0.9, 1.52, 3.5); g.add(spk);
+  }
+
+  // ── Entry paving + steps (south / front) ───────────────────────
+  const pave = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.1, 1.1), paveMat);
+  pave.position.set(0, 0.05, 3.1); g.add(pave);
+  // Two entry steps
+  const step1 = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.14, 0.5), paveMat);
+  step1.position.set(0, 0.07, 3.52); g.add(step1);
+  const step2 = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.22, 0.5), paveMat);
+  step2.position.set(0, 0.11, 3.78); g.add(step2);
+
+  // ── Side service deck — S. DECK 4' WIDE (left side, full depth) ─
+  const sdeck = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.1, 10.2), deckMat);
+  sdeck.position.set(-3.95, 0.05, -1.75); g.add(sdeck);
+  // Deck plank lines (alternating lighter strips)
+  for (let dp = 0; dp < 14; dp++) {
+    const dpl = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.02, 0.06), deckLight);
+    dpl.position.set(-3.95, 0.11, -6.5 + dp * 0.72); g.add(dpl);
+  }
+
+  // ── Splash pool + coping (back-left, matching 21'10"×9'8") ──────
+  const poolZ = -5.4, poolX = -1.1;
+  // Pool water surface
+  const pw = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.18, 2.2), poolMat);
+  pw.position.set(poolX, 0.09, poolZ); g.add(pw);
+  // Pool floor (slightly lower, deeper color)
+  const pfl = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.05, 2.1), poolFloor);
+  pfl.position.set(poolX, -0.2, poolZ); g.add(pfl);
+  // Pool coping (stone edge surround)
+  const cpN = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.12, 0.2), copingMat);
+  cpN.position.set(poolX, 0.22, poolZ - 1.15); g.add(cpN);
+  const cpS = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.12, 0.2), copingMat);
+  cpS.position.set(poolX, 0.22, poolZ + 1.15); g.add(cpS);
+  const cpE = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.12, 2.6), copingMat);
+  cpE.position.set(poolX + 2.45, 0.22, poolZ); g.add(cpE);
+  const cpW = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.12, 2.6), copingMat);
+  cpW.position.set(poolX - 2.45, 0.22, poolZ); g.add(cpW);
+  // Pool step ledge (entry end)
+  const pstep = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.12, 0.3), copingMat);
+  pstep.position.set(poolX + 1.4, 0.06, poolZ + 0.8); g.add(pstep);
+
+  // ── Wood deck area (back-right, matching 12'×9'8") ──────────────
+  const dkZ = poolZ, dkX = 2.4;
+  const dkBase = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.14, 2.2), deckMat);
+  dkBase.position.set(dkX, 0.07, dkZ); g.add(dkBase);
+  // Deck plank lines (parallel strips)
+  for (let dp2 = 0; dp2 < 8; dp2++) {
+    const dpl2 = new THREE.Mesh(new THREE.BoxGeometry(2.28, 0.03, 0.06), deckLight);
+    dpl2.position.set(dkX, 0.16, dkZ - 0.96 + dp2 * 0.28); g.add(dpl2);
+  }
+  // Outdoor furniture suggestion (low cube for chair silhouette)
+  const furn1 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.32, 0.5), new THREE.MeshLambertMaterial({ color: 0xb0a89a }));
+  furn1.position.set(dkX - 0.5, 0.23, dkZ - 0.6); g.add(furn1);
+  const furn2 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.32, 0.5), new THREE.MeshLambertMaterial({ color: 0xb0a89a }));
+  furn2.position.set(dkX + 0.5, 0.23, dkZ - 0.6); g.add(furn2);
+  const table = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.06, 8), new THREE.MeshLambertMaterial({ color: 0x8a7055 }));
+  table.position.set(dkX, 0.38, dkZ - 0.6); g.add(table);
+
+  // ── Right garden strip ──────────────────────────────────────────
+  const gRight = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.06, 9.5), gardenMat);
+  gRight.position.set(3.9, 0.03, -1.75); g.add(gRight);
+  // Planting bed along back wall
+  const bedB = new THREE.Mesh(new THREE.BoxGeometry(7.8, 0.1, 0.5), soilMat);
+  bedB.position.set(0, 0.05, -6.7); g.add(bedB);
+  // Small shrubs (green spheres in garden bed)
+  const shrubMat = new THREE.MeshLambertMaterial({ color: 0x2d6e28 });
+  const shrubDark = new THREE.MeshLambertMaterial({ color: 0x1e4f1a });
+  for (let sh = 0; sh < 5; sh++) {
+    const shrub = new THREE.Mesh(new THREE.SphereGeometry(0.28, 6, 5), sh % 2 === 0 ? shrubMat : shrubDark);
+    shrub.position.set(-2.8 + sh * 1.4, 0.35, -6.7); g.add(shrub);
+  }
+  // Right garden shrubs
+  for (let sh2 = 0; sh2 < 4; sh2++) {
+    const shrub2 = new THREE.Mesh(new THREE.SphereGeometry(0.24, 6, 5), shrubMat);
+    shrub2.position.set(3.9, 0.3, -5.5 + sh2 * 1.8); g.add(shrub2);
+  }
+
+  // ── Paving path from entry to building ─────────────────────────
+  const path = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.08, 2.4), paveMat);
+  path.position.set(0, 0.04, 1.8); g.add(path);
+  // Paving grid lines
+  for (let pg2 = 0; pg2 < 4; pg2++) {
+    const pgL = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.02, 0.04), new THREE.MeshLambertMaterial({ color: 0xb0aba4 }));
+    pgL.position.set(0, 0.09, 0.8 + pg2 * 0.6); g.add(pgL);
+  }
+
+  // Rotate so pool faces outward (away from shared road)
+  if (poolSide === 'back')       g.rotation.y = Math.PI;        // pool faces south, entry faces north
+  else if (poolSide === 'left')  g.rotation.y = -Math.PI / 2;   // pool faces west
+  else if (poolSide === 'right') g.rotation.y =  Math.PI / 2;   // pool faces east
+  // 'front' = default, pool faces north, entry faces south
+
+  g.position.set(x, 0, z);
+  scene.add(g);
+  return g;
+}
+
+// Flat disc-on-pole canopy shade structure (matching reference renders)
+function mkCanopy(x, z) {
+  const poleMat = new THREE.MeshLambertMaterial({ color: 0xa8a49c });
+  const discMat = new THREE.MeshLambertMaterial({ color: 0xd4d0c8, transparent: true, opacity: 0.85 });
+  const ringMat = new THREE.MeshLambertMaterial({ color: 0xb8b4ac });
+  const yOff = (Math.abs(x * 7.3 + z * 3.1) % 5) * 0.15; // Stagger to prevent Z-fighting
+  // Central pole
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 7.5 + yOff, 8), poleMat);
+  pole.position.set(x, 3.75 + yOff/2, z); pole.castShadow = true; scene.add(pole);
+  // Flat circular disc canopy top
+  const disc = new THREE.Mesh(new THREE.CylinderGeometry(5.5, 5.5, 0.18, 24), discMat);
+  disc.position.set(x, 7.6 + yOff, z); scene.add(disc);
+  // Inner ring reinforcement
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(3.8, 0.1, 6, 24), ringMat);
+  ring.rotation.x = Math.PI / 2; ring.position.set(x, 7.5 + yOff, z); scene.add(ring);
+  // Mid ring
+  const ring2 = new THREE.Mesh(new THREE.TorusGeometry(1.8, 0.08, 6, 18), ringMat);
+  ring2.rotation.x = Math.PI / 2; ring2.position.set(x, 7.5 + yOff, z); scene.add(ring2);
+  // Radial spokes
+  for (let i = 0; i < 10; i++) {
+    const ang = (i / 10) * Math.PI * 2;
+    const sp = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 5.5, 4), ringMat);
+    sp.position.set(x + Math.cos(ang) * 2.75, 7.5 + yOff, z + Math.sin(ang) * 2.75);
+    sp.rotation.z = Math.PI / 2; sp.rotation.y = ang; scene.add(sp);
+  }
+}
+
+// Corten steel pergola gateway frame (rusty orange, seen near sports area in renders)
+function mkCortenFrame(x, z) {
+  const mat = new THREE.MeshLambertMaterial({ color: 0x8b3a1a }); // corten rust
+  const posts = [[-1.4,-1.4],[1.4,-1.4],[-1.4,1.4],[1.4,1.4]];
+  posts.forEach(function(off) {
+    const p = new THREE.Mesh(new THREE.BoxGeometry(0.28, 5.5, 0.28), mat);
+    p.position.set(x + off[0], 2.75, z + off[1]); p.castShadow = true; scene.add(p);
+  });
+  // Top horizontal beams
+  [[-1.4,0],[1.4,0]].forEach(function(off) {
+    const b = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 3.0), mat);
+    b.position.set(x + off[0], 5.5, z + off[1]); scene.add(b);
+  });
+  [[0,-1.4],[0,1.4]].forEach(function(off) {
+    const b = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.2, 0.2), mat);
+    b.position.set(x + off[0], 5.5, z + off[1]); scene.add(b);
+  });
+  // Cross beams at mid height
+  const cb1 = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.18, 0.18), mat);
+  cb1.position.set(x, 3.5, z - 1.4); scene.add(cb1);
+  const cb2 = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.18, 0.18), mat);
+  cb2.position.set(x, 3.5, z + 1.4); scene.add(cb2);
+}
+
+// Butterfly leaf sculpture (landmark at mound)
+function mkLeafSculpture(x, z) {
+  const mat = new THREE.MeshLambertMaterial({ color: 0xe8e8e2, wireframe: true });
+  const sol = new THREE.MeshLambertMaterial({ color: 0xf0f0ec, transparent: true, opacity: 0.55 });
+  // Two leaf shapes made from TorusGeometry segments
+  for (let s = 0; s < 2; s++) {
+    const leaf = new THREE.Mesh(new THREE.SphereGeometry(3.2, 8, 6, 0, Math.PI * 1.1, 0, Math.PI * 0.7), mat);
+    leaf.rotation.z = s === 0 ? -0.5 : 0.5;
+    leaf.rotation.y = s === 0 ? -0.3 : 0.3;
+    leaf.position.set(x + (s === 0 ? -1.6 : 1.6), 3.8, z);
+    scene.add(leaf);
+    const fill = new THREE.Mesh(new THREE.SphereGeometry(3.0, 6, 4, 0, Math.PI * 1.0, 0, Math.PI * 0.6), sol);
+    fill.rotation.z = s === 0 ? -0.5 : 0.5;
+    fill.rotation.y = s === 0 ? -0.3 : 0.3;
+    fill.position.set(x + (s === 0 ? -1.6 : 1.6), 3.8, z);
+    scene.add(fill);
+  }
+  // Central stem
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.28, 3.5, 6), new THREE.MeshLambertMaterial({ color: 0xd0ccc4 }));
+  stem.position.set(x, 1.75, z); scene.add(stem);
+}
+
+// Accurate entry gate: security cabin + V-columns + wood canopy + brand wall
+function mkEntryGate(cx, cz, rotY) {
+  const g = new THREE.Group();
+  g.position.set(cx, 0, cz);
+  if (rotY) g.rotation.y = rotY;
+  cx = 0; cz = 0;
+  const stoneMat = new THREE.MeshLambertMaterial({ color: 0xcbc4b8 });
+  const woodMat  = new THREE.MeshLambertMaterial({ color: 0x7a5330 });
+  const darkMat  = new THREE.MeshLambertMaterial({ color: 0x1e1e1c });
+  const glassMat = new THREE.MeshLambertMaterial({ color: 0x6a9acc, transparent: true, opacity: 0.55 });
+  const screenMat= new THREE.MeshLambertMaterial({ color: 0x2a2820 });
+
+  // ------ Security cabin (left side) ------
+  const cabin = new THREE.Mesh(new THREE.BoxGeometry(5.5, 5.5, 5), stoneMat);
+  cabin.position.set(cx - 9.5, 2.75, cz); cabin.castShadow = true; g.add(cabin);
+  // Glass windows on cabin
+  const cwin = new THREE.Mesh(new THREE.BoxGeometry(3.0, 2.2, 0.18), glassMat);
+  cwin.position.set(cx - 9.5, 3.0, cz + 2.5); g.add(cwin);
+  // Cabin roof slab
+  const croof = new THREE.Mesh(new THREE.BoxGeometry(6.5, 0.3, 6), woodMat);
+  croof.position.set(cx - 9.5, 5.65, cz); g.add(croof);
+
+  // ------ Wide flat canopy over road opening ------
+  // Wood underside
+  const cpy = new THREE.Mesh(new THREE.BoxGeometry(14, 0.55, 5.8), woodMat);
+  cpy.position.set(cx - 1.5, 6.5, cz); cpy.castShadow = true; g.add(cpy);
+  // Dark metal cap on top
+  const cpyTop = new THREE.Mesh(new THREE.BoxGeometry(14, 0.25, 6.2), darkMat);
+  cpyTop.position.set(cx - 1.5, 7.05, cz); g.add(cpyTop);
+
+  // ------ Two diagonal V-shaped support columns under canopy ------
+  const postMat2 = new THREE.MeshLambertMaterial({ color: 0xb0a898 });
+  for (let s = 0; s < 2; s++) {
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.36, 7.5, 7), postMat2);
+    post.rotation.z = s === 0 ? 0.22 : -0.22;
+    post.position.set(cx - 5 + s * 5, 3.5, cz); post.castShadow = true; g.add(post);
+  }
+
+  // ------ Sliding gate (horizontal slatted bars) ------
+  for (let b = 0; b < 5; b++) {
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(7, 0.25, 0.18), darkMat);
+    bar.position.set(cx + 3.5, 0.5 + b * 0.85, cz + 2.2); g.add(bar);
+  }
+  // Gate frame
+  const gframe = new THREE.Mesh(new THREE.BoxGeometry(0.28, 4.5, 0.28), darkMat);
+  gframe.position.set(cx + 7.1, 2.25, cz + 2.2); g.add(gframe);
+
+  // ------ Brand / feature wall (right side) ------
+  const bwall = new THREE.Mesh(new THREE.BoxGeometry(8, 6, 4.5), woodMat);
+  bwall.position.set(cx + 14, 3.0, cz); bwall.castShadow = true; g.add(bwall);
+  // Stone column stripes on brand wall
+  for (let ci = 0; ci < 3; ci++) {
+    const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.6, 6, 4.6), stoneMat);
+    stripe.position.set(cx + 11.2 + ci * 2.8, 3.0, cz); g.add(stripe);
+  }
+  // Decorative screen panels (black laser-cut look)
+  const scr1 = new THREE.Mesh(new THREE.BoxGeometry(2.8, 4.5, 0.22), screenMat);
+  scr1.position.set(cx + 11, 3.5, cz + 2.3); g.add(scr1);
+  const scr2 = new THREE.Mesh(new THREE.BoxGeometry(2.8, 4.5, 0.22), screenMat);
+  scr2.position.set(cx + 14.5, 3.5, cz + 2.3); g.add(scr2);
+  // Brand wall roof extension
+  const bwroof = new THREE.Mesh(new THREE.BoxGeometry(8.5, 0.3, 5.5), darkMat);
+  bwroof.position.set(cx + 14, 6.3, cz); g.add(bwroof);
+
+  // ------ Boundary wall (stone, extending right) ------
+  mkBox(22, 2.0, 0.35, 0xc8c2b8, cx + 29, 0, cz + 2.3);
+  // Boundary left side
+  mkBox(8, 2.0, 0.35, 0xc8c2b8, cx - 16.5, 0, cz + 2.3);
+
+  // ------ Landscape planting beds at gate (colourful heliconia/flower beds) ------
+  // Flower clusters (red, orange, yellow — matching reference renders)
+  [[cx+7,cz-5],[cx+9,cz-6],[cx+8,cz-7],[cx-9,cz-5],[cx-11,cz-6],[cx-10,cz-7]].forEach(function(p) {
+    const cols = [0xcc2222, 0xee6611, 0xddcc11, 0xff4444];
+    cols.forEach(function(c, i) {
+      const f = new THREE.Mesh(new THREE.SphereGeometry(0.3, 6, 4), new THREE.MeshLambertMaterial({color:c}));
+      f.position.set(p[0] + (i-1.5)*0.4, 0.65, p[1]); g.add(f);
+    });
+  });
+  mkTree(cx + 10, cz - 5, 5, 2.0, 0x2d7a36);
+  mkTree(cx + 14, cz - 4, 4, 1.6, 0x2d7a36);
+  mkPalm(cx + 18, cz - 2); mkPalm(cx + 22, cz - 4);
+
+  const entryMeta = {
+    type: 'entry',
+    title: 'Main Entry Gate --- Silverwoods',
+    desc: 'Grand arrival gate with wood-clad canopy, V-column architecture, security cabin, and decorative "SILVERWOODS" brand wall. 24x7 manned with boom barrier.'
+  };
+  const hitbox = new THREE.Mesh(new THREE.BoxGeometry(42, 12, 10), new THREE.MeshBasicMaterial({ visible: false }));
+  hitbox.position.set(cx + 4, 6, cz);
+  hitbox.userData = entryMeta;
+  interactables.push(hitbox); g.add(hitbox);
+  scene.add(g);
+}
+
+// Accurate clubhouse: 3-story dark glass structure + mushroom columns + canopy + pool
+function mkClubhouse(cx, cz) {
+  const darkMat  = new THREE.MeshLambertMaterial({ color: 0x1a2636 });
+  const glassMat = new THREE.MeshLambertMaterial({ color: 0x1e4a88, transparent: true, opacity: 0.6 });
+  const colMat   = new THREE.MeshLambertMaterial({ color: 0x6a6a78 });
+  const woodMat  = new THREE.MeshLambertMaterial({ color: 0x8a6238 });
+  const cladMat  = new THREE.MeshLambertMaterial({ color: 0x2a3040 });
+
+  const clubMeta = {
+    type: 'clubhouse', title: 'Clubhouse --- 50,000 sq.ft',
+    desc: 'Multi-story luxury clubhouse with gym, yoga, banquet hall, rooftop pool, bar, billiards, and guest rooms. Signature mushroom columns at entrance.'
+  };
+
+  // Ground floor (wide lobby)
+  const gf = new THREE.Mesh(new THREE.BoxGeometry(34, 5, 28), darkMat);
+  gf.position.set(cx, 2.5, cz); gf.castShadow = true; gf.receiveShadow = true;
+  gf.userData = clubMeta; interactables.push(gf); scene.add(gf);
+  // Glass facade on front of GF
+  const gfg = new THREE.Mesh(new THREE.BoxGeometry(26, 5, 0.3), glassMat);
+  gfg.position.set(cx, 2.5, cz + 14.15); scene.add(gfg);
+
+  // First floor
+  const f1 = new THREE.Mesh(new THREE.BoxGeometry(32, 4.5, 26), cladMat);
+  f1.position.set(cx, 7.25, cz); f1.castShadow = true;
+  f1.userData = clubMeta; interactables.push(f1); scene.add(f1);
+  // Glass horizontal bands on F1
+  for (let gi = 0; gi < 2; gi++) {
+    const gb = new THREE.Mesh(new THREE.BoxGeometry(28, 1.0, 0.28), glassMat);
+    gb.position.set(cx, 5.8 + gi * 2.5, cz + 13); scene.add(gb);
+  }
+
+  // Second floor (smaller, setback)
+  const f2 = new THREE.Mesh(new THREE.BoxGeometry(28, 4.0, 22), cladMat);
+  f2.position.set(cx, 11.5, cz); f2.castShadow = true;
+  f2.userData = clubMeta; interactables.push(f2); scene.add(f2);
+
+  // Canopy / wooden slat roof projecting front
+  const canopy = new THREE.Mesh(new THREE.BoxGeometry(34, 0.5, 8), woodMat);
+  canopy.position.set(cx, 13.6, cz + 15.5); canopy.castShadow = true; scene.add(canopy);
+  // Slats on canopy
+  for (let si = 0; si < 12; si++) {
+    const sl = new THREE.Mesh(new THREE.BoxGeometry(34, 0.18, 0.4), new THREE.MeshLambertMaterial({ color: 0x7a5428 }));
+    sl.position.set(cx, 13.9, cz + 11.5 + si * 0.72); scene.add(sl);
+  }
+  // Rooftop flat
+  const rf = new THREE.Mesh(new THREE.BoxGeometry(28, 0.4, 22), new THREE.MeshLambertMaterial({ color: 0x222830 }));
+  rf.position.set(cx, 13.6, cz); scene.add(rf);
+
+  // ------ Mushroom columns at front ------
+  const mushMat = new THREE.MeshLambertMaterial({ color: 0x888898 });
+  for (let mc = 0; mc < 5; mc++) {
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.7, 8.5, 12), mushMat);
+    stem.position.set(cx - 12 + mc * 6, 4.25, cz + 13); stem.castShadow = true; scene.add(stem);
+    const disc = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 0.8, 0.7, 16), mushMat);
+    disc.position.set(cx - 12 + mc * 6, 8.85, cz + 13); scene.add(disc);
+  }
+
+  // ------ Waterfall feature at base ------
+  const wf = new THREE.Mesh(new THREE.BoxGeometry(20, 1.5, 1.0), new THREE.MeshLambertMaterial({ color: 0x224466 }));
+  wf.position.set(cx, 0.75, cz + 14.5); scene.add(wf);
+  const wfall = new THREE.Mesh(new THREE.BoxGeometry(18, 0.18, 0.8), new THREE.MeshLambertMaterial({ color: 0x44aadd, transparent: true, opacity: 0.7 }));
+  wfall.position.set(cx, 0.08, cz + 14.5); scene.add(wfall);
+
+  // ------ SILVERWOOD signage wall (horizontal wood planks facing arrival road) ------
+  const sigWall = new THREE.Mesh(new THREE.BoxGeometry(20, 2.8, 0.5), woodMat);
+  sigWall.position.set(cx, 1.6, cz + 15.5); scene.add(sigWall);
+  // Raised letter block "SILVERWOOD" representation (white plaque on wood wall)
+  const sigPl = new THREE.Mesh(new THREE.BoxGeometry(9, 1.4, 0.22), new THREE.MeshLambertMaterial({ color: 0xf0ece4 }));
+  sigPl.position.set(cx + 3, 1.6, cz + 15.78); scene.add(sigPl);
+  // Tree logo circle representation
+  const sigLogo = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 0.18, 12), new THREE.MeshLambertMaterial({ color: 0x2a5a2a }));
+  sigLogo.rotation.x = Math.PI / 2; sigLogo.position.set(cx - 5, 1.8, cz + 15.78); scene.add(sigLogo);
+  // Royal palms flanking SILVERWOOD sign
+  [-10, -6, 6, 10].forEach(function(ox) { mkPalm(cx + ox, cz + 27); });
+  mkPalm(cx - 14, cz + 24); mkPalm(cx + 14, cz + 24);
+
+  // ------ Rooftop infinity pool ------
+  mkFlat(20, 5, 0x1a88e8, cx, cz - 5, 13.8, 1, {
+    type: 'pool', title: 'Rooftop Infinity Pool',
+    desc: 'Stunning rooftop infinity pool with panoramic views over the villa community. Dedicated sun deck and lounging areas.'
+  });
+  mkFlat(20, 1.2, 0x55ccff, cx, cz - 7.2, 14.0, 0.35);
+
+  // ------ External staircase ------
+  for (let s = 0; s < 5; s++) {
+    const step = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.6, 1.0), new THREE.MeshLambertMaterial({ color: 0x3a3850 }));
+    step.position.set(cx + 18, 0.3 + s * 0.6, cz + 14 - s * 1.1); scene.add(step);
+  }
+}
+
+function rng(a, b) { return a + Math.random() * (b - a); }
+
+// Flat road-surface text (painted on the road/flyover, not a floating flag)
+function mkRoadText(text, x, z, rotY, planeW, color) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1024; canvas.height = 128; // Higher res for larger text
+  const ctx = canvas.getContext('2d');
+  ctx.font = 'bold 50px Arial, sans-serif';
+  ctx.fillStyle = color || '#ffffff'; // White paint looks more like road markings
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.letterSpacing = '8px';
+  ctx.fillText(text.toUpperCase(), 512, 64);
+  const tex = new THREE.CanvasTexture(canvas);
+  // use standard material with depth test so it actually sits on the surface
+  const mat = new THREE.MeshLambertMaterial({ map: tex, transparent: true, depthWrite: false });
+  const pw = planeW || 80;
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(pw, pw * (128 / 1024)), mat);
+  plane.setRotationFromEuler(new THREE.Euler(-Math.PI / 2, rotY || 0, 0, 'YXZ'));
+  // Place it exactly on the asphalt (0.12)
+  plane.position.set(x, 0.12, z);
+  plane.receiveShadow = true;
+  scene.add(plane);
+}
+function vrRoadText(text, x, z, rotY, planeW, color) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1024; canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  ctx.font = 'bold 50px Arial, sans-serif';
+  ctx.fillStyle = color || '#ffffff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.letterSpacing = '8px';
+  ctx.fillText(text.toUpperCase(), 512, 64);
+  const tex = new THREE.CanvasTexture(canvas);
+  const mat = new THREE.MeshLambertMaterial({ map: tex, transparent: true, depthWrite: false });
+  const pw = planeW || 80;
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(pw, pw * (128 / 1024)), mat);
+  plane.setRotationFromEuler(new THREE.Euler(-Math.PI / 2, rotY || 0, 0, 'YXZ'));
+  plane.position.set(x, 0.12, z);
+  plane.receiveShadow = true;
+  vrScene.add(plane);
+}
+
+// ── JARVIS / Iron Man HUD targeting animation ─────────────────────────
+const J = '#00d4ff';           // primary cyan
+const JD = 'rgba(0,212,255,'; // cyan with alpha
+let _tgtLines = [], _tgtTimers = [], _scanInt = null;
+
+function _jEl(tag, attrs) {
+  const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+  document.getElementById('bp-target-svg').appendChild(e);
+  _tgtLines.push(e);
+  return e;
+}
+function _jLine(x1, y1, x2, y2, col, delay, dur, w) {
+  const ln = _jEl('line', { x1, y1, x2, y2, stroke: col || J, 'stroke-width': w || 1.5 });
+  const len = Math.hypot(x2 - x1, y2 - y1) + 2;
+  ln.setAttribute('stroke-dasharray', len);
+  ln.setAttribute('stroke-dashoffset', len);
+  _tgtTimers.push(setTimeout(() => {
+    ln.style.transition = `stroke-dashoffset ${dur || 130}ms ease-out`;
+    ln.setAttribute('stroke-dashoffset', 0);
+  }, delay || 0));
+  return ln;
+}
+
+function spawnTargetAnim(viewCx, viewCy, title) {
+  clearTargetAnim();
+  const svg = document.getElementById('bp-target-svg');
+  const box = document.getElementById('bp-landmark-box');
+  const canvasEl = document.getElementById('blueprint-canvas');
+  if (!svg || !box || !canvasEl) return;
+  // Convert viewport coords → canvas-relative coords (SVG is absolute inside canvas)
+  const cRect = canvasEl.getBoundingClientRect();
+  const cx = viewCx - cRect.left;
+  const cy = viewCy - cRect.top;
+  const cW = cRect.width;
+  const cH = cRect.height;
+
+  // ── 1. CENTER DOT pulse ───────────────────────────────────────────────
+  const dot = _jEl('circle', { cx, cy, r: 3, fill: J, opacity: 0 });
+  dot.setAttribute('filter', 'url(#jarvisGlow)');
+  _tgtTimers.push(setTimeout(() => { dot.style.transition = 'opacity 0.1s'; dot.setAttribute('opacity', 1); }, 0));
+
+  // SVG glow filter (inject once)
+  if (!svg.querySelector('#jarvisGlow')) {
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    defs.innerHTML = `<filter id="jarvisGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>`;
+    svg.prepend(defs);
+  }
+
+  // ── 2. INNER spinning arc ring ────────────────────────────────────────
+  const r1 = 20, c1 = 2 * Math.PI * r1;
+  const ring1 = _jEl('circle', { cx, cy, r: r1, fill: 'none', stroke: J,
+    'stroke-width': 1.6, 'stroke-dasharray': `${c1*0.22} ${c1*0.03} ${c1*0.22} ${c1*0.03} ${c1*0.22} ${c1*0.03}`,
+    opacity: 0 });
+  ring1.style.transformOrigin = `${cx}px ${cy}px`;
+  ring1.style.animation = 'jarvisSpin 5.2s linear infinite';
+  _tgtTimers.push(setTimeout(() => { ring1.style.transition = 'opacity 0.2s'; ring1.setAttribute('opacity', 0.95); }, 40));
+
+  // ── 3. OUTER counter-spinning arc ring ────────────────────────────────
+  const r2 = 34, c2 = 2 * Math.PI * r2;
+  const ring2 = _jEl('circle', { cx, cy, r: r2, fill: 'none', stroke: J,
+    'stroke-width': 0.8, 'stroke-dasharray': `${c2*0.10} ${c2*0.07}`,
+    opacity: 0 });
+  ring2.style.transformOrigin = `${cx}px ${cy}px`;
+  ring2.style.animation = 'jarvisSpinRev 9s linear infinite';
+  _tgtTimers.push(setTimeout(() => { ring2.style.transition = 'opacity 0.25s'; ring2.setAttribute('opacity', 0.5); }, 60));
+
+  // ── 4. CROSSHAIR lines ────────────────────────────────────────────────
+  const chLen = 12, chGap = r1 + 2;
+  [[cx - chGap - chLen, cy, cx - chGap, cy],
+   [cx + chGap, cy, cx + chGap + chLen, cy],
+   [cx, cy - chGap - chLen, cx, cy - chGap],
+   [cx, cy + chGap, cx, cy + chGap + chLen]].forEach(([x1,y1,x2,y2], i) => {
+    _jLine(x1, y1, x2, y2, J, 80 + i * 20, 90, 1.4);
+  });
+
+  // ── 5. CORNER BRACKETS ────────────────────────────────────────────────
+  const bs = 13, bOff = r1 + 4;
+  [[-1,-1],[1,-1],[1,1],[-1,1]].forEach(([sx, sy], i) => {
+    const bx = cx + sx * bOff, by = cy + sy * bOff;
+    _jLine(bx, by, bx + sx * bs, by, `${JD}0.9)`, 120 + i * 25, 80, 1.8);
+    _jLine(bx, by, bx, by + sy * bs, `${JD}0.9)`, 120 + i * 25, 80, 1.8);
+  });
+
+  // ── 6. ANGULAR CONNECTOR path (reticle → panel) ───────────────────────
+  // All coords are canvas-relative; goRight based on canvas width
+  const goRight = cx < cW * 0.58;
+  const kinkX = Math.max(50, Math.min(cW - 50, goRight ? cx + 48 : cx - 48));
+  const kinkY = Math.max(40, cy - 32);
+  // panelX: clamp so box stays inside canvas (estimate box ~210px wide)
+  const rawPanelX = goRight ? cx + 185 : cx - 185;
+  const panelX = goRight
+    ? Math.min(rawPanelX, cW - 230)
+    : Math.max(rawPanelX, 20);
+
+  _tgtTimers.push(setTimeout(() => {
+    // Diagonal segment from reticle
+    const dLen = Math.hypot(kinkX - cx, kinkY - cy);
+    const d1 = _jEl('line', { x1: cx, y1: cy, x2: kinkX, y2: kinkY,
+      stroke: J, 'stroke-width': 1.3, 'stroke-dasharray': dLen, 'stroke-dashoffset': dLen, opacity: 0.8 });
+    requestAnimationFrame(() => { d1.style.transition = 'stroke-dashoffset 0.16s ease-out'; d1.setAttribute('stroke-dashoffset', 0); });
+
+    // Junction dot
+    _tgtTimers.push(setTimeout(() => {
+      _jEl('circle', { cx: kinkX, cy: kinkY, r: 2.2, fill: J, opacity: 0.9 });
+
+      // Horizontal segment to panel
+      const hLen = Math.abs(panelX - kinkX);
+      const h1 = _jEl('line', { x1: kinkX, y1: kinkY, x2: panelX, y2: kinkY,
+        stroke: J, 'stroke-width': 1.3, 'stroke-dasharray': hLen,
+        'stroke-dashoffset': goRight ? hLen : -hLen, opacity: 0.8 });
+      requestAnimationFrame(() => { h1.style.transition = 'stroke-dashoffset 0.19s ease-out'; h1.setAttribute('stroke-dashoffset', 0); });
+
+      // Endpoint dot
+      _tgtTimers.push(setTimeout(() => {
+        _jEl('circle', { cx: panelX, cy: kinkY, r: 2, fill: J, opacity: 0.85 });
+
+        // Small tick drop from endpoint down to panel top
+        const tDrop = 16;
+        _jLine(panelX, kinkY, panelX, kinkY + tDrop, `${JD}0.7)`, 0, 80, 1.1);
+
+        // ── 7. GLASS PANEL (canvas-relative absolute positioning) ──────────
+        _tgtTimers.push(setTimeout(() => {
+          // Position within canvas (absolute, not fixed)
+          const boxTop  = Math.max(4, Math.min(kinkY + tDrop - 18, cH - 55));
+          box.style.display = 'block';
+          box.style.opacity = '0';
+          box.style.top    = boxTop + 'px';
+          box.style.right  = 'auto';
+          // Temporarily left:0 so offsetWidth resolves correctly
+          box.style.left   = '0px';
+
+          const nameEl = document.getElementById('bp-landmark-name');
+          nameEl.textContent = title;
+          box.style.width = 'auto'; // allow it to size to content
+          const bW = box.offsetWidth; // get full width
+          box.style.width = bW + 'px'; // lock width so brackets draw correctly
+          nameEl.textContent = ''; // clear for typewriter
+
+          const cursor = document.getElementById('bp-scan-cursor');
+          if (cursor) cursor.style.display = 'inline';
+          box.style.transform = `scaleX(0.7) translateX(${goRight ? '-12px' : '12px'})`;
+          box.style.transformOrigin = goRight ? 'left center' : 'right center';
+
+          requestAnimationFrame(() => {
+            // Now clamp left so box stays inside canvas
+            const boxLeft = goRight
+              ? Math.min(panelX + 6, cW - bW - 4)
+              : Math.max(panelX - bW - 6, 4);
+            box.style.left = boxLeft + 'px';
+
+            requestAnimationFrame(() => {
+              box.style.transition = 'opacity 0.18s ease, transform 0.22s ease';
+              box.style.opacity = '1';
+              box.style.transform = 'scaleX(1) translateX(0)';
+
+              // Typewriter scan-in
+              _tgtTimers.push(setTimeout(() => {
+                let idx = 0;
+                const nameEl = document.getElementById('bp-landmark-name');
+                if (_scanInt) clearInterval(_scanInt);
+                _scanInt = setInterval(() => {
+                  if (idx <= title.length) { nameEl.textContent = title.slice(0, idx); idx++; }
+                  else { clearInterval(_scanInt); _scanInt = null; if (cursor) cursor.style.display = 'none'; }
+                }, 38);
+
+                // SVG corner brackets — use canvas-relative coords from box offsetLeft/Top
+                _tgtTimers.push(setTimeout(() => {
+                  const bx0 = box.offsetLeft - 4,  by0 = box.offsetTop - 4;
+                  const bx1 = bx0 + box.offsetWidth + 8, by1 = by0 + box.offsetHeight + 8;
+                  const bs2 = 10;
+                  [[bx0,by0,1,1],[bx1,by0,-1,1],[bx1,by1,-1,-1],[bx0,by1,1,-1]].forEach(([px,py,sdx,sdy]) => {
+                    _jEl('line',{x1:px,y1:py,x2:px+sdx*bs2,y2:py,stroke:J,'stroke-width':1.6,opacity:0.8});
+                    _jEl('line',{x1:px,y1:py,x2:px,y2:py+sdy*bs2,stroke:J,'stroke-width':1.6,opacity:0.8});
+                  });
+                  // Internal sweep shimmer
+                  const midY = by0 + 4 + (box.offsetHeight / 2);
+                  const sl = _jEl('line', { x1: bx0+4, y1: midY, x2: bx1-4, y2: midY,
+                    stroke: `${JD}0.15)`, 'stroke-width': box.offsetHeight, opacity: 1 });
+                  sl.style.transition = 'opacity 1s ease 0.4s';
+                  setTimeout(() => { sl.setAttribute('opacity', 0); }, 500);
+                }, 80));
+              }, 100));
+            });
+          });
+        }, 190));
+      }, 195));
+    }, 165));
+  }, 300));
+}
+
+function clearTargetAnim() {
+  if (_scanInt) { clearInterval(_scanInt); _scanInt = null; }
+  // Clear intervals stored in _tgtTimers (both timeouts and intervals)
+  _tgtTimers.forEach(t => { clearTimeout(t); clearInterval(t); });
+  _tgtTimers = [];
+  const svg = document.getElementById('bp-target-svg');
+  if (svg) _tgtLines.forEach(l => { try { svg.removeChild(l); } catch (_) {} });
+  _tgtLines = [];
+  const box = document.getElementById('bp-landmark-box');
+  if (box) { box.style.transition = 'opacity 0.18s'; box.style.opacity = '0'; setTimeout(() => { if(box) box.style.display = 'none'; }, 200); }
+}
+
+// Canvas-texture sprite label (always faces camera, visible from any angle)
+function mkLabel(text, x, y, z, hexCol, size) {
+  size = size || 10;
+  const canvas = document.createElement('canvas');
+  canvas.width = 512; canvas.height = 72;
+  const ctx = canvas.getContext('2d');
+  ctx.font = 'bold 24px Arial, sans-serif';
+  const tw = ctx.measureText(text).width;
+  ctx.fillStyle = 'rgba(0,0,0,0.80)';
+  ctx.fillRect(0, 0, 512, 72);
+  ctx.strokeStyle = hexCol || '#ffffff';
+  ctx.lineWidth = 2.5;
+  ctx.strokeRect(2, 2, 508, 68);
+  ctx.fillStyle = hexCol || '#ffffff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, 256, 36);
+  const tex = new THREE.CanvasTexture(canvas);
+  const mat = new THREE.SpriteMaterial({ map: tex, depthTest: false });
+  const sp = new THREE.Sprite(mat);
+  sp.position.set(x, y, z);
+  sp.scale.set(size * (512 / 72), size, 1);
+  scene.add(sp);
+  return sp;
+}
+
+// Same for VR scene
+function vrLabel(text, x, y, z, hexCol, size) {
+  size = size || 10;
+  const canvas = document.createElement('canvas');
+  canvas.width = 512; canvas.height = 72;
+  const ctx = canvas.getContext('2d');
+  ctx.font = 'bold 24px Arial, sans-serif';
+  ctx.fillStyle = 'rgba(0,0,0,0.82)';
+  ctx.fillRect(0, 0, 512, 72);
+  ctx.strokeStyle = hexCol || '#ffffff';
+  ctx.lineWidth = 2.5;
+  ctx.strokeRect(2, 2, 508, 68);
+  ctx.fillStyle = hexCol || '#ffffff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, 256, 36);
+  const tex = new THREE.CanvasTexture(canvas);
+  const mat = new THREE.SpriteMaterial({ map: tex, depthTest: false });
+  const sp = new THREE.Sprite(mat);
+  sp.position.set(x, y, z);
+  sp.scale.set(size * (512 / 72), size, 1);
+  vrScene.add(sp);
+  return sp;
+}
+
+// Coloured pole + disc landmark marker (clickable)
+function mkLandmarkMarker(x, z, col, type, title, desc) {
+  const poleMat = new THREE.MeshLambertMaterial({ color: col });
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 14, 8), poleMat);
+  pole.position.set(x, 7, z); pole.castShadow = true; scene.add(pole);
+  const disc = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 2, 20), poleMat);
+  disc.position.set(x, 14.5, z);
+  disc.userData = { type, title, desc, landmark: true }; interactables.push(disc); scene.add(disc);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(5.5, 0.35, 6, 22),
+    new THREE.MeshLambertMaterial({ color: col, transparent: true, opacity: 0.55 }));
+  ring.rotation.x = Math.PI / 2; ring.position.set(x, 14.5, z); scene.add(ring);
+  mkZone(20, 20, x, z, { type, title, desc, landmark: true });
+}
+
+// Directional road signboard
+function mkDirectionSign(x, z, rotY, col, title, desc) {
+  const pMat = new THREE.MeshLambertMaterial({ color: 0x2a3a28 });
+  const sMat = new THREE.MeshLambertMaterial({ color: col });
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 11, 6), pMat);
+  pole.position.set(x, 5.5, z); scene.add(pole);
+  const sign = new THREE.Mesh(new THREE.BoxGeometry(18, 4.5, 0.55), sMat);
+  sign.rotation.y = rotY; sign.position.set(x, 12.5, z);
+  sign.userData = { type: 'direction', title, desc }; interactables.push(sign); scene.add(sign);
+  const arrow = new THREE.Mesh(new THREE.BoxGeometry(14, 0.9, 0.35), new THREE.MeshLambertMaterial({ color: 0xf5f5e8 }));
+  arrow.rotation.y = rotY; arrow.position.set(x, 11.2, z); scene.add(arrow);
+}
+
+// ---- Surrounding landmarks & road context (outside project boundary) ----
+function mkLandmarks() {
+  // Extended context ground
+  const extG = new THREE.Mesh(new THREE.PlaneGeometry(800, 750),
+    new THREE.MeshLambertMaterial({ color: 0x182416 }));
+  extG.rotation.x = -Math.PI / 2; extG.position.set(-20, -0.28, -50); extG.receiveShadow = true; scene.add(extG);
+
+  // ── APPROACH ROAD EXTENSION (gate → Southern Bypass) ──────────────────
+  // Internal N-S spine connecting main road to north cluster (along amenity corridor)
+  mkFlat(7, 108, 0x3e3e3c, -2, -74);
+  for (let i = 0; i < 5; i++) mkFlat(0.38, 7, 0xcccc22, -2, -28 - i * 18, 0.12);
+
+  // ── SOUTHERN BYPASS (E-W highway) ─────────────────────────────────────
+  mkFlat(660, 16, 0x3a3838, -10, -128);
+  mkFlat(660, 0.55, 0xe0e0dc, -10, -136, 0.1);
+  mkFlat(660, 0.55, 0xe0e0dc, -10, -120, 0.1);
+  for (let i = 0; i < 23; i++) mkFlat(9, 0.42, 0xcccc22, -315 + i * 30, -128, 0.12);
+  mkRoadText('SOUTHERN BYPASS', -30, -128, 0, 160);
+  mkRoadText('SOUTHERN BYPASS', -230, -128, 0, 160);
+  mkRoadText('SOUTHERN BYPASS', 140, -128, 0, 160);
+  mkZone(100, 14, -10, -128, { type: 'bypass', title: 'Southern Bypass', desc: 'Major arterial highway connecting Kamalgazi Flyover (E.M. Bypass) in the west to Rajpur & Baruipur in the east. Silverwoods is accessed from this bypass at Jagaddal More.' });
+
+  // ── ADI GANGA CANAL ───────────────────────────────────────────────────
+  mkFlat(660, 13, 0x1a6a9a, -10, -150, 0.05, 0.82, { type: 'water', title: 'Adi Ganga Canal', desc: 'The historic Adi Ganga — an ancient channel of the Ganges — flows alongside the Southern Bypass.' });
+  mkFlat(660, 1.2, 0x55ccee, -10, -150, 0.2, 0.4);
+  mkRoadText('ADI GANGA CANAL', -10, -150, 0, 140, '#44bbff');
+
+
+  // ── E.M. BYPASS (N-S far west) ────────────────────────────────────────
+  mkFlat(14, 380, 0x3a3838, -230, -95);
+  for (let i = 0; i < 14; i++) mkFlat(0.42, 8, 0xcccc22, -230, -220 + i * 26, 0.12);
+  mkFlat(0.55, 380, 0xe0e0dc, -236, -95, 0.1);
+  mkFlat(0.55, 380, 0xe0e0dc, -224, -95, 0.1);
+  mkRoadText('E.M. BYPASS', -230, -100, Math.PI / 2, 100);
+  mkRoadText('E.M. BYPASS', -230, -180, Math.PI / 2, 100);
+  mkZone(14, 80, -230, -110, { type: 'bypass', title: 'E.M. Bypass', desc: 'Eastern Metropolitan Bypass — main highway of South Kolkata. Connects Ruby Crossing (north) to Garia/Baruipur (south). Kavi Nazrul Metro (Garia) is on this corridor.' });
+
+
+  // ── NARENDRAPUR NSC BOSE ROAD (far north, E-W) ────────────────────────
+  mkFlat(700, 12, 0x343230, -30, -210);
+  for (let i = 0; i < 23; i++) mkFlat(9, 0.42, 0xcccc22, -315 + i * 30, -210, 0.12);
+  mkRoadText('NARENDRAPUR NSC BOSE ROAD', -30, -210, 0, 200);
+  mkRoadText('NARENDRAPUR NSC BOSE ROAD', 160, -210, 0, 200);
+  mkZone(100, 12, -30, -210, { type: 'bypass', title: 'Narendrapur NSC Bose Road', desc: 'Netaji Subhas Chandra Bose Road — major arterial through Narendrapur connecting Kamalgazi Flyover to Sonarpur Railway Station.' });
+
+  // ── KAMALGAZI FLYOVER JUNCTION (NW, EM Bypass × NSC Bose) ────────────
+  const kjRing = new THREE.Mesh(new THREE.CylinderGeometry(20, 20, 0.5, 32),
+    new THREE.MeshLambertMaterial({ color: 0x484840 }));
+  kjRing.position.set(-230, 0.28, -210); scene.add(kjRing);
+  mkFlat(18, 18, 0x2a6a2a, -230, -210, 0.12);
+  mkTree(-228, -210, 8, 3, 0x1e6a28); mkTree(-232, -212, 7, 2.8, 0x226632);
+  mkLandmarkMarker(-230, -210, 0xf5a623, 'junction', 'Kamalgazi Flyover', 'Major flyover junction where E.M. Bypass meets Narendrapur NSC Bose Road. Key navigation landmark ~8 km northwest of Silverwoods.');
+  mkRoadText('KAMALGAZI FLYOVER', -230, -210, 0, 38, '#f5a623');
+
+  // ── JAGADDAL MORE JUNCTION ─────────────────────────────────────────────
+  const jRing = new THREE.Mesh(new THREE.CylinderGeometry(14, 14, 0.5, 32),
+    new THREE.MeshLambertMaterial({ color: 0x484840 }));
+  jRing.position.set(108, 0.28, -128); scene.add(jRing);
+  mkFlat(12, 12, 0x2a6a2a, 108, -128, 0.12);
+  mkTree(106, -128, 9, 3.5, 0x1e6a28); mkTree(110, -126, 8, 3.0, 0x226632);
+  mkLandmarkMarker(108, -128, 0xf5a623, 'junction', 'Jagaddal More', 'Primary junction on Southern Bypass & Dr BC Roy Road. Main navigation landmark for Silverwoods — approx. 500 m from project entry gate.');
+  mkRoadText('JAGADDAL MORE', 108, -128, 0, 26, '#f5a623');
+
+  // ── LAL GATE MORE (junction on bypass) ────────────────────────────────
+  mkFlat(10, 10, 0x5a5850, 32, -128, 0.1);
+  mkTree(30, -126, 7, 2.5, 0x226622); mkTree(34, -130, 6, 2.2, 0x1e6a28);
+  mkLandmarkMarker(32, -128, 0xdd9933, 'junction', 'Lal Gate More', 'Junction on Southern Bypass between Rathtala area and Jagaddal More. Local bus and auto interchange point.');
+
+  // ── RATHTALA MORE / TEMPLE ────────────────────────────────────────────
+  mkBox(8, 10, 8, 0xe8d8a8, 72, 0, -126, null);
+  mkBox(2.8, 13, 2.8, 0xe8d8a8, 72, 0, -123, null);
+  mkLandmarkMarker(72, -128, 0xd4a040, 'heritage', 'Rathtala More (Temple)', 'Historic temple junction on Southern Bypass. Key local navigation landmark between Lal Gate and Jagaddal More.');
+
+  // ── CHINTAMANI KAR BIRD SANCTUARY ─────────────────────────────────────
+  mkFlat(52, 44, 0x1a6a20, -48, -152, 0.02);
+  for (let i = 0; i < 16; i++) mkTree(-65 + i * 6, -146 + (i % 3) * 8, rng(7, 11), rng(3, 4.5), 0x1a6a22);
+  mkFlat(52, 44, 0x1a7a22, -48, -152, 0.04, 0.4);
+  mkLandmarkMarker(-48, -152, 0x28b850, 'nature', 'Chintamani Kar Bird Sanctuary', 'Protected wetland bird sanctuary NW of Silverwoods along Southern Bypass. Home to migratory and local bird species year-round.');
+
+  // ── AARTI HOSPITAL ────────────────────────────────────────────────────
+  mkFlat(26, 20, 0xf8f4f4, -88, -120, 0);
+  mkBox(20, 9, 14, 0xf8f8f8, -88, 0, -120, null);
+  mkBox(2.5, 7, 0.6, 0xdd2222, -88, 5, -113, null);
+  mkBox(0.6, 7, 2.5, 0xdd2222, -88, 5, -113, null);
+  mkLandmarkMarker(-88, -128, 0xee3344, 'hospital', 'AARTI Hospital', 'Multi-specialty hospital on Southern Bypass near Kamalgazi. Emergency, diagnostics and specialist care within 5 km of Silverwoods.');
+
+  // ── APOLLO DIAGNOSTICS ────────────────────────────────────────────────
+  mkFlat(14, 11, 0xe8f4ff, -115, -120, 0);
+  mkBox(12, 5, 8, 0x2266bb, -115, 0, -120, null);
+  mkLandmarkMarker(-115, -128, 0x2288ee, 'hospital', 'Apollo Diagnostics', 'Apollo Diagnostics centre on NSC Bose Road corridor. Advanced pathology, radiology and health screening within 6 km.');
+
+  // ── REMEDY DIAGNOSTICS ────────────────────────────────────────────────
+  mkFlat(12, 10, 0xe8f0ff, -135, -120, 0);
+  mkBox(10, 4, 7, 0x4488cc, -135, 0, -120, null);
+  mkLandmarkMarker(-135, -128, 0x44aaee, 'hospital', 'Remedy Diagnostics', 'Diagnostics centre on Southern Bypass corridor. Pathology and imaging services near Kamalgazi area.');
+
+  // ── WOODSQUARE MALL ───────────────────────────────────────────────────
+  mkFlat(26, 20, 0xd8c8e8, -100, -118, 0);
+  mkBox(22, 8, 15, 0xc8b8e0, -100, 0, -118, null);
+  mkLandmarkMarker(-100, -128, 0xaa66dd, 'mall', 'Woodsquare Mall', 'Popular shopping destination on Southern Bypass near Narendrapur. Retail, dining and entertainment hub within 5 km of Silverwoods.');
+
+  // ── SPRINGFIELD (residential) ─────────────────────────────────────────
+  mkFlat(22, 17, 0xd8e8f8, -150, -118, 0);
+  mkBox(18, 10, 13, 0xc8d8f0, -150, 0, -118, null);
+  mkLandmarkMarker(-150, -128, 0x4488cc, 'villa', 'Springfield', 'Residential project on Southern Bypass. Contemporary apartments in the Narendrapur-Kamalgazi growth corridor.');
+
+  // ── GRAND AVENUE ──────────────────────────────────────────────────────
+  mkFlat(20, 16, 0xf8e8d8, -170, -118, 0);
+  mkBox(16, 9, 11, 0xf0e0c8, -170, 0, -118, null);
+  mkLandmarkMarker(-170, -128, 0xee9944, 'villa', 'Grand Avenue', 'Premium residential project near Kamalgazi Flyover area on Southern Bypass.');
+
+  // ── RELIANCE FRESH (Southern Bypass — central) ────────────────────────
+  mkBox(10, 5, 8, 0x2277aa, -22, 0, -121, null);
+  mkLandmarkMarker(-22, -128, 0x2288bb, 'mall', 'Reliance Fresh', 'Reliance Fresh supermarket on Southern Bypass. Daily grocery and essentials near Silverwoods.');
+
+  // ── RELIANCE FRESH (near Kamalgazi — west) ───────────────────────────
+  mkBox(10, 5, 8, 0x2277aa, -195, 0, -121, null);
+  mkLandmarkMarker(-195, -128, 0x2288bb, 'mall', 'Reliance Fresh (Kamalgazi)', 'Reliance Fresh near Kamalgazi / E.M. Bypass junction on Southern Bypass.');
+
+  // ── ALTITUDE GRAND / DHALAI BRIDGE AREA ──────────────────────────────
+  mkFlat(26, 20, 0xe0d8c8, -200, -165, 0);
+  mkBox(22, 13, 15, 0xd8d0c0, -200, 0, -165, null);
+  mkLandmarkMarker(-200, -172, 0xcc8844, 'villa', 'Altitude Grand (Dhalai Bridge Area)', 'Prominent residential high-rise near Dhalai Bridge / Patuli area on E.M. Bypass connector. Major landmark for this corridor.');
+
+  // ── HINDUSTAN HEALTH POINT (E.M. Bypass) ─────────────────────────────
+  mkFlat(16, 13, 0xf8f4f0, -230, -157, 0);
+  mkBox(13, 6, 9, 0xf8f8f0, -230, 0, -157, null);
+  mkBox(2, 5, 0.5, 0xdd2222, -230, 4, -152, null);
+  mkBox(0.5, 5, 2, 0xdd2222, -230, 4, -152, null);
+  mkLandmarkMarker(-230, -163, 0xee5544, 'hospital', 'Hindustan Health Point', 'Healthcare facility on E.M. Bypass near Kamalgazi Flyover area.');
+
+  // ── BDM INTERNATIONAL SCHOOL (E.M. Bypass) ───────────────────────────
+  mkFlat(24, 18, 0xf0e8c0, -230, -147, 0);
+  mkBox(20, 8, 13, 0xe8e0b8, -230, 0, -147, null);
+  mkLandmarkMarker(-230, -153, 0xe8cc30, 'school', 'BDM International School', 'Well-regarded international school near Kamalgazi on E.M. Bypass / NSC Bose Road corridor.');
+
+  // ── BD MEMORIAL SCHOOL (E.M. Bypass) ─────────────────────────────────
+  mkFlat(22, 17, 0xd0e8d0, -230, -138, 0);
+  mkBox(18, 7, 12, 0xc8e0c8, -230, 0, -138, null);
+  mkLandmarkMarker(-230, -143, 0x44aa44, 'school', 'BD Memorial School', 'Well-known school near Kamalgazi / E.M. Bypass. Approx. 5 km from Silverwoods.');
+
+  // ── KAVI NAZRUL METRO STN. (GARIA) ───────────────────────────────────
+  mkFlat(22, 16, 0x2a3a6a, -230, -222, 0);
+  mkBox(18, 7, 11, 0x2a3a7a, -230, 0, -222, null);
+  mkBox(0.7, 8, 13, 0x336699, -222, 0, -222, null);
+  mkLandmarkMarker(-230, -225, 0x4466cc, 'metro', 'Kavi Nazrul Metro Stn. (Garia)', 'Kavi Nazrul metro station on the Purple Line (Garia–Esplanade). Nearest metro to Silverwoods via E.M. Bypass, approx. 8–10 km.');
+
+  // ── SHAHID KHUDIRAM METRO STN. ────────────────────────────────────────
+  mkFlat(20, 14, 0x2a3a6a, -212, -217, 0);
+  mkBox(16, 7, 10, 0x2a3a7a, -212, 0, -217, null);
+  mkLandmarkMarker(-212, -218, 0x4466cc, 'metro', 'Shahid Khudiram Metro Stn.', 'Metro station on the Purple Line adjacent to Kavi Nazrul. Serves the Garia-Baruipur junction area.');
+
+  // ── LIONS CALCUTTA VIDYA MANDIR ───────────────────────────────────────
+  mkFlat(28, 22, 0xd4b060, 150, -116, 0);
+  mkBox(22, 8, 16, 0xdbb858, 150, 0, -116, null);
+  mkBox(3, 7, 0.5, 0xcc2222, 150, 4, -107, null);
+  mkLandmarkMarker(150, -128, 0xf5d020, 'school', 'Lions Calcutta Vidya Mandir', 'Reputed school on Dr BC Roy Road, directly adjacent to the Silverwoods site. Walking distance from the project gate.');
+
+  // ── RELIANCE FRESH & GALLERIA MALL (east, Dr BC Roy Road) ────────────
+  mkFlat(24, 18, 0xd8c8e8, 175, -118, 0);
+  mkBox(20, 8, 13, 0xc8b8e0, 175, 0, -118, null);
+  mkLandmarkMarker(175, -128, 0x9955cc, 'mall', 'Reliance Fresh & Galleria Mall', 'Shopping destination east of Dr BC Roy Road on Southern Bypass. Grocery, retail, food court and entertainment.');
+
+  // ── SWARNIM INTERNATIONAL SCHOOL ─────────────────────────────────────
+  mkFlat(22, 17, 0xe8f0d8, 208, -116, 0);
+  mkBox(18, 7, 12, 0xe0e8d0, 208, 0, -116, null);
+  mkLandmarkMarker(208, -128, 0x88cc44, 'school', 'Swarnim International School', 'International school east of Silverwoods. Located towards Rajpur on the Southern Bypass corridor.');
+
+  // ── RAJPUR KALITALA ───────────────────────────────────────────────────
+  mkBox(9, 10, 9, 0xe8d8a8, 238, 0, -126, null);
+  mkBox(2.8, 13, 2.8, 0xe8d8a8, 238, 0, -123, null);
+  mkLandmarkMarker(238, -128, 0xd4a840, 'heritage', 'Rajpur Kalitala', 'Temple and local landmark at Rajpur Kalitala junction on Southern Bypass. Towards Rajpur direction.');
+
+  // ── BIPATTARINI CHANDI BARI ───────────────────────────────────────────
+  mkBox(10, 11, 10, 0xf0e0c8, 265, 0, -126, null);
+  mkBox(3.2, 14, 3.2, 0xf0e0c8, 265, 0, -122, null);
+  mkLandmarkMarker(265, -128, 0xcc8833, 'heritage', 'Bipattarini Chandi Bari', 'Revered temple at the eastern end of the Southern Bypass towards Rajpur. Important religious site in the region.');
+
+  // ── NARENDRAPUR RAMKRISHNA MISSION (NSC Bose Road) ───────────────────
+  mkFlat(36, 30, 0xe8d8b0, -25, -218, 0);
+  mkBox(28, 11, 22, 0xece0bc, -25, 0, -218, null);
+  mkBox(6, 15, 6, 0xe8d8b0, -25, 0, -210, null);
+  mkLandmarkMarker(-25, -225, 0xd4a040, 'heritage', 'Narendrapur Ramkrishna Mission Ashram', 'Celebrated Ramkrishna Mission campus — school, college, hospital & ashram. Major educational and spiritual landmark of South Kolkata on NSC Bose Road.');
+
+  // ── FUTURE INSTITUTE OF ENGINEERING (NSC Bose Road) ──────────────────
+  mkFlat(34, 26, 0xd0c8e0, -65, -218, 0);
+  mkBox(28, 12, 20, 0xd8d0e8, -65, 0, -218, null);
+  mkLandmarkMarker(-65, -225, 0x9966cc, 'institute', 'Future Institute of Engineering & Management', 'Premier engineering & management college on Narendrapur NSC Bose Road. Approx. 7 km from Silverwoods via Southern Bypass.');
+
+  // ── ROYAL GARDENS HEIGHTS (NSC Bose Road) ────────────────────────────
+  mkFlat(22, 18, 0xf0e8f8, 28, -218, 0);
+  mkBox(18, 13, 14, 0xe8e0f0, 28, 0, -218, null);
+  mkLandmarkMarker(28, -225, 0xcc88ee, 'villa', 'Royal Gardens Heights', 'Premium residential project on Narendrapur NSC Bose Road. Part of the growing Narendrapur-Rajpur residential corridor.');
+
+  // ── LUXURIA (NSC Bose Road) ───────────────────────────────────────────
+  mkFlat(20, 16, 0xf8e8f8, 58, -218, 0);
+  mkBox(16, 15, 12, 0xf0e0f0, 58, 0, -218, null);
+  mkLandmarkMarker(58, -225, 0xbb44bb, 'villa', 'Luxuria', 'Upscale residential project on NSC Bose Road. Premium living in the Narendrapur growth corridor.');
+
+  // ── GLOBAL CITY (NSC Bose Road) ───────────────────────────────────────
+  mkFlat(28, 22, 0xe8f0f8, 95, -218, 0);
+  mkBox(22, 15, 17, 0xe0e8f0, 95, 0, -218, null);
+  mkLandmarkMarker(95, -225, 0x2288cc, 'villa', 'Global City', 'Large integrated township project on NSC Bose Road. Commercial, residential and amenity hub in the Narendrapur corridor.');
+
+  // ── DIRECTION SIGNBOARDS ──────────────────────────────────────────────
+  mkDirectionSign(-10, -250, 0, 0x1a4a22, '▲ Towards Kamalgazi Flyover & E.M. Bypass', 'Kamalgazi Flyover connects to E.M. Bypass. Kavi Nazrul Metro (Garia) & Shahid Khudiram Metro approx. 8–10 km via EM Bypass.');
+  mkDirectionSign(298, -128, Math.PI / 2, 0x1a3a4a, '▶ Towards Rajpur & Baruipur', 'NH-116B towards Rajpur, Sonarpur Railway Station and Baruipur. Bipattarini Chandi Bari, Rajpur Kalitala en route.');
+  mkDirectionSign(-310, -128, -Math.PI / 2, 0x1a3a4a, '◀ Towards Garia & Ruby Crossing', 'Towards Garia More, Ruby Hospital and Ruby Crossing. Garia Railway Station approx. 6 km via Southern Bypass and Kamalgazi.');
+  mkDirectionSign(-10, 160, Math.PI, 0x3a2a1a, '▼ Towards Garia (South)', 'Silverwoods south access via Dr BC Roy Road towards Garia. Bus routes and auto connectivity to Garia Railway Station.');
+  mkDirectionSign(-230, -252, 0, 0x1a2a4a, '▲ Towards Ruby Crossing / Garia Rly. Stn.', 'North on E.M. Bypass towards Ruby Crossing, Deshapriya Park and Gariahat. Garia Railway Station is south of this corridor.');
+  mkDirectionSign(128, -252, 0, 0x4a2a1a, '▲ Towards Sonarpur Railway Stn.', 'North on Dr BC Roy Road towards Sonarpur Railway Station. Regular trains to Sealdah and Canning from Sonarpur.');
+
+  // Peripheral trees for context area
+  for (let tx = -320; tx < 320; tx += 22) {
+    mkTree(tx, -110, rng(5, 9), rng(2, 3.2), 0x1a5c22);
+    mkTree(tx, -170, rng(5, 8), rng(2, 3), 0x236b2c);
+  }
+  for (let tz = -235; tz < -30; tz += 22) {
+    mkTree(-118, tz, rng(5, 8), rng(2, 3), 0x1a5c22);
+    mkTree(168, tz, rng(5, 8), rng(2, 3), 0x226b2c);
+  }
+}
+
+// --------- Scene ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+// ── PLOT DISPATCHER ───────────────────────────────────────────────────
+var _pn = 0;
+function mkP(x, z, side) {
+  _pn++;
+  var bNum = PLOT_TO_BROCHURE[_pn] || _pn;
+  var info = PLOT_DATA[String(bNum)] || { status: 'available', owner: '', reserved_until: null };
+  if (info.status === 'sold') {
+    var vNum = String(bNum).padStart(3,'0');
+    mkVilla(x, z, side || 'back', {
+      type: 'sold', title: 'Villa  #' + vNum,
+      desc: 'Sold', owner: info.owner, completion_pct: info.completion_pct || 0, villaNum: bNum, brochureNum: bNum
+    });
+  } else if (info.status === 'not_for_sale') {
+    mkAvailPlot(x, z, _pn, 'not_for_sale', null);
+  } else if (info.status === 'reserved') {
+    mkAvailPlot(x, z, _pn, 'reserved', info.reserved_until);
+  } else {
+    mkAvailPlot(x, z, _pn, 'available', null);
+  }
+}
+
+// ── 3D Plot → Brochure Plot Number Mapping ───────────────────────────
+const PLOT_TO_BROCHURE = {
+  1:29,2:28,3:27,4:26,5:25,6:24,7:1,8:2,9:3,10:4,11:5,12:6,13:7,14:8,15:9,16:10,17:11,
+  18:23,19:22,20:21,21:20,22:19,23:18,
+  24:12,25:13,26:14,27:15,28:16,29:17,
+  30:32,31:33,32:34,33:35,34:36,
+  35:37,36:38,37:39,38:40,
+  39:58,40:57,41:56,42:55,43:59,44:60,45:54,46:53,
+  47:41,48:42,49:43,50:44,51:45,52:46,
+  53:52,54:51,55:50,56:49,57:48,58:47,
+  59:115,60:96,61:95,62:78,63:77,64:61,
+  65:114,66:97,67:94,68:79,69:76,70:62,
+  71:113,72:98,73:93,74:80,75:75,76:63,
+  77:112,78:99,79:92,80:81,81:74,82:64,
+  83:110,84:101,85:91,86:82,87:72,
+  88:67,89:66,
+  90:109,91:102,92:90,93:83,94:71,
+  95:108,96:103,97:89,98:84,99:70,
+  100:107,101:104,102:88,103:85,104:69,
+  105:106,106:105,107:87,108:86,109:68,
+  110:121,111:120,112:119,113:118,114:117,115:116,
+  116:73,117:65,118:111,119:100
+};
+
+// ── AVAILABLE PLOT MARKER ─────────────────────────────────────────────
+function mkAvailPlot(x, z, num, status, reservedUntil) {
+  var isRes = status === 'reserved';
+  var isNfs = status === 'not_for_sale';
+  // JARVIS cyan for NFS, gold for reserved, green for available
+  var col   = isRes ? 0xc9a84c : isNfs ? 0x00d4ff : 0x7fc47f;
+  var bgCol = isRes ? 0x0d0b05 : isNfs ? 0x000d1a : 0x050d05;
+  var g = new THREE.Group();
+  var pad = new THREE.Mesh(new THREE.PlaneGeometry(9.0,9.0),
+    new THREE.MeshLambertMaterial({color:bgCol}));
+  pad.rotation.x = -Math.PI/2; pad.position.y=0.5; pad.renderOrder=10; g.add(pad);
+
+  // NFS: extra glowing inner fill plane (deep electric blue tint)
+  if(isNfs){
+    var nfsGlow=new THREE.Mesh(new THREE.PlaneGeometry(8.2,8.2),
+      new THREE.MeshBasicMaterial({color:0x001a2e,transparent:true,opacity:0.85}));
+    nfsGlow.rotation.x=-Math.PI/2; nfsGlow.position.y=0.51; nfsGlow.renderOrder=10; g.add(nfsGlow);
+  }
+
+  var edges = new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.BoxGeometry(9.0,0.04,9.0)),
+    new THREE.LineBasicMaterial({color:col}));
+  edges.position.y=0.52; edges.renderOrder=11; g.add(edges);
+  var inner = new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.BoxGeometry(7.8,0.04,7.8)),
+    new THREE.LineBasicMaterial({color:col,opacity:isNfs?.6:.25,transparent:true}));
+  inner.position.y=0.53; inner.renderOrder=11; g.add(inner);
+
+  // NFS: second inner ring for JARVIS hex-grid feel
+  if(isNfs){
+    var ring2=new THREE.LineSegments(
+      new THREE.EdgesGeometry(new THREE.BoxGeometry(6.4,0.04,6.4)),
+      new THREE.LineBasicMaterial({color:0x00d4ff,opacity:.35,transparent:true}));
+    ring2.position.y=0.54; ring2.renderOrder=11; g.add(ring2);
+  }
+
+  [[4.2,4.2],[4.2,-4.2],[-4.2,4.2],[-4.2,-4.2]].forEach(function(p){
+    var post=new THREE.Mesh(new THREE.BoxGeometry(.14,.7,.14),
+      new THREE.MeshLambertMaterial({color:col}));
+    post.position.set(p[0],.35,p[1]); g.add(post);
+  });
+
+  // Number label canvas — show brochure plot number
+  var bNum = PLOT_TO_BROCHURE[num] || num;
+  var cv=document.createElement('canvas'); cv.width=256; cv.height=128;
+  var ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,256,128);
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  if(isNfs){
+    // JARVIS-style: scanline-ish bg, cyan glow text
+    ctx.fillStyle='rgba(0,20,40,0.0)';
+    ctx.fillRect(0,0,256,128);
+    ctx.fillStyle='#00d4ff';
+    ctx.font='bold 26px Georgia,serif';
+    ctx.fillText('Plot '+bNum, 128, 44);
+    ctx.fillStyle='rgba(0,212,255,0.85)';
+    ctx.font='bold 15px Georgia,serif';
+    ctx.fillText('Not for Sale', 128, 82);
+  } else {
+    ctx.fillStyle=isRes?'#c9a84c':'#7fc47f';
+    ctx.font='bold 28px Georgia,serif';
+    ctx.fillText('Plot '+bNum, 128, 64);
+  }
+  var lbl=new THREE.Mesh(new THREE.PlaneGeometry(isNfs?6:5,isNfs?3.8:3.2),
+    new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv),transparent:true,side:THREE.DoubleSide}));
+  lbl.rotation.x=-Math.PI/2; lbl.position.y=0.56; lbl.renderOrder=12; g.add(lbl);
+
+  // Hitbox
+  var hit=new THREE.Mesh(new THREE.BoxGeometry(9,4,9),
+    new THREE.MeshBasicMaterial({visible:false}));
+  hit.position.y=2;
+  hit.userData={type:status,title:'Plot '+bNum,owner:'',villaNum:num,brochureNum:bNum,reservedUntil:reservedUntil||null};
+  interactables.push(hit); g.add(hit);
+  g.position.set(x,0,z); scene.add(g);
+}
+
+// =====================================================================
+// BUILD SCENE
+// =====================================================================
+function buildScene() {
+  // ── GROUND ──────────────────────────────────────────────────────────
+  const gnd = new THREE.Mesh(
+    new THREE.PlaneGeometry(400, 620),
+    new THREE.MeshLambertMaterial({ color: 0x1a2b1a })
+  );
+  gnd.rotation.x = -Math.PI / 2;
+  gnd.position.set(20, -0.2, -152);
+  gnd.receiveShadow = true;
+  scene.add(gnd);
+
+
+
+  // ── DR BC ROY ROAD (approaches from SE, slight diagonal) ────────────
+  const drbcGeo = new THREE.PlaneGeometry(220, 12);
+  const drbcMat = new THREE.MeshLambertMaterial({ color: 0x3a3838 });
+  const drbcMesh = new THREE.Mesh(drbcGeo, drbcMat);
+  drbcMesh.rotation.x = -Math.PI / 2;
+  drbcMesh.rotation.z = 0.10;
+  drbcMesh.position.set(20, 0.05, 24);
+  scene.add(drbcMesh);
+  (function() {
+    const lMat = new THREE.MeshLambertMaterial({ color: 0xcccc44 });
+    const cos = Math.cos(0.10), sin = Math.sin(0.10);
+    for (let i = 0; i < 14; i++) {
+      const d = -100 + i * 16;
+      const lm = new THREE.Mesh(new THREE.PlaneGeometry(8, 0.35), lMat);
+      lm.rotation.x = -Math.PI / 2;
+      lm.rotation.z = 0.10;
+      lm.position.set(20 + d * cos, 0.12, 24 - d * sin);
+      scene.add(lm);
+    }
+  })();
+
+  // ── ENTRY GATE — placed just inside the project boundary ────────────
+  mkEntryGate(5, 5, 0);
+
+  // ── MAIN 33'4" N-S SPINE ROAD ───────────────────────────────────────
+  // Runs from gate (z=+5) northward to z=-150
+  mkFlat(7, 158, 0x3a3838, 5, -72);
+  for (let i = 0; i < 13; i++) mkFlat(0.35, 4, 0xcccc44, 5, 0 - i * 13, 0.12);
+
+
+  const meta = { type: 'villa', title: 'Villa Plot', desc: 'Premium G+2 villa — Silverwoods.' };
+
+  // ── MARKETING / SALES OFFICE (east of gate, smaller) ───────────────
+  const og = new THREE.Group();
+  og.position.set(20, 0, -10);
+  const ob = new THREE.Mesh(new THREE.BoxGeometry(10, 5, 8),
+    new THREE.MeshLambertMaterial({ color: 0xddddcc }));
+  ob.position.y = 2.5; ob.castShadow = true; og.add(ob);
+  const orM = new THREE.Mesh(new THREE.ConeGeometry(7, 4, 4),
+    new THREE.MeshLambertMaterial({ color: 0x8b5a2b }));
+  orM.rotation.y = Math.PI / 4; orM.position.y = 7; orM.castShadow = true; og.add(orM);
+  scene.add(og);
+  mkZone(12, 10, 20, 8, {
+    type: 'office', title: 'Sales & Marketing Office',
+    desc: 'Silverwoods project experience centre at the main entry.'
+  });
+
+  // ── ENTRY ZONE: RIGHT/EAST column — 6 villas (shifted 12 back from gate) ─
+  for (let i = 0; i < 6; i++) mkP(18, -20 - i * 12, 'left');
+
+  // ── ENTRY ZONE: LEFT/WEST column — 11 villas ────────────────────────
+  for (let i = 0; i < 11; i++) mkP(-8, -8 - i * 12, 'right');
+
+  // ── LEFT GROUP [3,9,5,3,2] + bottom row [11,7,36,34,36,29] ─────────────
+  // These are the main E-W block west of the road gap (z=-94 south row, z=-108 north row)
+
+  mkP(18, -91, 'left');  // leftmost: west-facing
+  for (let i = 1; i < 6; i++) mkP(18 + i * 12, -91, 'back');   // bottom row: x=30→78
+  mkFlat(87, 5, 0x3a3838, 45, -99, 0.15);  // E-W road between rows — extended to connect left spine and right N-S road
+  for (let i = 0; i < 6; i++) mkP(18 + i * 12, -108, 'front'); // top row:    x=18→78
+
+
+  // E-W access road through NE cluster block
+
+  // ── NORTH ROW — [3,9,5,3,2] west group + [40,49,48,37] east group ─────
+  // Spine road (x=5) acts as the road IN THE MIDDLE between these two groups
+  // [3,9,5,3,2] — 1 villa WEST of spine, z=-122 (5 removed from left side)
+
+  // E-W road on top of horizontal villa section
+  mkFlat(148, 5, 0x3a3838, 80, -131);  // trimmed left end — was hitting plot #017
+  // [40,49,48,37] — 5 villas EAST of spine, z=-122
+  for (let i = 0; i < 5; i++) mkP(18 + i * 12, -122, 'back');
+  // x = 18, 30, 42, 54, 66
+
+  // Road gap then 4 more villas further east
+  // Road gap: x=66 to x=90 (24 units)
+  for (let i = 0; i < 4; i++) mkP(98 + i * 12, -122, 'back');
+  // x = 90, 102, 114, 126
+
+
+  // E-W road south face of north row (trimmed — starts at left wing x=-8)
+  // ── AMENITY ZONE (east of spine, between entry and north cluster) ───
+
+
+  // mkLeafSculpture(65, -22);  // already added below in amenities
+
+  // ── AMENITIES ─────────────────────────────────────────────────────
+
+
+
+
+
+
+
+  // ── END AMENITIES ──────────────────────────────────────────────────
+
+  // ══════════════════════════════════════════════════════════════════════
+  // NORTH SECTION — all structures north of current [3,9,5,3,2] row
+  // Matches site plan exactly: small cluster → right block → clubhouse/amenities → villa 39
+  // ══════════════════════════════════════════════════════════════════════
+
+
+  // ── LEFT WING — 8 villas (4+4) ───────────────────────────────────────
+  for (let i = 0; i < 3; i++) mkP(34 + i * 12, -143, 'front');  // plots 39,40,41
+  mkP(74, -140, 'right');                                         // plot 42 — east-facing column
+  for (let i = 0; i < 2; i++) mkP(46 + i * 12, -157, 'back');   // plots 43,44
+  mkP(74, -149, 'right');                                         // plot 45 — east-facing column
+  mkP(74, -158, 'right');                                         // plot 46 — east-facing column
+
+  // ── CANOPY CLUSTER — left of 8-villa wing (staggered) ────────────────
+  mkCanopy(13, -141);   // top
+  mkCanopy(18, -148);   // right, mid
+  mkCanopy(14, -158);   // bottom
+
+  // ── RIGHT WING — 12 villas (6+6) ────────────────────────────────────
+  for (let i = 0; i < 6; i++) mkP(98 + i * 12, -143, 'front');
+  for (let i = 0; i < 6; i++) mkP(98 + i * 12, -157, 'back');
+
+  // ── E-W ROAD on top of z=-143/z=-157 rows, just beneath Multi-Activity Lawn ──
+  mkFlat(163, 5, 0x3a3838, 83, -168);  // extended left to meet N-S spine
+  mkFlat(7, 17, 0x3a3838, 5, -159.5);  // N-S spine extension: connects 10m spine to 7.5m road
+
+
+  // ── CLUBHOUSE (west of center, north-center of site) ──────────────────
+  mkClubhouse(22, -210);
+
+  // ── FUTURE DEVELOPMENT PLOTS — left of clubhouse ──────────────────────
+  mkFlat(22, 24, 0xede8e0, -18, -163, 0, 1, { type: 'phase3', title: 'Phase 3 — Future Development' });
+  mkFlat(22, 24, 0xede8e0, -18, -186, 0, 1, { type: 'phase3', title: 'Phase 3 — Future Development' });
+  mkFlat(22, 24, 0xede8e0, -18, -209, 0, 1, { type: 'phase3', title: 'Phase 3 — Future Development' });
+
+  // ── POOL (3) — south of clubhouse ─────────────────────────────────────
+  mkFlat(10, 26, 0x7a8870, 22, -196, 0, 1, { type: 'pool', title: 'Ground Infinity Pool' });
+  mkFlat(8, 24, 0x1a80d4, 22, -196, 0.1, 1, { type: 'pool', title: 'Ground Infinity Pool' });
+
+  // ── ORNAMENTAL GREEN / SEATING PLAZA (5) — southeast of pool ──────────
+
+
+  // ── ORNAMENTAL GREEN / SEATING PLAZAS ────────────────────────────────
+  mkFlat(14, 12, 0x3a6a30, 40, -206, 0, 1, { type: 'plaza', title: 'Green Seating Plaza (North)' });
+
+
+
+  // ── BUTTERFLY LEAF SCULPTURE — replacing canopy cluster ──────────────
+  mkLeafSculpture(45, -175);
+
+  // ── CIRCULAR ROUNDABOUT / DROP-OFF LOOP ────────────────────────────────
+  const rdAbout = new THREE.Mesh(new THREE.RingGeometry(5, 6.5, 48),
+    new THREE.MeshLambertMaterial({ color: 0x3e3e3c, side: THREE.DoubleSide }));
+  rdAbout.rotation.x = -Math.PI / 2; rdAbout.position.set(47, 0.12, -188); scene.add(rdAbout);
+  const rdIsland = new THREE.Mesh(new THREE.CircleGeometry(4.5, 48),
+    new THREE.MeshLambertMaterial({ color: 0x2a7a35 }));
+  rdIsland.rotation.x = -Math.PI / 2; rdIsland.position.set(47, 0.15, -188); scene.add(rdIsland);
+  const rdMound = new THREE.Mesh(new THREE.SphereGeometry(1.8, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2),
+    new THREE.MeshLambertMaterial({ color: 0x38a048 }));
+  rdMound.position.set(47, 0.15, -188); scene.add(rdMound);
+  mkTree(47, -188, 5, 2.2, 0x1a6e28);
+
+
+  // ── MULTI-ACTIVITY LAWN / FOOTBALL (6) — east, same level as clubhouse ─
+  mkFlat(24, 34, 0x2a7a35, 70, -190, 0, 1, { type: 'lawn', title: 'Multi-Activity Lawn' });
+  mkFlat(20, 30, 0x38b048, 70, -190, 0.08);
+  mkFlat(0.35, 30, 0xffffff, 70, -190, 0.12);
+  mkFlat(20, 0.35, 0xffffff, 70, -190, 0.12);
+  const ccN = new THREE.Mesh(new THREE.RingGeometry(2.8, 3.2, 36),
+    new THREE.MeshLambertMaterial({ color: 0xffffff, side: THREE.DoubleSide }));
+  ccN.rotation.x = -Math.PI / 2; ccN.position.set(70, 0.15, -190); scene.add(ccN);
+
+  // ── HORIZONTAL CONNECTING ROAD — between kids playground (z=-225) and 24-villa block (z=-240) ──
+  // Runs E-W at z=-230, connecting all 4 N-S roads (x=-13, x=22, x=54, x=86)
+
+  // ── NEW NORTH CLUSTER — 24 villas (12+12) behind gardens, north of NSC Bose Road ──
+  // Left group (6+6=12): x=0→60, flanking playground on west
+  // 6 cols × 4 rows = 24 villas — 3 groups of 2 cols, N-S roads between groups
+  // Left group x=10,22 | Middle x=42,54 | Right x=74,86
+  // Pair 1 — rows 1 & 2
+  mkP(-3, -240, 'left'); mkP(11, -240, 'right');
+  mkP(31, -240, 'left'); mkP(45, -240, 'right');
+  mkP(63, -240, 'left'); mkP(77, -240, 'right');
+  mkP(-3, -254, 'left'); mkP(11, -254, 'right');
+  mkP(31, -254, 'left'); mkP(45, -254, 'right');
+  mkP(63, -254, 'left'); mkP(77, -254, 'right');
+  // Pair 2 — rows 3 & 4
+  mkP(-3, -268, 'left'); mkP(11, -268, 'right');
+  mkP(31, -268, 'left'); mkP(45, -268, 'right');
+  mkP(63, -268, 'left'); mkP(77, -268, 'right');
+  mkP(-3, -282, 'left'); mkP(11, -282, 'right');
+  mkP(31, -282, 'left'); mkP(45, -282, 'right');
+  mkP(63, -282, 'left'); mkP(77, -282, 'right');
+  // South horizontal road — between kids playground (north edge z=-225) and 24-villa south row (z=-240)
+  mkFlat(104, 5, 0x3a3838, 36.5, -230);
+  // N-S roads — span from south horizontal road (z=-230) to north horizontal road (z=-307)
+  mkFlat(5, 77, 0x3a3838, 22, -268.5);
+  mkFlat(5, 77, 0x3a3838, 54, -268.5);
+  // Far-left road + blank plot
+  mkFlat(5, 77, 0x3a3838, -13, -268.5);
+  mkFlat(10, 77, 0xf5c842, -21, -269.5, 0, 1, { type: 'phase3', title: 'Plot' }); // blank plot left — extended to road corner below
+
+  // North horizontal road between 24-villa and 25-villa sections
+  mkFlat(104,5,0x3a3838,36.5,-307);  // trimmed left end to x=-15.5 to match N-S roads
+  mkP(-3, -320, 'left'); mkP(11, -320, 'right');
+  mkP(31, -320, 'left'); mkP(45, -320, 'right'); mkP(63, -320, 'left');
+  mkFlat(8, 8, 0xf5c842, 78, -340, 0, 1, { type: 'phase3', title: 'Plot' }); // blank plot — above villa 88
+  mkP(77, -340, 'right');  // new villa above villa 88
+  mkFlat(8, 8, 0xf5c842, 78, -320, 0, 1, { type: 'phase3', title: 'Plot' }); // blank plot right of villa 87
+  mkP(77, -320, 'right');  // villa on blank plot — right of villa 87
+  // Row 2 (front): z=-332
+  mkP(-3, -332, 'left'); mkP(11, -332, 'right');
+  mkP(31, -332, 'left'); mkP(45, -332, 'right'); mkP(63, -332, 'left');
+  // Row 3 (back): z=-344
+  mkP(-3, -344, 'left'); mkP(11, -344, 'right');
+  mkP(31, -344, 'left'); mkP(45, -344, 'right'); mkP(63, -344, 'left');
+  // Row 4 (front): z=-356
+  mkP(-3, -356, 'left'); mkP(11, -356, 'right');
+  mkP(31, -356, 'left'); mkP(45, -356, 'right'); mkP(63, -356, 'left');
+  // Row 5 (back): z=-368
+  // Gold plot beneath villa 106 (brochure) — same style as villa 65's plot
+  {
+    var _gpm106 = new THREE.MeshLambertMaterial({ color: 0xf5c842, depthTest: false });
+    var _gp106  = new THREE.Mesh(new THREE.PlaneGeometry(10, 10), _gpm106);
+    _gp106.rotation.x = -Math.PI / 2;
+    _gp106.position.set(-3, 0.08, -368);
+    _gp106.renderOrder = 9;
+    _gp106.userData = { type: 'phase3', title: 'Plot' };
+    interactables.push(_gp106); scene.add(_gp106);
+  }
+  mkP(-3, -368, 'left'); mkP(11, -368, 'right');
+  mkP(31, -368, 'left'); mkP(45, -368, 'right'); mkP(63, -368, 'left');
+  mkP(-22, -364, 'right');  // villa at top of left blank plot — east facing
+  mkP(-22, -344, 'right');  // villa below villa 110 — same row as villa 95
+  mkP(-22, -322, 'right');  // villa below
+  mkP(-22, -289, 'right');  // villa below villa 112
+  mkP(-22, -264, 'right');  // villa below
+  mkP(-22, -238, 'right');  // villa below
+  // N-S roads
+  mkFlat(5,65,0x3a3838,22,-339.5);    // between col2 and col3 — extended south to z=-307 to meet horizontal road
+  mkFlat(5,65,0x3a3838,54,-339.5);    // between col4 and col5
+  mkFlat(5,65,0x3a3838,-13,-339.5);   // far-left road
+  mkFlat(10,62,0xf5c842,-21,-338,0,1,{type:'phase3',title:'Plot'}); // blank plot far-left — styled like villa 109 plot
+  mkFlat(13, 5, 0x3a3838, -19.5, -333); // horizontal road connecting villas 111/112 to N-S road at x=-13
+  mkFlat(13, 5, 0x3a3838, -19.5, -276.5); // horizontal road connecting villas 113/114 to N-S road at x=-13
+  mkFlat(10,52,0xf5c842,78,-340,0,1,{type:'phase3',title:'Plot'}); // blank plot far-right — styled like villa 109 plot
+  mkFlat(5, 269, 0x3a3838, 86, -233.5);  // N-S road: trimmed south end to z=-99 (removed spur beside plot #023)
+  
+  // Above (north of) rightmost columns: garden (2 cols wide) + villa + blank plot
+  mkP(63, -296, 'left');
+  // Gold plot — depthTest:false so it renders above ground, renderOrder=9 so plot marker (10+) renders on top
+  {
+    var _gpm = new THREE.MeshLambertMaterial({ color: 0xf5c842, depthTest: false });
+    var _gp  = new THREE.Mesh(new THREE.PlaneGeometry(10, 10), _gpm);
+    _gp.rotation.x = -Math.PI / 2;
+    _gp.position.set(78, 0.08, -296);
+    _gp.renderOrder = 9;
+    _gp.userData = { type: 'phase3', title: 'Plot' };
+    interactables.push(_gp); scene.add(_gp);
+  }
+  mkP(77, -296, 'right');
+  // ── GREEN GARDEN — 2 columns wide, left of villa ──────────────────────
+  // 2 villas left of garden
+  mkP(-3, -296, 'left');
+  mkP(11, -296, 'right');
+  mkFlat(24, 12, 0x1e6b22, 38, -296, 0, 1, { type: 'lawn', title: 'Landscape Garden' });
+  mkFlat(22, 10, 0x2d8a35, 38, -296, 0.05);
+  mkFlat(20,  8, 0x3aaa42, 38, -296, 0.08);
+  // winding path
+  mkFlat(2, 4, 0xc8b882, 34, -294, 0.12);
+  mkFlat(2, 4, 0xc8b882, 38, -297, 0.12);
+  mkFlat(2, 4, 0xc8b882, 42, -294, 0.12);
+  // canopy trees scattered in garden
+  mkTree(28, -293, 5, 2.8, 0x1a7a28);
+  mkTree(32, -299, 4, 2.2, 0x22882e);
+  mkTree(37, -293, 4.5, 2.5, 0x1e7a26);
+  mkTree(42, -299, 4, 2.0, 0x228830);
+  mkTree(47, -293, 3.5, 1.8, 0x1a7228);
+  mkTree(29, -296, 3, 1.6, 0x2a9035);
+  mkTree(44, -295, 3.5, 1.8, 0x1d8030);
+
+  // ── KIDS PLAY AREA (6) — north of football, small road gap ──────────────
+  mkFlat(30, 3, 0x3a3838, 73, -210); // extended right to connect vertical road
+  mkFlat(26, 12, 0x3a8a44, 68, -219, 0, 1, { type: 'kids', title: 'Kids Play Area' });
+  // — SLIDE: platform tower + angled ramp —
+  const slideTower = new THREE.Mesh(new THREE.BoxGeometry(2, 3.5, 2), new THREE.MeshLambertMaterial({ color: 0xdd4422 }));
+  slideTower.position.set(62, 1.75, -222); scene.add(slideTower);
+  const slidePlatform = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.25, 2.4), new THREE.MeshLambertMaterial({ color: 0xcc3311 }));
+  slidePlatform.position.set(62, 3.62, -222); scene.add(slidePlatform);
+  const slideRamp = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.2, 4), new THREE.MeshLambertMaterial({ color: 0xff6633 }));
+  slideRamp.rotation.x = Math.PI / 6; slideRamp.position.set(62, 2.1, -219.2); scene.add(slideRamp);
+  const slideRail1 = new THREE.Mesh(new THREE.BoxGeometry(0.15, 1.5, 0.15), new THREE.MeshLambertMaterial({ color: 0xaaaaaa }));
+  slideRail1.position.set(61.5, 4.4, -222); scene.add(slideRail1);
+  const slideRail2 = slideRail1.clone(); slideRail2.position.set(62.5, 4.4, -222); scene.add(slideRail2);
+
+  // — SWING SET: A-frame posts + crossbar + 2 swings —
+  const swMat = new THREE.MeshLambertMaterial({ color: 0x4477dd });
+  const swPost1 = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4, 0.25), swMat);
+  swPost1.position.set(69, 2, -216); scene.add(swPost1);
+  const swPost2 = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4, 0.25), swMat);
+  swPost2.position.set(74, 2, -216); scene.add(swPost2);
+  const swBar = new THREE.Mesh(new THREE.BoxGeometry(5.5, 0.25, 0.25), swMat);
+  swBar.position.set(71.5, 4, -216); scene.add(swBar);
+  const swSeat1 = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.15, 0.5), new THREE.MeshLambertMaterial({ color: 0xffaa00 }));
+  swSeat1.position.set(70.5, 2, -216); scene.add(swSeat1);
+  const swChain1a = new THREE.Mesh(new THREE.BoxGeometry(0.08, 2, 0.08), new THREE.MeshLambertMaterial({ color: 0x888888 }));
+  swChain1a.position.set(70.1, 3, -216); scene.add(swChain1a);
+  const swChain1b = swChain1a.clone(); swChain1b.position.set(70.9, 3, -216); scene.add(swChain1b);
+  const swSeat2 = swSeat1.clone(); swSeat2.position.set(72.5, 2, -216); scene.add(swSeat2);
+  const swChain2a = swChain1a.clone(); swChain2a.position.set(72.1, 3, -216); scene.add(swChain2a);
+  const swChain2b = swChain1a.clone(); swChain2b.position.set(72.9, 3, -216); scene.add(swChain2b);
+
+  // — MERRY-GO-ROUND: disc + center pole —
+  const mgrDisc = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 0.2, 24), new THREE.MeshLambertMaterial({ color: 0xee2277 }));
+  mgrDisc.position.set(76, 0.5, -222); scene.add(mgrDisc);
+  const mgrPole = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 1.2, 10), new THREE.MeshLambertMaterial({ color: 0xaaaaaa }));
+  mgrPole.position.set(76, 0.8, -222); scene.add(mgrPole);
+  const mgrBar1 = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.12, 0.15), new THREE.MeshLambertMaterial({ color: 0xcc1166 }));
+  mgrBar1.position.set(76, 1.1, -222); scene.add(mgrBar1);
+  const mgrBar2 = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.12, 3.6), new THREE.MeshLambertMaterial({ color: 0xcc1166 }));
+  mgrBar2.position.set(76, 1.1, -222); scene.add(mgrBar2);
+
+  // ── ROYAL PALMS — south of pool, ornamental border ────────────────────
+  // right-side palms removed
+
+  // ── VILLA 39 — isolated, northwest corner ─────────────────────────────
+
+  // ── PERIPHERAL TREES (boundary) — equal margins left & right, no south row ──
+  for (let tz = -395; tz <= 5; tz += 8) {
+    mkTree(-115, tz, rng(4, 7), rng(1.8, 2.5), 0x1a5c22);
+    mkTree(190,  tz, rng(4, 7), rng(1.8, 2.5), 0x1a5c22);
+  }
+  for (let tx = -115; tx <= 190; tx += 8) {
+    mkTree(tx, -395, rng(4, 7), rng(1.8, 2.5), 0x1a5c22);
+  }
+}
+
+
+
+// =====================================================================
+// INIT  (called after all helpers and let declarations are initialized)
+// =====================================================================
+function init() {
+  var container = document.getElementById('canvas-wrap');
+  var W = container.clientWidth, H = container.clientHeight;
+
+  renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(W,H);
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.shadowMap.enabled=true;
+  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.shadowMap.autoUpdate=false;
+  container.appendChild(renderer.domElement);
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x060606);
+  scene.fog = new THREE.FogExp2(0x080604,0.0038);
+
+  camera = new THREE.PerspectiveCamera(40,W/H,5,800);
+  camera.position.set(80,190,100);
+  camera.lookAt(5,0,-60);
+
+  controls = new THREE.OrbitControls(camera,renderer.domElement);
+  controls.enableDamping=true; controls.dampingFactor=0.07;
+  controls.maxPolarAngle=Math.PI/2.08;
+  controls.minDistance=35; controls.maxDistance=500;
+  controls.autoRotateSpeed=0.4;
+  controls.target.set(-10,0,-120);
+  controls.update();
+
+  scene.add(new THREE.AmbientLight(0xffeedd,0.7));
+  var sun=new THREE.DirectionalLight(0xfff5d0,1.4);
+  sun.position.set(70,120,60); sun.castShadow=true;
+  sun.shadow.mapSize.set(2048,2048);
+  sun.shadow.camera.left=-200; sun.shadow.camera.right=200;
+  sun.shadow.camera.top=200; sun.shadow.camera.bottom=-200;
+  sun.shadow.camera.far=500; sun.shadow.bias=-0.002;
+  scene.add(sun);
+  var fill=new THREE.DirectionalLight(0x6688aa,0.4);
+  fill.position.set(-50,40,-30); scene.add(fill);
+
+  buildScene();
+  renderer.shadowMap.needsUpdate=true;
+  setupClick();
+
+  window.addEventListener('resize',function(){
+    var w=container.clientWidth,h=container.clientHeight;
+    renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix();
+  });
+
+  var _compassEl = document.getElementById('compass-svg');
+  (function animate(){
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene,camera);
+    if(_compassEl){
+      var ang = controls.getAzimuthalAngle() * (180/Math.PI);
+      _compassEl.style.transform = 'rotate('+ang+'deg)';
+    }
+  })();
+}
+
+// ── RIGHT PANEL ───────────────────────────────────────────────────────
+var _panelCdTimer=null;
+function showRightPanel(ud){
+  var isVilla=ud.type==='sold'||ud.type==='reserved'||ud.type==='available'||ud.type==='not_for_sale';
+  var isSold=ud.type==='sold',isRes=ud.type==='reserved',isNfs=ud.type==='not_for_sale';
+  var ph=document.getElementById('plot-placeholder');
+  var det=document.getElementById('plot-details');
+  if(ph)ph.classList.add('hidden');
+  if(det){
+    det.classList.remove('hidden');
+    if(window.innerWidth < 1024){
+      setTimeout(function(){ det.scrollIntoView({behavior:'smooth',block:'start'}); }, 100);
+    }
+  }
+  var iconEl=document.getElementById('plot-icon');
+  if(iconEl)iconEl.className=isVilla?'fas fa-home text-gold-500/70 text-sm':'fas fa-map-marker-alt text-gold-500/70 text-sm';
+  var titleEl=document.getElementById('plot-title');
+  if(titleEl)titleEl.textContent=ud.title||'—';
+  var tagEl=document.getElementById('plot-tag');
+  if(tagEl){
+    if(!isVilla){tagEl.textContent='';tagEl.style.color='';}
+    else if(isSold){tagEl.textContent='▸ SOLD';tagEl.style.color='#e07070';}
+    else if(isRes){tagEl.textContent='▸ RESERVED';tagEl.style.color='#c9a84c';}
+    else if(isNfs){tagEl.textContent='▸ NOT FOR SALE';tagEl.style.color='#00d4ff';}
+    else if(ud.type==='available'){tagEl.textContent='▸ AVAILABLE';tagEl.style.color='#7fc47f';}
+    else{tagEl.textContent=ud.desc||'';tagEl.style.color='';}
+  }
+  // Owner name
+  var ownerEl=document.getElementById('plot-owner');
+  if(ownerEl){
+    if(isSold&&ud.owner){ownerEl.textContent='Owner · '+ud.owner;ownerEl.classList.remove('hidden');}
+    else{ownerEl.classList.add('hidden');}
+  }
+  // Completion bar
+  var compEl=document.getElementById('plot-completion');
+  var compBar=document.getElementById('plot-completion-bar');
+  var compPct=document.getElementById('plot-completion-pct');
+  if(compEl){
+    if(isSold){
+      var pct=ud.completion_pct||0;
+      compEl.classList.remove('hidden');
+      if(compPct)compPct.textContent=pct+'%';
+      setTimeout(function(){if(compBar)compBar.style.width=pct+'%';},50);
+    } else {
+      compEl.classList.add('hidden');
+      if(compBar)compBar.style.width='0%';
+    }
+  }
+  // Reservation countdown
+  if(_panelCdTimer){clearInterval(_panelCdTimer);_panelCdTimer=null;}
+  var timerEl=document.getElementById('plot-reserved-timer');
+  var cdEl=document.getElementById('pei-countdown');
+  if(timerEl&&cdEl){
+    if(isRes&&ud.reservedUntil){
+      var expiry=new Date(ud.reservedUntil);
+      function pad(n){return String(n).padStart(2,'0');}
+      function updatePanelCd(){
+        var diff=expiry-Date.now();
+        if(diff<=0){cdEl.textContent='⏱ Booking expired';clearInterval(_panelCdTimer);_panelCdTimer=null;return;}
+        var d=Math.floor(diff/86400000),h=Math.floor((diff%86400000)/3600000),
+            m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
+        cdEl.textContent='⏱ Reservation expires in '+(d>0?d+'d ':'')+pad(h)+'h '+pad(m)+'m '+pad(s)+'s';
+      }
+      updatePanelCd();
+      _panelCdTimer=setInterval(updatePanelCd,1000);
+      timerEl.classList.remove('hidden');
+    } else {
+      timerEl.classList.add('hidden');
+    }
+  }
+  var extraEl=document.getElementById('plot-extra-info');
+  if(extraEl){
+    if(!isVilla){extraEl.classList.add('hidden');}
+    var bn=ud.brochureNum||ud.villaNum;
+    if(isVilla&&bn){
+      var vt=getVillaType(bn);
+      if(vt!==null){
+        var ar=VILLA_TYPE_AREAS[vt]||VILLA_TYPE_AREAS[1];
+        var pr=VILLA_TYPE_PRICES[vt]||'—';
+        var bEl=document.getElementById('pei-buildup');
+        var tEl=document.getElementById('pei-terrace');
+        var totEl=document.getElementById('pei-total');
+        var prEl=document.getElementById('pei-price');
+        if(bEl)bEl.textContent=ar.buildup!=='—'?ar.buildup+' sq.ft':'—';
+        if(tEl)tEl.textContent=ar.terrace!=='—'?ar.terrace+' sq.ft':'—';
+        if(totEl)totEl.textContent=ar.total!=='—'?ar.total+' sq.ft':'—';
+        if(prEl)prEl.textContent=pr;
+        extraEl.classList.remove('hidden');
+      } else { extraEl.classList.add('hidden'); }
+    } else { extraEl.classList.add('hidden'); }
+  }
+}
+
+// ── CLICK HANDLER ─────────────────────────────────────────────────────
+function setupClick() {
+  var ray=new THREE.Raycaster(), mouse=new THREE.Vector2();
+  var cvs=renderer.domElement;
+
+  function doRaycast(cx, cy) {
+    var rect=cvs.getBoundingClientRect();
+    mouse.x=((cx-rect.left)/rect.width)*2-1;
+    mouse.y=-((cy-rect.top)/rect.height)*2+1;
+    ray.setFromCamera(mouse,camera);
+    var hits=ray.intersectObjects(interactables,true);
+    if(hits.length){
+      var ud=hits[0].object.userData;
+      if(ud&&ud.title){
+        if(document.fullscreenElement){
+          showHud(cx,cy,ud);
+        } else {
+          hideHud();
+          showRightPanel(ud);
+        }
+      }
+    } else {
+      hideHud();
+    }
+  }
+
+  cvs.addEventListener('click',function(e){ doRaycast(e.clientX,e.clientY); });
+
+  // Mobile tap — OrbitControls intercepts touch so click doesn't fire reliably
+  var _touchStartX=0,_touchStartY=0,_touchStartT=0;
+  cvs.addEventListener('touchstart',function(e){ _touchStartX=e.touches[0].clientX; _touchStartY=e.touches[0].clientY; _touchStartT=Date.now(); },{passive:true});
+  cvs.addEventListener('touchend',function(e){
+    var dx=e.changedTouches[0].clientX-_touchStartX, dy=e.changedTouches[0].clientY-_touchStartY;
+    if(Math.abs(dx)<12&&Math.abs(dy)<12&&Date.now()-_touchStartT<300){ doRaycast(_touchStartX,_touchStartY); }
+  },{passive:true});
+}
+
+// ── HUD ───────────────────────────────────────────────────────────────
+function _hEl(tag,attrs){
+  var svg=document.getElementById('hud-svg');
+  var e=document.createElementNS('http://www.w3.org/2000/svg',tag);
+  Object.keys(attrs).forEach(function(k){e.setAttribute(k,attrs[k]);});
+  svg.appendChild(e); _hudLines.push(e); return e;
+}
+
+function showHud(cx,cy,ud){
+  hideHud();
+  _hudGen++;
+  var gen=_hudGen;
+  var isVilla=ud.type==='sold'||ud.type==='reserved'||ud.type==='available'||ud.type==='not_for_sale';
+  var isSold=ud.type==='sold', isRes=ud.type==='reserved', isNfsHud=ud.type==='not_for_sale';
+  var ac=isSold?'#e07070':isRes?'#c9a84c':isNfsHud?'#00d4ff':'#7fc47f';
+  var box=document.getElementById('hud-box');
+  var tEl=document.getElementById('hud-title');
+  var sEl=document.getElementById('hud-st');
+  var oEl=document.getElementById('hud-owner');
+  var cur=document.getElementById('hud-cur');
+  var cRect=renderer.domElement.getBoundingClientRect();
+  var px=cx-cRect.left, py=cy-cRect.top;
+  var cW=cRect.width, cH=cRect.height;
+  var goRight=px<cW*.58;
+  var kx=Math.max(50,Math.min(cW-50,goRight?px+48:px-48));
+  var ky=Math.max(40,py-32);
+  var rawPx=goRight?px+185:px-185;
+  var bx=goRight?Math.min(rawPx,cW-230):Math.max(rawPx,20);
+
+  function aLine(x1,y1,x2,y2,delay){
+    var ln=_hEl('line',{x1:x1,y1:y1,x2:x2,y2:y2,stroke:ac,'stroke-width':1.2});
+    var len=Math.hypot(x2-x1,y2-y1)+2;
+    ln.setAttribute('stroke-dasharray',len); ln.setAttribute('stroke-dashoffset',len);
+    _tgt.push(setTimeout(function(){
+      if(gen!==_hudGen)return;
+      ln.style.transition='stroke-dashoffset 130ms ease-out';
+      ln.setAttribute('stroke-dashoffset',0);
+    },delay));
+  }
+
+  // ── Jarvis SVG animation (runs independently of card) ──────────────
+  _hEl('circle',{cx:px,cy:py,r:3,fill:ac,opacity:.9});
+  var rr=15,cc=2*Math.PI*rr;
+  var ring=_hEl('circle',{cx:px,cy:py,r:rr,fill:'none',stroke:ac,'stroke-width':1.2,
+    'stroke-dasharray':cc*.72+' '+cc*.28,opacity:0});
+  ring.style.transformOrigin=px+'px '+py+'px';
+  ring.style.animation='ringSpin 5s linear infinite';
+
+  // ── FLAT timeouts: ALL IDs pushed to _tgt immediately so hideHud can cancel every one ──
+  _tgt.push(setTimeout(function(){ if(gen!==_hudGen)return; ring.style.transition='opacity .2s';ring.setAttribute('opacity',.75); },30));
+
+  // Line 1: click-point → kx,ky
+  _tgt.push(setTimeout(function(){ if(gen!==_hudGen)return; aLine(px,py,kx,ky,0); }, 50));
+  // Dot + Line 2: kx,ky → bx,ky
+  _tgt.push(setTimeout(function(){ if(gen!==_hudGen)return; _hEl('circle',{cx:kx,cy:ky,r:2,fill:ac,opacity:.8}); aLine(kx,ky,bx,ky,0); }, 180));
+  // Dot + Line 3: bx,ky → bx,ky+14
+  _tgt.push(setTimeout(function(){ if(gen!==_hudGen)return; _hEl('circle',{cx:bx,cy:ky,r:1.8,fill:ac,opacity:.8}); aLine(bx,ky,bx,ky+14,0); }, 280));
+
+  // ── Show card at 410ms (after Jarvis lines animate) ─────────────────
+  _tgt.push(setTimeout(function(){
+    if(gen!==_hudGen)return;
+    if(!box)return;
+    box.style.borderColor=ac+'55';
+    if(tEl) tEl.style.color=ac;
+    if(tEl) tEl.textContent='';
+    if(sEl) sEl.textContent='';
+    if(oEl) oEl.style.display='none';
+    var _cEl=document.getElementById('hud-completion'); if(_cEl) _cEl.style.display='none';
+    var _cBar=document.getElementById('hud-completion-bar'); if(_cBar) _cBar.style.width='0%';
+    if(cur) cur.style.display='inline';
+    box.style.transition='none';
+    box.style.display='block'; box.style.opacity='0';
+    box.style.transform='scaleX(.75)';
+    box.style.transformOrigin=goRight?'left center':'right center';
+    box.style.width='auto';
+    var bW=box.offsetWidth||175;
+    box.style.width=bW+'px';
+    var bLeft=goRight?Math.min(bx+16,cW-bW-4):Math.max(bx-bW-16,4);
+    box.style.top=Math.max(4,Math.min(ky+6,cH-55))+'px';
+    box.style.left=bLeft+'px';
+    void box.getBoundingClientRect();
+    box.style.transition='opacity .18s,transform .2s';
+    box.style.opacity='1'; box.style.transform='scaleX(1)';
+  }, 410));
+
+  // ── Title typewriter + content at 490ms ──────────────────────────────
+  _tgt.push(setTimeout(function(){
+    if(gen!==_hudGen)return;
+    if(_si)clearInterval(_si);
+    var txt=ud.title, idx=0;
+    if(cur) cur.style.display='inline';
+    _si=setInterval(function(){
+      if(gen!==_hudGen){clearInterval(_si);_si=null;return;}
+      if(idx<=txt.length){ if(tEl) tEl.textContent=txt.slice(0,idx); idx++; }
+      else{
+        clearInterval(_si);_si=null;
+        if(cur) cur.style.display='none';
+        var cdEl=document.getElementById('hud-countdown');
+        if(_cdTimer){clearInterval(_cdTimer);_cdTimer=null;}
+        if(cdEl) cdEl.style.display='none';
+        if(isVilla){
+          var isNfs=ud.type==='not_for_sale';
+          var cls=isSold?'sold':isRes?'res':isNfs?'nfs':'avail';
+          if(sEl){sEl.className='hud-st '+cls; sEl.textContent=isSold?'▸ SOLD':isRes?'▸ RESERVED':isNfs?'▸ NOT FOR SALE':'▸ AVAILABLE';}
+          var _pre=document.getElementById('hud-pre'); if(_pre) _pre.textContent='Silverwoods · Plot';
+          var _desc=document.getElementById('hud-desc'); if(_desc) _desc.style.display='none';
+          if(isSold&&ud.owner&&oEl){oEl.style.display='block';oEl.textContent='Owner · '+ud.owner;}
+          var compEl=document.getElementById('hud-completion');
+          var compBar=document.getElementById('hud-completion-bar');
+          var compPct=document.getElementById('hud-completion-pct');
+          if(isSold&&compEl){
+            var pct=ud.completion_pct||0;
+            compEl.style.display='block';
+            compPct.textContent=pct+'%';
+            setTimeout(function(){compBar.style.width=pct+'%';},50);
+          } else if(compEl){
+            compEl.style.display='none';
+            if(compBar) compBar.style.width='0%';
+          }
+          if(isRes&&ud.reservedUntil&&cdEl){
+            var expiry=new Date(ud.reservedUntil);
+            cdEl.style.display='block';
+            function updateCd(){
+              var diff=expiry-Date.now();
+              if(diff<=0){cdEl.textContent='⏱ Booking expired';clearInterval(_cdTimer);_cdTimer=null;return;}
+              var d=Math.floor(diff/86400000),hh=Math.floor((diff%86400000)/3600000),
+                  mm=Math.floor((diff%3600000)/60000),ss=Math.floor((diff%60000)/1000);
+              cdEl.textContent='⏱ '+(d>0?d+'d ':'')+pad(hh)+'h '+pad(mm)+'m '+pad(ss)+'s remaining';
+            }
+            function pad(n){return String(n).padStart(2,'0');}
+            updateCd(); _cdTimer=setInterval(updateCd,1000);
+          }
+        } else {
+          if(sEl) sEl.textContent='';
+          var _pre=document.getElementById('hud-pre'); if(_pre) _pre.textContent='Silverwoods · Architecture';
+          var _desc=document.getElementById('hud-desc');
+          if(_desc){if(ud.desc){_desc.textContent=ud.desc;_desc.style.display='block';}else{_desc.style.display='none';}}
+        }
+        var bn=ud.brochureNum||ud.villaNum;
+        var _det=document.getElementById('hud-details');
+        var _ht=document.getElementById('hud-type');
+        var _hb=document.getElementById('hud-buildup');
+        var _hp=document.getElementById('hud-price');
+        if(isVilla&&bn&&_det){
+          var vt=getVillaType(bn);
+          if(vt===null){
+            if(_ht) _ht.textContent='—'; if(_hb) _hb.textContent='—'; if(_hp) _hp.textContent='—';
+          } else {
+            var ar=VILLA_TYPE_AREAS[vt]||VILLA_TYPE_AREAS[1];
+            var pr=VILLA_TYPE_PRICES[vt]||'—';
+            if(_ht) _ht.textContent='VILLA TYPE '+vt;
+            if(_hb) _hb.textContent=ar.buildup!=='—'?ar.buildup+' SQ.FT':'—';
+            if(_hp) _hp.textContent=pr;
+          }
+          _det.style.display='block';
+        } else if(!isVilla){
+          if(_det) _det.style.display='none';
+        } else {
+          if(_det) _det.style.display='none';
+        }
+      }
+    },44);
+  }, 490));
+}
+
+
+
+function hideHud(){
+  _tgt.forEach(clearTimeout);_tgt=[];
+  if(_si){clearInterval(_si);_si=null;}
+  if(_cdTimer){clearInterval(_cdTimer);_cdTimer=null;}
+  var _cdEL=document.getElementById('hud-countdown'); if(_cdEL) _cdEL.style.display='none';
+  var svg=document.getElementById('hud-svg');
+  if(svg)_hudLines.forEach(function(l){try{svg.removeChild(l);}catch(e){}});
+  _hudLines=[];
+  var box=document.getElementById('hud-box');
+  if(box){
+    box.style.transition='opacity 0.15s ease';
+    box.style.opacity='0';
+    var _hideGen=_hudGen;
+    setTimeout(function(){
+      if(_hudGen===_hideGen) box.style.display='none';
+    }, 160);
+  }
+  document.getElementById('hud-details').style.display='none';
+  document.getElementById('hud-desc').style.display='none';
+}
+
+// ── CONTROLS ──────────────────────────────────────────────────────────
+var _aRot=false;
+document.getElementById('btn-reset').addEventListener('click',function(){
+  camera.position.set(80,190,100);controls.target.set(-10,0,-120);controls.update();
+});
+document.getElementById('btn-rot').addEventListener('click',function(){
+  _aRot=!_aRot; controls.autoRotate=_aRot;
+  var b=document.getElementById('btn-rot');
+  b.style.color=_aRot?'rgba(255,255,255,.9)':'rgba(255,255,255,.55)';
+  b.style.background=_aRot?'rgba(255,255,255,.12)':'rgba(0,0,0,.40)';
+});
+
+function toggleFullscreen(){
+  var cw = document.getElementById('canvas-wrap');
+  if(!document.fullscreenElement){
+    cw.requestFullscreen().then(function(){
+      document.getElementById('btn-fs').querySelector('i').className='fas fa-compress text-xs';
+      cw.style.height = '100vh';
+      var w = window.innerWidth, h = window.innerHeight;
+      renderer.setSize(w, h); camera.aspect = w/h; camera.updateProjectionMatrix();
+    }).catch(function(){});
+  } else {
+    document.exitFullscreen();
+  }
+}
+function syncFsIcon(){
+  var icon=document.getElementById('btn-fs').querySelector('i');
+  icon.className=document.fullscreenElement?'fas fa-compress text-xs':'fas fa-expand text-xs';
+}
+document.addEventListener('fullscreenchange', function(){
+  if(!document.fullscreenElement){
+    var cw = document.getElementById('canvas-wrap');
+    cw.style.height = '';
+    document.getElementById('btn-fs').querySelector('i').className='fas fa-expand text-xs';
+    hideHud();
+    setTimeout(function(){
+      var w = cw.clientWidth, h = cw.clientHeight;
+      renderer.setSize(w, h); camera.aspect = w/h; camera.updateProjectionMatrix();
+    }, 100);
+  }
+});
+
+// ── START ─────────────────────────────────────────────────────────────
+function safeInit() {
+  var cw = document.getElementById('canvas-wrap');
+  if (!cw) return;
+  // If layout hasn't settled yet (e.g. Tailwind CDN still injecting), retry
+  if (cw.clientWidth === 0 || cw.clientHeight === 0) {
+    setTimeout(safeInit, 50);
+    return;
+  }
+  try { init(); }
+  catch(e) {
+    console.error('[PlotMetrics] init error:', e);
+    cw.innerHTML = '<div style="color:#c9a84c;font-family:monospace;font-size:12px;padding:20px;background:#060606;height:100%;display:flex;align-items:center;justify-content:center;">3D engine error: ' + e.message + '</div>';
+  }
+}
+if (document.readyState === 'complete') {
+  setTimeout(safeInit, 0);
+} else {
+  window.addEventListener('load', safeInit);
+}
+</script>
+{% endblock %}
+</html>

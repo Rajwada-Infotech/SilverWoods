@@ -1,0 +1,2641 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Site Plan — Silverwoods{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Blueprint page responsive styles */
+#blueprint-canvas { height: 350px !important; overflow: hidden !important; }
+#blueprint-canvas canvas { max-width: 100% !important; display: block !important; }
+@media (min-width: 640px) { #blueprint-canvas { height: 450px !important; } }
+@media (min-width: 1024px) { #blueprint-canvas { height: 550px !important; } }
+.glass-warm { overflow: hidden; }
+
+/* Jarvis panels: scale down on mobile, show at bottom on small screens */
+@media (max-width: 639px) {
+    #villa-jarvis-panel {
+        left: 8px !important;
+        right: 8px !important;
+        top: auto !important;
+        bottom: 8px !important;
+        transform: none !important;
+        width: auto !important;
+        max-height: 55% !important;
+        z-index: 35 !important;
+        overflow-y: auto;
+    }
+    #floor-jarvis-panel {
+        left: 8px !important;
+        right: 8px !important;
+        top: auto !important;
+        transform: none !important;
+        width: auto !important;
+        z-index: 36 !important;
+        max-height: 55% !important;
+        overflow-y: auto;
+    }
+    #villa-jarvis-panel > div { padding: 12px 14px !important; }
+    #vjp-title { font-size: 12px !important; }
+    /* hint bar: allow wrapping */
+    .blueprint-hint-bar { flex-wrap: wrap; gap: 6px !important; }
+    .blueprint-hint-bar .sep { display: none; }
+}
+@media (min-width: 640px) and (max-width: 1023px) {
+    #villa-jarvis-panel { width: 240px !important; }
+    #floor-jarvis-panel { left: 256px !important; width: 190px !important; }
+}
+
+/* Legend bar: horizontal scroll on tiny screens */
+.legend-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap !important; scrollbar-width: none; }
+.legend-scroll::-webkit-scrollbar { display: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="min-h-screen pt-24 md:pt-28 pb-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div class="text-center mb-6 md:mb-8">
+            <p class="text-[10px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/60 mb-4 mt-6 md:mt-8">South Jagaddal, Kolkata</p>
+            <h1 class="font-display text-4xl sm:text-5xl md:text-6xl font-bold text-brown-800 dark:text-cream-100">Site <span class="italic">Plan</span></h1>
+            <p class="text-brown-400 dark:text-cream-300/30 text-xs sm:text-sm mt-3">Explore the 8.1 acre villa community — click any zone to learn more</p>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-6">
+            <!-- 3D Site Plan Viewer -->
+            <div class="lg:col-span-2 min-w-0 overflow-hidden">
+                <div class="glass-warm rounded-2xl overflow-hidden">
+                    <!-- Legend bar -->
+                    <div class="px-4 py-3 border-b border-brown-700/[0.08] dark:border-white/[0.05] flex legend-scroll items-center gap-x-5 gap-y-2">
+                        <span class="text-[10px] font-semibold text-brown-400 dark:text-cream-300/40 tracking-widest uppercase">Legend:</span>
+                        <span class="legend-item inline-flex items-center gap-1.5 text-[10px] font-medium text-brown-600 dark:text-cream-300/60 whitespace-nowrap">
+                            <i class="fas fa-house-user text-sm" style="color:#3d9c40"></i> Villa Plots</span>
+                        <span class="legend-item inline-flex items-center gap-1.5 text-[10px] font-medium text-brown-600 dark:text-cream-300/60 whitespace-nowrap">
+                            <i class="fas fa-landmark text-sm" style="color:#4a7ab5"></i> Clubhouse</span>
+                        <span class="legend-item inline-flex items-center gap-1.5 text-[10px] font-medium text-brown-600 dark:text-cream-300/60 whitespace-nowrap">
+                            <i class="fas fa-swimming-pool text-sm" style="color:#1a9ae8"></i> Pool</span>
+                        <span class="legend-item inline-flex items-center gap-1.5 text-[10px] font-medium text-brown-600 dark:text-cream-300/60 whitespace-nowrap">
+                            <i class="fas fa-leaf text-sm" style="color:#28a83a"></i> Lawn / Sports</span>
+                        <span class="legend-item inline-flex items-center gap-1.5 text-[10px] font-medium text-brown-600 dark:text-cream-300/60 whitespace-nowrap">
+                            <i class="fas fa-water text-sm" style="color:#2a85c0"></i> Water Body</span>
+                        <span class="legend-item inline-flex items-center gap-1.5 text-[10px] font-medium text-brown-600 dark:text-cream-300/60 whitespace-nowrap">
+                            <i class="fas fa-archway text-sm" style="color:#c9a84c"></i> Entry Gate</span>
+                    </div>
+                    <!-- Canvas -->
+                    <div class="relative">
+                        <div id="blueprint-canvas" class="w-full relative" style="height:550px;background:#0c1410;overflow:hidden">
+    <!-- VILLA JARVIS DETAIL PANEL -->
+    <div id="villa-jarvis-panel" style="display:none;position:absolute;left:20px;top:50%;transform:translateY(-50%);z-index:25;width:290px;font-family:'Courier New',Consolas,monospace">
+      <div style="background:rgba(0,8,20,0.93);border:1px solid rgba(0,212,255,0.45);border-radius:4px;box-shadow:0 0 0 1px rgba(0,212,255,0.07),0 0 36px rgba(0,212,255,0.18),inset 0 0 60px rgba(0,40,80,0.3);backdrop-filter:blur(22px);padding:18px 20px;position:relative">
+        <button onclick="event.stopPropagation();closeVillaPanel()" style="position:absolute;top:8px;right:12px;background:none;border:none;color:rgba(0,212,255,0.5);cursor:pointer;font-size:16px;line-height:1;pointer-events:all">×</button>
+        <div style="font-size:8px;letter-spacing:.32em;color:rgba(0,212,255,0.45);margin-bottom:3px">SILVERWOODS · RESIDENTIAL</div>
+        <div id="vjp-title" style="font-size:15px;font-weight:700;color:#00d4ff;letter-spacing:.22em;margin-bottom:10px">VILLA · #001</div>
+        <div style="height:1px;background:linear-gradient(90deg,rgba(0,212,255,0.45),rgba(0,212,255,0.03));margin-bottom:12px"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
+          <div style="background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.12);padding:8px;border-radius:2px">
+            <div style="font-size:7px;color:rgba(0,212,255,0.42);letter-spacing:.2em;margin-bottom:2px">TYPE</div>
+            <div id="vjp-type" style="font-size:10px;color:#00d4ff;font-weight:700">VILLA TYPE 4</div>
+          </div>
+          <div style="background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.12);padding:8px;border-radius:2px">
+            <div style="font-size:7px;color:rgba(0,212,255,0.42);letter-spacing:.2em;margin-bottom:2px">FLOORS</div>
+            <div style="font-size:10px;color:#00d4ff;font-weight:700">G+2</div>
+          </div>
+          <div style="background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.12);padding:8px;border-radius:2px">
+            <div style="font-size:7px;color:rgba(0,212,255,0.42);letter-spacing:.2em;margin-bottom:2px">CONFIG</div>
+            <div id="vjp-config" style="font-size:10px;color:#00d4ff;font-weight:700">4 BHK</div>
+          </div>
+          <div style="background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.12);padding:8px;border-radius:2px">
+            <div style="font-size:7px;color:rgba(0,212,255,0.42);letter-spacing:.2em;margin-bottom:2px">STARTING PRICE</div>
+            <div id="vjp-price" style="font-size:10px;color:#00d4ff;font-weight:700">—</div>
+          </div>
+        </div>
+        <div style="background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.12);padding:10px;border-radius:2px;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+            <span style="font-size:8px;color:rgba(0,212,255,0.48);letter-spacing:.12em">BUILDUP AREA</span>
+            <span id="vjp-buildup" style="font-size:8px;color:#00d4ff;font-weight:700">2,400.36 SQ.FT</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+            <span style="font-size:8px;color:rgba(0,212,255,0.48);letter-spacing:.12em">TERRACE AREA</span>
+            <span id="vjp-terrace" style="font-size:8px;color:#00d4ff;font-weight:700">637.06 SQ.FT</span>
+          </div>
+          <div style="height:1px;background:rgba(0,212,255,0.1);margin:5px 0"></div>
+          <div style="display:flex;justify-content:space-between">
+            <span style="font-size:8px;color:rgba(0,212,255,0.7);letter-spacing:.12em;font-weight:700">SUPER BUILDUP</span>
+            <span id="vjp-superbuildup" style="font-size:8px;color:#00d4ff;font-weight:700">3,689.52 SQ.FT</span>
+          </div>
+        </div>
+        <div style="font-size:7px;color:rgba(0,212,255,0.45);letter-spacing:.28em;margin-bottom:8px">SELECT FLOOR</div>
+        <div style="display:flex;gap:6px">
+          <button onclick="selectFloor(0,'GROUND FLOOR')" class="vjp-floor-btn" style="flex:1;padding:9px 4px;background:rgba(0,212,255,0.07);border:1px solid rgba(0,212,255,0.28);color:#00d4ff;font-size:8px;letter-spacing:.12em;font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;pointer-events:all">GROUND<br>FLOOR</button>
+          <button onclick="selectFloor(1,'1ST FLOOR')" class="vjp-floor-btn" style="flex:1;padding:9px 4px;background:rgba(0,212,255,0.07);border:1px solid rgba(0,212,255,0.28);color:#00d4ff;font-size:8px;letter-spacing:.12em;font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;pointer-events:all">1ST<br>FLOOR</button>
+          <button onclick="selectFloor(2,'2ND FLOOR')" class="vjp-floor-btn" style="flex:1;padding:9px 4px;background:rgba(0,212,255,0.07);border:1px solid rgba(0,212,255,0.28);color:#00d4ff;font-size:8px;letter-spacing:.12em;font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;pointer-events:all">2ND<br>FLOOR</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLOOR ACTION PANEL (secondary) -->
+    <div id="floor-jarvis-panel" style="display:none;position:absolute;left:326px;top:50%;transform:translateY(-50%);z-index:25;width:220px;font-family:'Courier New',Consolas,monospace">
+      <div style="background:rgba(0,8,20,0.93);border:1px solid rgba(0,212,255,0.45);border-radius:4px;box-shadow:0 0 0 1px rgba(0,212,255,0.07),0 0 36px rgba(0,212,255,0.18),inset 0 0 60px rgba(0,40,80,0.3);backdrop-filter:blur(22px);padding:18px 20px;position:relative">
+        <button onclick="closeFloorPanel()" style="position:absolute;top:8px;right:12px;background:none;border:none;color:rgba(0,212,255,0.5);cursor:pointer;font-size:16px;line-height:1;pointer-events:all">×</button>
+        <div style="font-size:7px;letter-spacing:.32em;color:rgba(0,212,255,0.45);margin-bottom:3px">FLOOR ACCESS</div>
+        <div id="fjp-floor-name" style="font-size:13px;font-weight:700;color:#00d4ff;letter-spacing:.2em;margin-bottom:10px">GROUND FLOOR</div>
+        <div style="height:1px;background:linear-gradient(90deg,rgba(0,212,255,0.45),rgba(0,212,255,0.03));margin-bottom:14px"></div>
+        <button onclick="openFloorVisit()" style="display:block;width:100%;padding:12px 14px;background:rgba(0,212,255,0.07);border:1px solid rgba(0,212,255,0.32);color:#00d4ff;font-size:9px;letter-spacing:.22em;font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;margin-bottom:8px;text-align:left;pointer-events:all"><i class="fas fa-play-circle" style="margin-right:8px;opacity:.7"></i>VISIT · WALKTHROUGH</button>
+        <button onclick="openFloorLayout()" style="display:block;width:100%;padding:12px 14px;background:rgba(0,212,255,0.07);border:1px solid rgba(0,212,255,0.32);color:#00d4ff;font-size:9px;letter-spacing:.22em;font-family:'Courier New',monospace;cursor:pointer;border-radius:2px;text-align:left;pointer-events:all"><i class="fas fa-drafting-compass" style="margin-right:8px;opacity:.7"></i>LAYOUT · FLOOR PLAN</button>
+      </div>
+    </div>
+
+    <!-- MEDIA MODAL (video / image) -->
+    <div id="media-jarvis-modal" style="display:none;position:absolute;inset:0;z-index:30;background:rgba(0,4,12,0.93);backdrop-filter:blur(12px);align-items:center;justify-content:center" onclick="closeMediaModal()">
+      <div onclick="event.stopPropagation()" style="position:relative;width:680px;max-width:90%;background:rgba(0,8,20,0.96);border:1px solid rgba(0,212,255,0.45);border-radius:4px;box-shadow:0 0 0 1px rgba(0,212,255,0.07),0 0 48px rgba(0,212,255,0.2);padding:20px;font-family:'Courier New',monospace">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div id="media-modal-title" style="font-size:10px;font-weight:700;color:#00d4ff;letter-spacing:.25em"></div>
+          <button onclick="closeMediaModal()" style="background:none;border:none;color:rgba(0,212,255,0.6);cursor:pointer;font-size:18px;line-height:1;pointer-events:all">×</button>
+        </div>
+        <div style="height:1px;background:linear-gradient(90deg,rgba(0,212,255,0.4),transparent);margin-bottom:14px"></div>
+        <video id="media-video" controls style="width:100%;border-radius:2px;display:none;background:#000;max-height:400px"></video>
+        <img id="media-image" style="width:100%;border-radius:2px;display:none;max-height:400px;object-fit:contain" />
+        <div id="media-placeholder" style="display:none;width:100%;height:180px;align-items:center;justify-content:center;color:rgba(0,212,255,0.28);font-size:9px;letter-spacing:.2em;border:1px dashed rgba(0,212,255,0.15);border-radius:2px">FILE NOT FOUND · ADD TO /STATIC/</div>
+      </div>
+    </div>
+
+    <!-- JARVIS SVG overlay — clipped inside canvas -->
+    <svg id="bp-target-svg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:20;overflow:visible"></svg>
+    <!-- JARVIS glass panel label — clipped inside canvas -->
+    <div id="bp-landmark-box" style="position:absolute;display:none;z-index:21;pointer-events:none;padding:10px 24px 10px 18px;background:rgba(0,8,20,0.82);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(0,212,255,0.45);border-radius:2px;box-shadow:0 0 0 1px rgba(0,212,255,0.08),0 0 28px rgba(0,212,255,0.18),inset 0 1px 0 rgba(0,212,255,0.10),inset 0 0 60px rgba(0,40,80,0.35);font-size:12.5px;font-weight:700;color:#00d4ff;letter-spacing:0.16em;text-transform:uppercase;white-space:nowrap;font-family:'Courier New',Consolas,monospace;transition:opacity 0.2s ease,transform 0.2s ease"><span id="bp-landmark-name"></span><span id="bp-scan-cursor" style="opacity:1;animation:jarvisBlink 0.55s step-end infinite;margin-left:2px">|</span></div>
+    <!-- Controls — inside canvas so they appear in fullscreen -->
+    <div id="canvas-ctrl-btns" style="position:absolute;top:16px;right:16px;display:flex;flex-direction:column;gap:8px;z-index:30;">
+        <button id="btn-fullscreen" onclick="toggleFullscreen()" class="ctrl-btn w-9 h-9 rounded-lg bg-black/40 backdrop-blur-sm border border-white/10 flex items-center justify-center transition-all" title="Fullscreen">
+            <i class="fas fa-expand text-xs"></i>
+        </button>
+        <button onclick="resetCamera()" class="ctrl-btn w-9 h-9 rounded-lg bg-black/40 backdrop-blur-sm border border-white/10 flex items-center justify-center transition-all" title="Reset View">
+            <i class="fas fa-compress-arrows-alt text-xs"></i>
+        </button>
+        <button id="autoRotBtn" onclick="toggleAutoRot()" class="ctrl-btn w-9 h-9 rounded-lg bg-black/40 backdrop-blur-sm border border-white/10 flex items-center justify-center transition-all" title="Auto Rotate">
+            <i class="fas fa-sync-alt text-xs"></i>
+        </button>
+    </div>
+    <!-- Compass — inside canvas so it appears in fullscreen -->
+    <div id="canvas-compass" style="position:absolute;bottom:16px;left:16px;z-index:30;">
+        <div class="w-14 h-14 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 flex items-center justify-center">
+            <svg id="compass-svg" viewBox="0 0 64 64" class="w-12 h-12" style="transition:transform 0.3s ease">
+                <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+                <line x1="32" y1="5" x2="32" y2="10" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+                <line x1="32" y1="54" x2="32" y2="59" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+                <line x1="5" y1="32" x2="10" y2="32" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+                <line x1="54" y1="32" x2="59" y2="32" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+                <polygon points="32,8 28,32 32,28 36,32" fill="#c9a84c" opacity="0.9"/>
+                <polygon points="32,56 28,32 32,36 36,32" fill="rgba(255,255,255,0.25)"/>
+                <circle cx="32" cy="32" r="2.5" fill="rgba(255,255,255,0.5)"/>
+                <text x="32" y="18" text-anchor="middle" font-size="7" font-weight="700" fill="#c9a84c" font-family="Inter,sans-serif">N</text>
+                <text x="32" y="52" text-anchor="middle" font-size="6" fill="rgba(255,255,255,0.3)" font-family="Inter,sans-serif">S</text>
+                <text x="50" y="34" text-anchor="middle" font-size="6" fill="rgba(255,255,255,0.3)" font-family="Inter,sans-serif">E</text>
+                <text x="14" y="34" text-anchor="middle" font-size="6" fill="rgba(255,255,255,0.3)" font-family="Inter,sans-serif">W</text>
+            </svg>
+        </div>
+    </div>
+  </div>
+  <style>
+    @keyframes jarvisBlink{0%,100%{opacity:1}50%{opacity:0}}
+    @keyframes jarvisSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    @keyframes jarvisSpinRev{from{transform:rotate(0deg)}to{transform:rotate(-360deg)}}
+  </style>
+                    </div>
+                    <div class="blueprint-hint-bar px-4 py-2.5 border-t border-brown-700/[0.08] dark:border-white/[0.05] flex flex-wrap items-center justify-center gap-3 text-[10px] tracking-wide text-brown-500 dark:text-cream-300/50">
+                        <span class="inline-flex items-center gap-1.5">
+                            <i class="fas fa-mouse text-brown-400 dark:text-gold-500/60"></i> Drag to orbit
+                        </span>
+                        <span class="sep text-brown-300 dark:text-white/20">·</span>
+                        <span class="inline-flex items-center gap-1.5">
+                            <i class="fas fa-search-plus text-brown-400 dark:text-gold-500/60"></i> Scroll to zoom
+                        </span>
+                        <span class="sep text-brown-300 dark:text-white/20">·</span>
+                        <span class="inline-flex items-center gap-1.5">
+                            <i class="fas fa-hand-pointer text-brown-400 dark:text-gold-500/60"></i> Click zone to explore
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Panel -->
+            <div>
+                <div class="glass-warm rounded-2xl p-6 lg:sticky lg:top-28">
+                    <!-- Project stats -->
+                    <div class="grid grid-cols-2 gap-3 mb-6">
+                        <div class="bg-brown-700/[0.04] dark:bg-white/[0.03] rounded-xl p-3 text-center">
+                            <div id="stat-val-1" class="font-display text-2xl font-bold text-brown-800 dark:text-cream-100">121</div>
+                            <div id="stat-lbl-1" class="text-[10px] text-brown-400 dark:text-cream-300/40 uppercase tracking-wider mt-0.5">Villa Units</div>
+                        </div>
+                        <div class="bg-brown-700/[0.04] dark:bg-white/[0.03] rounded-xl p-3 text-center">
+                            <div id="stat-val-2" class="font-display text-2xl font-bold text-brown-800 dark:text-cream-100">8.1</div>
+                            <div id="stat-lbl-2" class="text-[10px] text-brown-400 dark:text-cream-300/40 uppercase tracking-wider mt-0.5">Acres</div>
+                        </div>
+                        <div class="bg-brown-700/[0.04] dark:bg-white/[0.03] rounded-xl p-3 text-center">
+                            <div id="stat-val-3" class="font-display text-2xl font-bold text-brown-800 dark:text-cream-100">G+2</div>
+                            <div id="stat-lbl-3" class="text-[10px] text-brown-400 dark:text-cream-300/40 uppercase tracking-wider mt-0.5">Villa Floors</div>
+                        </div>
+                        <div class="bg-brown-700/[0.04] dark:bg-white/[0.03] rounded-xl p-3 text-center">
+                            <div id="stat-val-4" class="font-display text-xl font-bold text-brown-800 dark:text-cream-100">Oct '29</div>
+                            <div id="stat-lbl-4" class="text-[10px] text-brown-400 dark:text-cream-300/40 uppercase tracking-wider mt-0.5">Possession</div>
+                        </div>
+                    </div>
+
+                    <div class="divider mb-6"></div>
+
+                    <!-- Zone placeholder -->
+                    <div id="flat-placeholder" class="text-center py-8">
+                        <div class="w-14 h-14 bg-gold-500/10 border border-gold-500/15 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-map-marked-alt text-gold-500/60 text-xl"></i>
+                        </div>
+                        <h3 class="font-display text-sm font-bold text-brown-800 dark:text-cream-100 mb-2">Explore the Site</h3>
+                        <p class="text-brown-400 dark:text-cream-300/30 text-xs leading-relaxed">Click on any zone in the 3D view to see details about that area</p>
+                    </div>
+
+                    <!-- Zone details (shown on click) -->
+                    <div id="flat-details" class="hidden">
+                        <div class="flex items-start gap-3 mb-4">
+                            <div class="w-10 h-10 bg-gold-500/10 border border-gold-500/20 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <i id="zone-icon" class="fas fa-home text-gold-500/70 text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 id="detail-zone-title" class="font-display text-sm font-bold text-brown-800 dark:text-cream-100 leading-snug"></h3>
+                                <div id="zone-tag" class="text-[9px] tracking-widest uppercase text-gold-600 dark:text-gold-500/70 mt-1 font-semibold"></div>
+                            </div>
+                        </div>
+                        <p id="detail-zone-desc" class="text-brown-500 dark:text-cream-300/50 text-xs leading-relaxed border-t border-brown-700/[0.06] dark:border-white/[0.05] pt-4 mb-4"></p>
+
+                        <!-- Villa-specific info (hidden for non-villa zones) -->
+                        <div id="villa-extra-info" class="hidden">
+
+                            <div class="bg-brown-100/60 dark:bg-white/[0.03] border border-brown-200 dark:border-white/[0.07] rounded-lg p-3 mb-3 text-xs space-y-1.5">
+                                <div class="flex justify-between">
+                                    <span class="text-brown-400 dark:text-cream-300/40 tracking-wide">Buildup Area</span>
+                                    <span id="vei-buildup" class="font-semibold text-brown-700 dark:text-cream-200">—</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-brown-400 dark:text-cream-300/40 tracking-wide">Terrace Area</span>
+                                    <span id="vei-terrace" class="font-semibold text-brown-700 dark:text-cream-200">—</span>
+                                </div>
+                                <div class="border-t border-brown-200 dark:border-white/[0.06] pt-1.5 flex justify-between">
+                                    <span class="font-bold text-brown-700 dark:text-cream-100 tracking-wide">Total Buildup</span>
+                                    <span id="vei-total" class="font-bold text-brown-800 dark:text-cream-100">—</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'home' %}#contact" class="btn-primary block text-center mt-6 rounded-xl">
+                        <i class="fas fa-phone-alt mr-2"></i> Enquire Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+<script>
+const flatData = {{ flats|safe }};
+const VILLA_TYPE_AREAS = {{ villa_areas_json|safe }};
+const VILLA_TYPE_PRICES = {{ villa_prices_json|safe }};
+
+var UNDEFINED_PLOTS = [65,66,67,106,116,117,118,119,120,121];
+function getVillaType(n) {
+  if (UNDEFINED_PLOTS.indexOf(n) !== -1) return null;
+  if (n === 18) return 7;
+  if (n === 8 || (n >= 25 && n <= 28)) return 3;
+  if ((n >= 1 && n <= 11 && n !== 8) || n === 23 || n === 24 || n === 29) return 4;
+  if (n >= 19 && n <= 22) return 6;
+  if (n >= 12 && n <= 17) return 2;
+  if (n >= 32 && n <= 36) return 5;
+  return 1;
+}
+
+const PLOT_TO_BROCHURE = {
+  1:29,2:28,3:27,4:26,5:25,6:24,7:1,8:2,9:3,10:4,11:5,12:6,13:7,14:8,15:9,16:10,17:11,
+  18:23,19:22,20:21,21:20,22:19,23:18,
+  24:12,25:13,26:14,27:15,28:16,29:17,
+  30:32,31:33,32:34,33:35,34:36,
+  35:37,36:38,37:39,38:40,
+  39:58,40:57,41:56,42:55,43:59,44:60,45:54,46:53,
+  47:41,48:42,49:43,50:44,51:45,52:46,
+  53:52,54:51,55:50,56:49,57:48,58:47,
+  59:115,60:96,61:95,62:78,63:77,64:61,
+  65:114,66:97,67:94,68:79,69:76,70:62,
+  71:113,72:98,73:93,74:80,75:75,76:63,
+  77:112,78:99,79:92,80:81,81:74,82:64,
+  83:110,84:101,85:91,86:82,87:72,
+  88:67,89:66,
+  90:109,91:102,92:90,93:83,94:71,
+  95:108,96:103,97:89,98:84,99:70,
+  100:107,101:104,102:88,103:85,104:69,
+  105:106,106:105,107:87,108:86,109:68,
+  110:121,111:120,112:119,113:118,114:117,115:116,
+  116:73,117:65,118:111,119:100
+};
+
+let scene, camera, renderer, controls;
+const interactables = [];
+
+const zoneIcons = {
+  'villa': 'fa-home',
+  'clubhouse': 'fa-building',
+  'pool': 'fa-swimming-pool',
+  'lawn': 'fa-futbol',
+  'kids': 'fa-child',
+  'entry': 'fa-door-open',
+  'water': 'fa-water',
+  'plaza': 'fa-umbrella-beach',
+  'mound': 'fa-mountain',
+  'phase3': 'fa-map',
+  'sculpture': 'fa-mountain',
+  'hospital': 'fa-hospital',
+  'school': 'fa-graduation-cap',
+  'institute': 'fa-university',
+  'heritage': 'fa-place-of-worship',
+  'nature': 'fa-leaf',
+  'junction': 'fa-road',
+  'bypass': 'fa-road',
+  'direction': 'fa-location-arrow',
+  'metro': 'fa-subway',
+  'mall': 'fa-shopping-bag',
+};
+
+function init() {
+  const container = document.getElementById('blueprint-canvas');
+  const W = container.clientWidth, H = container.clientHeight;
+
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(W, H, false); // false = don't set inline style, CSS handles display size
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.domElement.style.width = '100%';
+  renderer.domElement.style.height = '100%';
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  container.appendChild(renderer.domElement);
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0c1410);
+  scene.fog = new THREE.FogExp2(0x0c1410, 0.004);
+
+  camera = new THREE.PerspectiveCamera(40, W / H, 5, 800);
+  camera.position.set(80, 190, 100);
+  camera.lookAt(5, 0, -60);
+
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.07;
+  controls.maxPolarAngle = Math.PI / 2.08;
+  controls.minDistance = 35;
+  controls.maxDistance = 500;
+  controls.autoRotateSpeed = 0.4;
+  controls.target.set(-10, 0, -120);
+  controls.update();
+
+  // Lighting
+  scene.add(new THREE.AmbientLight(0xffeedd, 0.7));
+  const sun = new THREE.DirectionalLight(0xfff5d0, 1.4);
+  sun.position.set(70, 120, 60);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.camera.left = -200; sun.shadow.camera.right = 200;
+  sun.shadow.camera.top = 200; sun.shadow.camera.bottom = -200;
+  sun.shadow.camera.far = 500;
+  sun.shadow.bias = -0.002;
+  scene.add(sun);
+  const fill = new THREE.DirectionalLight(0x6688aa, 0.4);
+  fill.position.set(-50, 40, -30);
+  scene.add(fill);
+
+  buildScene();
+  setupRaycasting();
+  animate();
+
+  window.addEventListener('resize', onResize);
+}
+
+// ─── Helpers ───────────────────────────────────────────────────
+function mkBox(w, h, d, col, x, y, z, meta) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshLambertMaterial({ color: col }));
+  m.position.set(x, y + h / 2, z);
+  m.castShadow = m.receiveShadow = true;
+  scene.add(m);
+  if (meta) { m.userData = meta; interactables.push(m); }
+  return m;
+}
+
+let flatSeq = 0;
+function mkFlat(w, d, col, x, z, yo, op, meta) {
+  yo = (yo === undefined) ? 0 : yo;
+  op = (op === undefined) ? 1 : op;
+  const mat = new THREE.MeshLambertMaterial({ color: col, transparent: op < 1, opacity: op });
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.22, d), mat);
+  flatSeq++;
+  m.position.set(x, yo + 0.11 + flatSeq * 0.003, z);
+  m.receiveShadow = true;
+  scene.add(m);
+  if (meta) { m.userData = meta; interactables.push(m); }
+  return m;
+}
+
+function mkZone(w, d, x, z, meta) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.1, d), new THREE.MeshBasicMaterial({ visible: false }));
+  m.position.set(x, 1.5, z);
+  m.userData = meta;
+  scene.add(m);
+  interactables.push(m);
+}
+
+function mkTree(x, z, h, r, col) {
+  h = (h === undefined) ? 5 : h;
+  r = (r === undefined) ? 1.8 : r;
+  col = (col === undefined) ? 0x2d6a3f : col;
+  const g = new THREE.Group();
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.32, h * 0.38, 6), new THREE.MeshLambertMaterial({ color: 0x5c3a1e }));
+  trunk.position.y = h * 0.19; trunk.castShadow = true; g.add(trunk);
+  const can = new THREE.Mesh(new THREE.SphereGeometry(r, 8, 6), new THREE.MeshLambertMaterial({ color: col }));
+  can.position.y = h * 0.52; can.castShadow = true; g.add(can);
+  g.position.set(x, 0, z); scene.add(g);
+}
+
+function mkPalm(x, z) {
+  const g = new THREE.Group();
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.25, 9, 6), new THREE.MeshLambertMaterial({ color: 0x8a6a3a }));
+  trunk.position.y = 4.5; g.add(trunk);
+  for (let f = 0; f < 8; f++) {
+    const fr = new THREE.Mesh(new THREE.ConeGeometry(1.6, 0.25, 5), new THREE.MeshLambertMaterial({ color: 0x2a8c3a }));
+    const ang = (f / 8) * Math.PI * 2;
+    fr.position.set(Math.cos(ang) * 0.6, 9.2, Math.sin(ang) * 0.6);
+    fr.rotation.z = Math.PI / 2.2; fr.rotation.y = ang; g.add(fr);
+  }
+  g.position.set(x, 0, z); scene.add(g);
+}
+
+// G+2 villa — Bungalow Type 1: splash pool + deck at back, side service deck, garden strips, entry steps
+function mkVilla(x, z, poolSide, meta) {
+  poolSide = (poolSide === undefined) ? 'back' : poolSide;
+  const g = new THREE.Group();
+  if (meta) {
+    const hitbox = new THREE.Mesh(new THREE.BoxGeometry(10, 12, 10), new THREE.MeshBasicMaterial({ visible: false }));
+    hitbox.position.set(0, 6, 0); hitbox.userData = meta; interactables.push(hitbox); g.add(hitbox);
+  }
+  const stoneMat  = new THREE.MeshLambertMaterial({ color: 0xede8df });
+  const teraMat   = new THREE.MeshLambertMaterial({ color: 0xbe4530 });
+  const roofMat   = new THREE.MeshLambertMaterial({ color: 0xcac4ba });
+  const glassMat  = new THREE.MeshLambertMaterial({ color: 0x3a7aaa, transparent: true, opacity: 0.72 });
+  const poolMat   = new THREE.MeshLambertMaterial({ color: 0x1a9ad4, transparent: true, opacity: 0.90 });
+  const poolFloor = new THREE.MeshLambertMaterial({ color: 0x0d6fa8, transparent: true, opacity: 0.85 });
+  const copingMat = new THREE.MeshLambertMaterial({ color: 0xddd8d0 });
+  const deckMat   = new THREE.MeshLambertMaterial({ color: 0x7a5828 });
+  const deckLight = new THREE.MeshLambertMaterial({ color: 0xa07840 });
+  const wallMat   = new THREE.MeshLambertMaterial({ color: 0xe8e4de });
+  const darkMat   = new THREE.MeshLambertMaterial({ color: 0x1e1e1c });
+  const paveMat   = new THREE.MeshLambertMaterial({ color: 0xccc8c0 });
+  const gardenMat = new THREE.MeshLambertMaterial({ color: 0x2e6620 });
+  const soilMat   = new THREE.MeshLambertMaterial({ color: 0x3d2a18 });
+  const gf = new THREE.Mesh(new THREE.BoxGeometry(5.8, 3.4, 5.2), stoneMat);
+  gf.position.y = 1.7; gf.castShadow = gf.receiveShadow = true; g.add(gf);
+  for (let ls = 0; ls < 4; ls++) { const lv = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.14, 0.1), darkMat); lv.position.set(-1.2, 0.5 + ls * 0.7, 2.76); g.add(lv); }
+  const gw = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.8, 0.1), glassMat); gw.position.set(1.4, 1.6, 2.76); g.add(gw);
+  const f1 = new THREE.Mesh(new THREE.BoxGeometry(5.8, 3.2, 5.2), stoneMat); f1.position.y = 5.0; f1.castShadow = true; g.add(f1);
+  const a1 = new THREE.Mesh(new THREE.BoxGeometry(2.2, 3.2, 2.15), teraMat); a1.position.set(-1.5, 5.0, 3.675); a1.castShadow = true; g.add(a1);
+  for (let ls = 0; ls < 6; ls++) { const lv = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.12, 1.7), darkMat); lv.position.set(-1.5, 3.5 + ls * 0.52, 3.92); g.add(lv); }
+  const bal = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.2, 1.21), roofMat); bal.position.set(1.5, 3.42, 3.205); g.add(bal);
+  const bGlass = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.8, 0.08), glassMat); bGlass.position.set(1.5, 3.85, 3.72); g.add(bGlass);
+  const f2 = new THREE.Mesh(new THREE.BoxGeometry(4.4, 4.1, 4.0), stoneMat); f2.position.y = 8.55; f2.castShadow = true; g.add(f2);
+  const a2 = new THREE.Mesh(new THREE.BoxGeometry(1.8, 4.1, 2.0), teraMat); a2.position.set(1.4, 8.55, 2.9); a2.castShadow = true; g.add(a2);
+  const rf = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.35, 4.0), roofMat); rf.position.y = 10.75; g.add(rf);
+  const pg = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.14, 1.8), deckMat); pg.position.set(-0.8, 11.0, -1.1); g.add(pg);
+  for (let ps = 0; ps < 4; ps++) { const psl = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.9, 1.8), deckMat); psl.position.set(-1.5 + ps * 0.6, 11.55, -1.1); g.add(psl); }
+  const rfGl = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.8, 0.08), glassMat); rfGl.position.set(-0.8, 11.325, -0.15); g.add(rfGl);
+  const cwF = new THREE.Mesh(new THREE.BoxGeometry(8.8, 1.4, 0.22), wallMat); cwF.position.set(0, 0.7, 3.5); g.add(cwF);
+  const cwB = new THREE.Mesh(new THREE.BoxGeometry(8.8, 1.4, 0.22), wallMat); cwB.position.set(0, 0.7, -7.0); g.add(cwB);
+  const cwL = new THREE.Mesh(new THREE.BoxGeometry(0.22, 1.4, 10.7), wallMat); cwL.position.set(-4.4, 0.7, -1.75); g.add(cwL);
+  const cwR = new THREE.Mesh(new THREE.BoxGeometry(0.22, 1.4, 10.7), wallMat); cwR.position.set(4.4, 0.7, -1.75); g.add(cwR);
+  for (let sp = 0; sp < 10; sp++) { const spk = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.42, 4), darkMat); spk.position.set(-4.2 + sp * 0.9, 1.52, 3.5); g.add(spk); }
+  const pave = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.1, 1.1), paveMat); pave.position.set(0, 0.05, 3.1); g.add(pave);
+  const step1 = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.14, 0.5), paveMat); step1.position.set(0, 0.07, 3.52); g.add(step1);
+  const step2 = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.22, 0.5), paveMat); step2.position.set(0, 0.11, 3.78); g.add(step2);
+  const sdeck = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.1, 10.2), deckMat); sdeck.position.set(-3.95, 0.05, -1.75); g.add(sdeck);
+  for (let dp = 0; dp < 14; dp++) { const dpl = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.02, 0.06), deckLight); dpl.position.set(-3.95, 0.11, -6.5 + dp * 0.72); g.add(dpl); }
+  const poolZ = -5.4, poolX = -1.1;
+  const pw = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.18, 2.2), poolMat); pw.position.set(poolX, 0.09, poolZ); g.add(pw);
+  const pfl = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.05, 2.1), poolFloor); pfl.position.set(poolX, -0.2, poolZ); g.add(pfl);
+  const cpN = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.12, 0.2), copingMat); cpN.position.set(poolX, 0.22, poolZ - 1.15); g.add(cpN);
+  const cpS = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.12, 0.2), copingMat); cpS.position.set(poolX, 0.22, poolZ + 1.15); g.add(cpS);
+  const cpE = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.12, 2.6), copingMat); cpE.position.set(poolX + 2.45, 0.22, poolZ); g.add(cpE);
+  const cpW = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.12, 2.6), copingMat); cpW.position.set(poolX - 2.45, 0.22, poolZ); g.add(cpW);
+  const dkX = 2.4, dkZ = poolZ;
+  const dkBase = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.14, 2.2), deckMat); dkBase.position.set(dkX, 0.07, dkZ); g.add(dkBase);
+  for (let dp2 = 0; dp2 < 8; dp2++) { const dpl2 = new THREE.Mesh(new THREE.BoxGeometry(2.28, 0.03, 0.06), deckLight); dpl2.position.set(dkX, 0.16, dkZ - 0.96 + dp2 * 0.28); g.add(dpl2); }
+  const gRight = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.06, 9.5), gardenMat); gRight.position.set(3.9, 0.03, -1.75); g.add(gRight);
+  const bedB = new THREE.Mesh(new THREE.BoxGeometry(7.8, 0.1, 0.5), soilMat); bedB.position.set(0, 0.05, -6.7); g.add(bedB);
+  const shrubMat = new THREE.MeshLambertMaterial({ color: 0x2d6e28 });
+  for (let sh = 0; sh < 5; sh++) { const shrub = new THREE.Mesh(new THREE.SphereGeometry(0.28, 6, 5), shrubMat); shrub.position.set(-2.8 + sh * 1.4, 0.35, -6.7); g.add(shrub); }
+  const path = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.08, 2.4), paveMat); path.position.set(0, 0.04, 1.8); g.add(path);
+  if (poolSide === 'back')       g.rotation.y = Math.PI;
+  else if (poolSide === 'left')  g.rotation.y = -Math.PI / 2;
+  else if (poolSide === 'right') g.rotation.y =  Math.PI / 2;
+  g.position.set(x, 0, z); scene.add(g); return g;
+}
+
+function mkCanopy(x, z) {
+  const poleMat = new THREE.MeshLambertMaterial({ color: 0xa8a49c });
+  const discMat = new THREE.MeshLambertMaterial({ color: 0xd4d0c8, transparent: true, opacity: 0.85 });
+  const ringMat = new THREE.MeshLambertMaterial({ color: 0xb8b4ac });
+  const yOff = (Math.abs(x * 7.3 + z * 3.1) % 5) * 0.15;
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 7.5 + yOff, 8), poleMat);
+  pole.position.set(x, 3.75 + yOff/2, z); pole.castShadow = true; scene.add(pole);
+  const disc = new THREE.Mesh(new THREE.CylinderGeometry(5.5, 5.5, 0.18, 24), discMat);
+  disc.position.set(x, 7.6 + yOff, z); scene.add(disc);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(3.8, 0.1, 6, 24), ringMat);
+  ring.rotation.x = Math.PI / 2; ring.position.set(x, 7.5 + yOff, z); scene.add(ring);
+  const ring2 = new THREE.Mesh(new THREE.TorusGeometry(1.8, 0.08, 6, 18), ringMat);
+  ring2.rotation.x = Math.PI / 2; ring2.position.set(x, 7.5 + yOff, z); scene.add(ring2);
+  for (let i = 0; i < 10; i++) {
+    const ang = (i / 10) * Math.PI * 2;
+    const sp = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 5.5, 4), ringMat);
+    sp.position.set(x + Math.cos(ang) * 2.75, 7.5 + yOff, z + Math.sin(ang) * 2.75);
+    sp.rotation.z = Math.PI / 2; sp.rotation.y = ang; scene.add(sp);
+  }
+}
+
+function mkLeafSculpture(x, z) {
+  const mat = new THREE.MeshLambertMaterial({ color: 0xe8e8e2, wireframe: true });
+  const sol = new THREE.MeshLambertMaterial({ color: 0xf0f0ec, transparent: true, opacity: 0.55 });
+  for (let s = 0; s < 2; s++) {
+    const leaf = new THREE.Mesh(new THREE.SphereGeometry(3.2, 8, 6, 0, Math.PI * 1.1, 0, Math.PI * 0.7), mat);
+    leaf.rotation.z = s === 0 ? -0.5 : 0.5; leaf.rotation.y = s === 0 ? -0.3 : 0.3;
+    leaf.position.set(x + (s === 0 ? -1.6 : 1.6), 3.8, z); scene.add(leaf);
+    const fill = new THREE.Mesh(new THREE.SphereGeometry(3.0, 6, 4, 0, Math.PI * 1.0, 0, Math.PI * 0.6), sol);
+    fill.rotation.z = s === 0 ? -0.5 : 0.5; fill.rotation.y = s === 0 ? -0.3 : 0.3;
+    fill.position.set(x + (s === 0 ? -1.6 : 1.6), 3.8, z); scene.add(fill);
+  }
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.28, 3.5, 6), new THREE.MeshLambertMaterial({ color: 0xd0ccc4 }));
+  stem.position.set(x, 1.75, z); scene.add(stem);
+}
+
+function mkEntryGate(cx, cz, rotY) {
+  const g = new THREE.Group();
+  g.position.set(cx, 0, cz);
+  if (rotY) g.rotation.y = rotY;
+  cx = 0; cz = 0;
+  const stoneMat = new THREE.MeshLambertMaterial({ color: 0xcbc4b8 });
+  const woodMat  = new THREE.MeshLambertMaterial({ color: 0x7a5330 });
+  const darkMat  = new THREE.MeshLambertMaterial({ color: 0x1e1e1c });
+  const glassMat = new THREE.MeshLambertMaterial({ color: 0x6a9acc, transparent: true, opacity: 0.55 });
+  const screenMat= new THREE.MeshLambertMaterial({ color: 0x2a2820 });
+  const cabin = new THREE.Mesh(new THREE.BoxGeometry(5.5, 5.5, 5), stoneMat);
+  cabin.position.set(cx - 9.5, 2.75, cz); cabin.castShadow = true; g.add(cabin);
+  const cwin = new THREE.Mesh(new THREE.BoxGeometry(3.0, 2.2, 0.18), glassMat);
+  cwin.position.set(cx - 9.5, 3.0, cz + 2.5); g.add(cwin);
+  const croof = new THREE.Mesh(new THREE.BoxGeometry(6.5, 0.3, 6), woodMat);
+  croof.position.set(cx - 9.5, 5.65, cz); g.add(croof);
+  const cpy = new THREE.Mesh(new THREE.BoxGeometry(14, 0.55, 5.8), woodMat);
+  cpy.position.set(cx - 1.5, 6.5, cz); cpy.castShadow = true; g.add(cpy);
+  const cpyTop = new THREE.Mesh(new THREE.BoxGeometry(14, 0.25, 6.2), darkMat);
+  cpyTop.position.set(cx - 1.5, 7.05, cz); g.add(cpyTop);
+  const postMat2 = new THREE.MeshLambertMaterial({ color: 0xb0a898 });
+  for (let s = 0; s < 2; s++) {
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.36, 7.5, 7), postMat2);
+    post.rotation.z = s === 0 ? 0.22 : -0.22;
+    post.position.set(cx - 5 + s * 5, 3.5, cz); post.castShadow = true; g.add(post);
+  }
+  for (let b = 0; b < 5; b++) {
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(7, 0.25, 0.18), darkMat);
+    bar.position.set(cx + 3.5, 0.5 + b * 0.85, cz + 2.2); g.add(bar);
+  }
+  const gframe = new THREE.Mesh(new THREE.BoxGeometry(0.28, 4.5, 0.28), darkMat);
+  gframe.position.set(cx + 7.1, 2.25, cz + 2.2); g.add(gframe);
+  const bwall = new THREE.Mesh(new THREE.BoxGeometry(8, 6, 4.5), woodMat);
+  bwall.position.set(cx + 14, 3.0, cz); bwall.castShadow = true; g.add(bwall);
+  for (let ci = 0; ci < 3; ci++) {
+    const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.6, 6, 4.6), stoneMat);
+    stripe.position.set(cx + 11.2 + ci * 2.8, 3.0, cz); g.add(stripe);
+  }
+  const scr1 = new THREE.Mesh(new THREE.BoxGeometry(2.8, 4.5, 0.22), screenMat);
+  scr1.position.set(cx + 11, 3.5, cz + 2.3); g.add(scr1);
+  const scr2 = new THREE.Mesh(new THREE.BoxGeometry(2.8, 4.5, 0.22), screenMat);
+  scr2.position.set(cx + 14.5, 3.5, cz + 2.3); g.add(scr2);
+  const bwroof = new THREE.Mesh(new THREE.BoxGeometry(8.5, 0.3, 5.5), darkMat);
+  bwroof.position.set(cx + 14, 6.3, cz); g.add(bwroof);
+  mkBox(22, 2.0, 0.35, 0xc8c2b8, cx + 29, 0, cz + 2.3);
+  mkBox(8, 2.0, 0.35, 0xc8c2b8, cx - 16.5, 0, cz + 2.3);
+  [[cx+7,cz-5],[cx+9,cz-6],[cx+8,cz-7],[cx-9,cz-5],[cx-11,cz-6],[cx-10,cz-7]].forEach(function(p) {
+    [0xcc2222, 0xee6611, 0xddcc11, 0xff4444].forEach(function(c, i) {
+      const f = new THREE.Mesh(new THREE.SphereGeometry(0.3, 6, 4), new THREE.MeshLambertMaterial({color:c}));
+      f.position.set(p[0] + (i-1.5)*0.4, 0.65, p[1]); g.add(f);
+    });
+  });
+  mkTree(cx + 10, cz - 5, 5, 2.0, 0x2d7a36);
+  mkTree(cx + 14, cz - 4, 4, 1.6, 0x2d7a36);
+  mkPalm(cx + 18, cz - 2); mkPalm(cx + 22, cz - 4);
+  const entryMeta = { type: 'entry', title: 'Main Entry Gate — Silverwoods', desc: 'Grand arrival gate with wood-clad canopy, V-column architecture, security cabin, and decorative SILVERWOODS brand wall. 24×7 manned with boom barrier.' };
+  const hitbox = new THREE.Mesh(new THREE.BoxGeometry(42, 12, 10), new THREE.MeshBasicMaterial({ visible: false }));
+  hitbox.position.set(cx + 4, 6, cz); hitbox.userData = entryMeta; interactables.push(hitbox); g.add(hitbox);
+  scene.add(g);
+}
+
+// Accurate clubhouse: 3-story dark glass structure + mushroom columns + canopy + pool
+function mkClubhouse(cx, cz) {
+  const darkMat  = new THREE.MeshLambertMaterial({ color: 0x1a2636 });
+  const glassMat = new THREE.MeshLambertMaterial({ color: 0x1e4a88, transparent: true, opacity: 0.6 });
+  const colMat   = new THREE.MeshLambertMaterial({ color: 0x6a6a78 });
+  const woodMat  = new THREE.MeshLambertMaterial({ color: 0x8a6238 });
+  const cladMat  = new THREE.MeshLambertMaterial({ color: 0x2a3040 });
+  const clubMeta = { type: 'clubhouse', title: 'Clubhouse — 50,000 sq.ft', desc: 'Multi-story luxury clubhouse with gym, yoga, banquet hall, rooftop pool, bar, billiards, and guest rooms. Signature mushroom columns at entrance.' };
+  const gf = new THREE.Mesh(new THREE.BoxGeometry(34, 5, 28), darkMat);
+  gf.position.set(cx, 2.5, cz); gf.castShadow = true; gf.receiveShadow = true;
+  gf.userData = clubMeta; interactables.push(gf); scene.add(gf);
+  const gfg = new THREE.Mesh(new THREE.BoxGeometry(26, 5, 0.3), glassMat);
+  gfg.position.set(cx, 2.5, cz + 14.15); scene.add(gfg);
+  const f1 = new THREE.Mesh(new THREE.BoxGeometry(32, 4.5, 26), cladMat);
+  f1.position.set(cx, 7.25, cz); f1.castShadow = true; f1.userData = clubMeta; interactables.push(f1); scene.add(f1);
+  for (let gi = 0; gi < 2; gi++) { const gb = new THREE.Mesh(new THREE.BoxGeometry(28, 1.0, 0.28), glassMat); gb.position.set(cx, 5.8 + gi * 2.5, cz + 13); scene.add(gb); }
+  const f2 = new THREE.Mesh(new THREE.BoxGeometry(28, 4.0, 22), cladMat);
+  f2.position.set(cx, 11.5, cz); f2.castShadow = true; f2.userData = clubMeta; interactables.push(f2); scene.add(f2);
+  const canopy = new THREE.Mesh(new THREE.BoxGeometry(34, 0.5, 8), woodMat);
+  canopy.position.set(cx, 13.6, cz + 15.5); canopy.castShadow = true; scene.add(canopy);
+  for (let si = 0; si < 12; si++) { const sl = new THREE.Mesh(new THREE.BoxGeometry(34, 0.18, 0.4), new THREE.MeshLambertMaterial({ color: 0x7a5428 })); sl.position.set(cx, 13.9, cz + 11.5 + si * 0.72); scene.add(sl); }
+  const rfTop = new THREE.Mesh(new THREE.BoxGeometry(28, 0.4, 22), new THREE.MeshLambertMaterial({ color: 0x222830 }));
+  rfTop.position.set(cx, 13.6, cz); scene.add(rfTop);
+  const mushMat = new THREE.MeshLambertMaterial({ color: 0x888898 });
+  for (let mc = 0; mc < 5; mc++) {
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.7, 8.5, 12), mushMat);
+    stem.position.set(cx - 12 + mc * 6, 4.25, cz + 13); stem.castShadow = true; scene.add(stem);
+    const disc = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 0.8, 0.7, 16), mushMat);
+    disc.position.set(cx - 12 + mc * 6, 8.85, cz + 13); scene.add(disc);
+  }
+  const wf = new THREE.Mesh(new THREE.BoxGeometry(20, 1.5, 1.0), new THREE.MeshLambertMaterial({ color: 0x224466 }));
+  wf.position.set(cx, 0.75, cz + 14.5); scene.add(wf);
+  const wfall = new THREE.Mesh(new THREE.BoxGeometry(18, 0.18, 0.8), new THREE.MeshLambertMaterial({ color: 0x44aadd, transparent: true, opacity: 0.7 }));
+  wfall.position.set(cx, 0.08, cz + 14.5); scene.add(wfall);
+  const sigWall = new THREE.Mesh(new THREE.BoxGeometry(20, 2.8, 0.5), woodMat);
+  sigWall.position.set(cx, 1.6, cz + 15.5); scene.add(sigWall);
+  const sigPl = new THREE.Mesh(new THREE.BoxGeometry(9, 1.4, 0.22), new THREE.MeshLambertMaterial({ color: 0xf0ece4 }));
+  sigPl.position.set(cx + 3, 1.6, cz + 15.78); scene.add(sigPl);
+  [-10, -6, 6, 10].forEach(function(ox) { mkPalm(cx + ox, cz + 27); });
+  mkPalm(cx - 14, cz + 24); mkPalm(cx + 14, cz + 24);
+  mkFlat(20, 5, 0x1a88e8, cx, cz - 5, 13.8, 1, { type: 'pool', title: 'Rooftop Infinity Pool', desc: 'Stunning rooftop infinity pool with panoramic views over the villa community.' });
+  mkFlat(20, 1.2, 0x55ccff, cx, cz - 7.2, 14.0, 0.35);
+  for (let s = 0; s < 5; s++) {
+    const step = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.6, 1.0), new THREE.MeshLambertMaterial({ color: 0x3a3850 }));
+    step.position.set(cx + 18, 0.3 + s * 0.6, cz + 14 - s * 1.1); scene.add(step);
+  }
+}
+
+function rng(a, b) { return a + Math.random() * (b - a); }
+
+function mkRoadText(text, x, z, rotY, planeW, color) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1024; canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  ctx.font = 'bold 50px Arial, sans-serif';
+  ctx.fillStyle = color || '#ffffff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text.toUpperCase(), 512, 64);
+  const tex = new THREE.CanvasTexture(canvas);
+  const mat = new THREE.MeshLambertMaterial({ map: tex, transparent: true, depthWrite: false });
+  const pw = planeW || 80;
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(pw, pw * (128 / 1024)), mat);
+  plane.setRotationFromEuler(new THREE.Euler(-Math.PI / 2, rotY || 0, 0, 'YXZ'));
+  plane.position.set(x, 0.12, z);
+  plane.receiveShadow = true;
+  scene.add(plane);
+}
+
+// mkP — places a detailed villa at given position, wired to JARVIS panel
+var _pn = 0;
+function mkP(x, z, side) {
+  _pn++;
+  var seqNum = _pn;
+  var bNum = PLOT_TO_BROCHURE[seqNum] || seqNum;
+  var label = 'VILLA PLOT  \u00b7  #' + String(bNum).padStart(3, '0');
+  mkVilla(x, z, side || 'back', {
+    type: 'villa',
+    title: label,
+    desc: 'Premium G+2 villa — Silverwoods. Private splash pool, wood deck, compound wall, and landscaped garden.',
+    villaNum: seqNum,
+    brochureNum: bNum,
+    landmark: true
+  });
+}
+
+// ─── Scene ─────────────────────────────────────────────────────
+function buildScene() {
+  // ── GROUND ──
+  const gnd = new THREE.Mesh(new THREE.PlaneGeometry(400, 620), new THREE.MeshLambertMaterial({ color: 0x1a2b1a }));
+  gnd.rotation.x = -Math.PI / 2;
+  gnd.position.set(20, -0.2, -152);
+  gnd.receiveShadow = true;
+  scene.add(gnd);
+
+  // ── DR BC ROY ROAD ──
+  const drbcGeo = new THREE.PlaneGeometry(220, 12);
+  const drbcMat = new THREE.MeshLambertMaterial({ color: 0x3a3838 });
+  const drbcMesh = new THREE.Mesh(drbcGeo, drbcMat);
+  drbcMesh.rotation.x = -Math.PI / 2; drbcMesh.rotation.z = 0.10;
+  drbcMesh.position.set(20, 0.05, 24); scene.add(drbcMesh);
+  (function() {
+    const lMat = new THREE.MeshLambertMaterial({ color: 0xcccc44 });
+    const cos = Math.cos(0.10), sin = Math.sin(0.10);
+    for (let i = 0; i < 14; i++) {
+      const d = -100 + i * 16;
+      const lm = new THREE.Mesh(new THREE.PlaneGeometry(8, 0.35), lMat);
+      lm.rotation.x = -Math.PI / 2; lm.rotation.z = 0.10;
+      lm.position.set(20 + d * cos, 0.12, 24 - d * sin); scene.add(lm);
+    }
+  })();
+
+  // ── ENTRY GATE ──
+  mkEntryGate(5, 5, 0);
+
+  // ── MAIN N-S SPINE ROAD ──
+  mkFlat(7, 158, 0x3a3838, 5, -72);
+  for (let i = 0; i < 13; i++) mkFlat(0.35, 4, 0xcccc44, 5, 0 - i * 13, 0.12);
+
+  // ── MARKETING / SALES OFFICE ──
+  const og = new THREE.Group();
+  og.position.set(20, 0, -10);
+  const ob = new THREE.Mesh(new THREE.BoxGeometry(10, 5, 8), new THREE.MeshLambertMaterial({ color: 0xddddcc }));
+  ob.position.y = 2.5; ob.castShadow = true; og.add(ob);
+  const orM = new THREE.Mesh(new THREE.ConeGeometry(7, 4, 4), new THREE.MeshLambertMaterial({ color: 0x8b5a2b }));
+  orM.rotation.y = Math.PI / 4; orM.position.y = 7; orM.castShadow = true; og.add(orM);
+  scene.add(og);
+  mkZone(12, 10, 20, 8, { type: 'office', title: 'Sales & Marketing Office', desc: 'Silverwoods project experience centre at the main entry.' });
+
+  // ── ENTRY ZONE: RIGHT/EAST column ──
+  for (let i = 0; i < 6; i++) mkP(18, -20 - i * 12, 'left');
+
+  // ── ENTRY ZONE: LEFT/WEST column ──
+  for (let i = 0; i < 11; i++) mkP(-8, -8 - i * 12, 'right');
+
+  mkP(18, -91, 'left');
+  for (let i = 1; i < 6; i++) mkP(18 + i * 12, -91, 'back');
+  mkFlat(87, 5, 0x3a3838, 45, -99, 0.15);
+  for (let i = 0; i < 6; i++) mkP(18 + i * 12, -108, 'front');
+
+  mkFlat(148, 5, 0x3a3838, 80, -131);
+  for (let i = 0; i < 5; i++) mkP(18 + i * 12, -122, 'back');
+  for (let i = 0; i < 4; i++) mkP(98 + i * 12, -122, 'back');
+
+  // ── LEFT WING ──
+  for (let i = 0; i < 3; i++) mkP(34 + i * 12, -143, 'front');
+  mkP(74, -140, 'right');
+  for (let i = 0; i < 2; i++) mkP(46 + i * 12, -157, 'back');
+  mkP(74, -149, 'right');
+  mkP(74, -158, 'right');
+
+  // ── CANOPY CLUSTER ──
+  mkCanopy(13, -141); mkCanopy(18, -148); mkCanopy(14, -158);
+
+  // ── RIGHT WING ──
+  for (let i = 0; i < 6; i++) mkP(98 + i * 12, -143, 'front');
+  for (let i = 0; i < 6; i++) mkP(98 + i * 12, -157, 'back');
+
+  mkFlat(163, 5, 0x3a3838, 83, -168);
+  mkFlat(7, 17, 0x3a3838, 5, -159.5);
+
+  // ── CLUBHOUSE ──
+  mkClubhouse(22, -210);
+
+  // ── FUTURE DEVELOPMENT PLOTS ──
+  mkFlat(22, 24, 0xede8e0, -18, -163, 0, 1, { type: 'phase3', title: 'Phase 3 — Future Development' });
+  mkFlat(22, 24, 0xede8e0, -18, -186, 0, 1, { type: 'phase3', title: 'Phase 3 — Future Development' });
+  mkFlat(22, 24, 0xede8e0, -18, -209, 0, 1, { type: 'phase3', title: 'Phase 3 — Future Development' });
+
+  // ── GROUND INFINITY POOL ──
+  mkFlat(10, 26, 0x7a8870, 22, -196, 0, 1, { type: 'pool', title: 'Ground Infinity Pool' });
+  mkFlat(8, 24, 0x1a80d4, 22, -196, 0.1, 1, { type: 'pool', title: 'Ground Infinity Pool' });
+
+  // ── ORNAMENTAL GREEN ──
+  mkFlat(14, 12, 0x3a6a30, 40, -206, 0, 1, { type: 'plaza', title: 'Green Seating Plaza (North)' });
+
+  // ── BUTTERFLY LEAF SCULPTURE ──
+  mkLeafSculpture(45, -175);
+
+  // ── CIRCULAR ROUNDABOUT ──
+  const rdAbout = new THREE.Mesh(new THREE.RingGeometry(5, 6.5, 48), new THREE.MeshLambertMaterial({ color: 0x3e3e3c, side: THREE.DoubleSide }));
+  rdAbout.rotation.x = -Math.PI / 2; rdAbout.position.set(47, 0.12, -188); scene.add(rdAbout);
+  const rdIsland = new THREE.Mesh(new THREE.CircleGeometry(4.5, 48), new THREE.MeshLambertMaterial({ color: 0x2a7a35 }));
+  rdIsland.rotation.x = -Math.PI / 2; rdIsland.position.set(47, 0.15, -188); scene.add(rdIsland);
+  const rdMound = new THREE.Mesh(new THREE.SphereGeometry(1.8, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshLambertMaterial({ color: 0x38a048 }));
+  rdMound.position.set(47, 0.15, -188); scene.add(rdMound);
+  mkTree(47, -188, 5, 2.2, 0x1a6e28);
+
+  // ── MULTI-ACTIVITY LAWN ──
+  mkFlat(24, 34, 0x2a7a35, 70, -190, 0, 1, { type: 'lawn', title: 'Multi-Activity Lawn' });
+  mkFlat(20, 30, 0x38b048, 70, -190, 0.08);
+  mkFlat(0.35, 30, 0xffffff, 70, -190, 0.12);
+  mkFlat(20, 0.35, 0xffffff, 70, -190, 0.12);
+  const ccN = new THREE.Mesh(new THREE.RingGeometry(2.8, 3.2, 36), new THREE.MeshLambertMaterial({ color: 0xffffff, side: THREE.DoubleSide }));
+  ccN.rotation.x = -Math.PI / 2; ccN.position.set(70, 0.15, -190); scene.add(ccN);
+
+  // ── NORTH CLUSTER — 24 villas ──
+  mkP(-3, -240, 'left'); mkP(11, -240, 'right');
+  mkP(31, -240, 'left'); mkP(45, -240, 'right');
+  mkP(63, -240, 'left'); mkP(77, -240, 'right');
+  mkP(-3, -254, 'left'); mkP(11, -254, 'right');
+  mkP(31, -254, 'left'); mkP(45, -254, 'right');
+  mkP(63, -254, 'left'); mkP(77, -254, 'right');
+  mkP(-3, -268, 'left'); mkP(11, -268, 'right');
+  mkP(31, -268, 'left'); mkP(45, -268, 'right');
+  mkP(63, -268, 'left'); mkP(77, -268, 'right');
+  mkP(-3, -282, 'left'); mkP(11, -282, 'right');
+  mkP(31, -282, 'left'); mkP(45, -282, 'right');
+  mkP(63, -282, 'left'); mkP(77, -282, 'right');
+
+  mkFlat(104, 5, 0x3a3838, 36.5, -230);
+  mkFlat(5, 77, 0x3a3838, 22, -268.5);
+  mkFlat(5, 77, 0x3a3838, 54, -268.5);
+  mkFlat(5, 77, 0x3a3838, -13, -268.5);
+  mkFlat(10, 77, 0xf5c842, -21, -269.5, 0, 1, { type: 'phase3', title: 'Plot' });
+
+  mkFlat(104, 5, 0x3a3838, 36.5, -307);
+  mkP(-3, -320, 'left'); mkP(11, -320, 'right');
+  mkP(31, -320, 'left'); mkP(45, -320, 'right'); mkP(63, -320, 'left');
+  mkFlat(8, 8, 0xf5c842, 78, -340, 0, 1, { type: 'phase3', title: 'Plot' });
+  mkP(77, -340, 'right');
+  mkFlat(8, 8, 0xf5c842, 78, -320, 0, 1, { type: 'phase3', title: 'Plot' });
+  mkP(77, -320, 'right');
+  mkP(-3, -332, 'left'); mkP(11, -332, 'right');
+  mkP(31, -332, 'left'); mkP(45, -332, 'right'); mkP(63, -332, 'left');
+  mkP(-3, -344, 'left'); mkP(11, -344, 'right');
+  mkP(31, -344, 'left'); mkP(45, -344, 'right'); mkP(63, -344, 'left');
+  mkP(-3, -356, 'left'); mkP(11, -356, 'right');
+  mkP(31, -356, 'left'); mkP(45, -356, 'right'); mkP(63, -356, 'left');
+  mkFlat(10, 10, 0xf5c842, -3, -368, 0, 1, { type: 'phase3', title: 'Plot' });
+  mkP(-3, -368, 'left'); mkP(11, -368, 'right');
+  mkP(31, -368, 'left'); mkP(45, -368, 'right'); mkP(63, -368, 'left');
+  mkP(-22, -364, 'right'); mkP(-22, -344, 'right'); mkP(-22, -322, 'right');
+  mkP(-22, -289, 'right'); mkP(-22, -264, 'right'); mkP(-22, -238, 'right');
+
+  mkFlat(5, 65, 0x3a3838, 22, -339.5);
+  mkFlat(5, 65, 0x3a3838, 54, -339.5);
+  mkFlat(5, 65, 0x3a3838, -13, -339.5);
+  mkFlat(10, 62, 0xf5c842, -21, -338, 0, 1, { type: 'phase3', title: 'Plot' });
+  mkFlat(13, 5, 0x3a3838, -19.5, -333);
+  mkFlat(13, 5, 0x3a3838, -19.5, -276.5);
+  mkFlat(10, 52, 0xf5c842, 78, -340, 0, 1, { type: 'phase3', title: 'Plot' });
+  mkFlat(5, 269, 0x3a3838, 86, -233.5);
+
+  mkP(63, -296, 'left');
+  mkFlat(10, 10, 0xf5c842, 78, -296, 0, 1, { type: 'phase3', title: 'Plot' });
+  mkP(77, -296, 'right');
+  mkP(-3, -296, 'left'); mkP(11, -296, 'right');
+  mkFlat(24, 12, 0x1e6b22, 38, -296, 0, 1, { type: 'lawn', title: 'Landscape Garden' });
+  mkFlat(22, 10, 0x2d8a35, 38, -296, 0.05);
+  mkFlat(20, 8, 0x3aaa42, 38, -296, 0.08);
+  mkTree(28, -293, 5, 2.8, 0x1a7a28); mkTree(32, -299, 4, 2.2, 0x22882e);
+  mkTree(37, -293, 4.5, 2.5, 0x1e7a26); mkTree(42, -299, 4, 2.0, 0x228830);
+  mkTree(47, -293, 3.5, 1.8, 0x1a7228); mkTree(29, -296, 3, 1.6, 0x2a9035);
+
+  // ── KIDS PLAY AREA ──
+  mkFlat(30, 3, 0x3a3838, 73, -210);
+  mkFlat(26, 12, 0x3a8a44, 68, -219, 0, 1, { type: 'kids', title: 'Kids Play Area' });
+  const slideTower = new THREE.Mesh(new THREE.BoxGeometry(2, 3.5, 2), new THREE.MeshLambertMaterial({ color: 0xdd4422 }));
+  slideTower.position.set(62, 1.75, -222); scene.add(slideTower);
+  const swMat = new THREE.MeshLambertMaterial({ color: 0x4477dd });
+  const swPost1 = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4, 0.25), swMat); swPost1.position.set(69, 2, -216); scene.add(swPost1);
+  const swPost2 = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4, 0.25), swMat); swPost2.position.set(74, 2, -216); scene.add(swPost2);
+  const swBar = new THREE.Mesh(new THREE.BoxGeometry(5.5, 0.25, 0.25), swMat); swBar.position.set(71.5, 4, -216); scene.add(swBar);
+  const mgrDisc = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 0.2, 24), new THREE.MeshLambertMaterial({ color: 0xee2277 }));
+  mgrDisc.position.set(76, 0.5, -222); scene.add(mgrDisc);
+
+  // ── PERIPHERAL TREES ──
+  for (let tz = -395; tz <= 5; tz += 8) {
+    mkTree(-115, tz, rng(4, 7), rng(1.8, 2.5), 0x1a5c22);
+    mkTree(190, tz, rng(4, 7), rng(1.8, 2.5), 0x1a5c22);
+  }
+  for (let tx = -115; tx <= 190; tx += 8) {
+    mkTree(tx, -395, rng(4, 7), rng(1.8, 2.5), 0x1a5c22);
+  }
+}
+
+// ─── JARVIS Target Animation ────────────────────────────────────
+const J = '#00d4ff';
+const JD = 'rgba(0,212,255,';
+let _tgtLines = [], _tgtTimers = [], _scanInt = null;
+
+function _jEl(tag, attrs) {
+  const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+  document.getElementById('bp-target-svg').appendChild(e);
+  _tgtLines.push(e);
+  return e;
+}
+function _jLine(x1, y1, x2, y2, col, delay, dur, w) {
+  const ln = _jEl('line', { x1, y1, x2, y2, stroke: col || J, 'stroke-width': w || 1.5 });
+  const len = Math.hypot(x2 - x1, y2 - y1) + 2;
+  ln.setAttribute('stroke-dasharray', len);
+  ln.setAttribute('stroke-dashoffset', len);
+  _tgtTimers.push(setTimeout(() => {
+    ln.style.transition = `stroke-dashoffset ${dur || 130}ms ease-out`;
+    ln.setAttribute('stroke-dashoffset', 0);
+  }, delay || 0));
+  return ln;
+}
+
+function spawnTargetAnim(viewCx, viewCy, title, type) {
+  clearTargetAnim();
+  const svg = document.getElementById('bp-target-svg');
+  const box = document.getElementById('bp-landmark-box');
+  const canvasEl = document.getElementById('blueprint-canvas');
+  if (!svg || !box || !canvasEl) return;
+  const cRect = canvasEl.getBoundingClientRect();
+  const cx = viewCx - cRect.left;
+  const cy = viewCy - cRect.top;
+  const cW = cRect.width;
+  const cH = cRect.height;
+
+  const ac = J;
+  const dot = _jEl('circle', { cx, cy, r: 3, fill: ac, opacity: 0 });
+  dot.setAttribute('filter', 'url(#jarvisGlow)');
+  _tgtTimers.push(setTimeout(() => { dot.style.transition = 'opacity 0.1s'; dot.setAttribute('opacity', 1); }, 0));
+
+  if (!svg.querySelector('#jarvisGlow')) {
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    defs.innerHTML = `<filter id="jarvisGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
+    svg.prepend(defs);
+  }
+
+  // Dynamic alpha helper for ac color
+  function acA(a) {
+    // Convert hex to rgba for alpha support
+    const r = parseInt(ac.slice(1,3),16), g = parseInt(ac.slice(3,5),16), b = parseInt(ac.slice(5,7),16);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+  // Update box border/text color to match zone
+  box.style.borderColor = acA(0.45);
+  box.style.color = ac;
+
+  const r1 = 20, c1 = 2 * Math.PI * r1;
+  const ring1 = _jEl('circle', { cx, cy, r: r1, fill: 'none', stroke: ac,
+    'stroke-width': 1.6, 'stroke-dasharray': `${c1*0.22} ${c1*0.03} ${c1*0.22} ${c1*0.03} ${c1*0.22} ${c1*0.03}`, opacity: 0 });
+  ring1.style.transformOrigin = `${cx}px ${cy}px`;
+  ring1.style.animation = 'jarvisSpin 5.2s linear infinite';
+  _tgtTimers.push(setTimeout(() => { ring1.style.transition = 'opacity 0.2s'; ring1.setAttribute('opacity', 0.95); }, 40));
+
+  const r2 = 34, c2 = 2 * Math.PI * r2;
+  const ring2 = _jEl('circle', { cx, cy, r: r2, fill: 'none', stroke: ac,
+    'stroke-width': 0.8, 'stroke-dasharray': `${c2*0.10} ${c2*0.07}`, opacity: 0 });
+  ring2.style.transformOrigin = `${cx}px ${cy}px`;
+  ring2.style.animation = 'jarvisSpinRev 9s linear infinite';
+  _tgtTimers.push(setTimeout(() => { ring2.style.transition = 'opacity 0.25s'; ring2.setAttribute('opacity', 0.5); }, 60));
+
+  const chLen = 12, chGap = r1 + 2;
+  [[cx-chGap-chLen,cy,cx-chGap,cy],[cx+chGap,cy,cx+chGap+chLen,cy],
+   [cx,cy-chGap-chLen,cx,cy-chGap],[cx,cy+chGap,cx,cy+chGap+chLen]].forEach(([x1,y1,x2,y2],i) => {
+    _jLine(x1,y1,x2,y2,ac,80+i*20,90,1.4);
+  });
+
+  const bs = 13, bOff = r1 + 4;
+  [[-1,-1],[1,-1],[1,1],[-1,1]].forEach(([sx,sy],i) => {
+    const bx = cx+sx*bOff, by = cy+sy*bOff;
+    _jLine(bx,by,bx+sx*bs,by,acA(0.9),120+i*25,80,1.8);
+    _jLine(bx,by,bx,by+sy*bs,acA(0.9),120+i*25,80,1.8);
+  });
+
+  const goRight = cx < cW * 0.58;
+  const kinkX = Math.max(50, Math.min(cW-50, goRight ? cx+48 : cx-48));
+  const kinkY = Math.max(40, cy-32);
+  const rawPanelX = goRight ? cx+185 : cx-185;
+  const panelX = goRight ? Math.min(rawPanelX, cW-230) : Math.max(rawPanelX, 20);
+
+  _tgtTimers.push(setTimeout(() => {
+    const dLen = Math.hypot(kinkX-cx, kinkY-cy);
+    const d1 = _jEl('line', { x1:cx, y1:cy, x2:kinkX, y2:kinkY,
+      stroke:ac, 'stroke-width':1.3, 'stroke-dasharray':dLen, 'stroke-dashoffset':dLen, opacity:0.8 });
+    requestAnimationFrame(() => { d1.style.transition='stroke-dashoffset 0.16s ease-out'; d1.setAttribute('stroke-dashoffset',0); });
+
+    _tgtTimers.push(setTimeout(() => {
+      _jEl('circle', { cx:kinkX, cy:kinkY, r:2.2, fill:ac, opacity:0.9 });
+      const hLen = Math.abs(panelX-kinkX);
+      const h1 = _jEl('line', { x1:kinkX, y1:kinkY, x2:panelX, y2:kinkY,
+        stroke:ac, 'stroke-width':1.3, 'stroke-dasharray':hLen,
+        'stroke-dashoffset': goRight ? hLen : -hLen, opacity:0.8 });
+      requestAnimationFrame(() => { h1.style.transition='stroke-dashoffset 0.19s ease-out'; h1.setAttribute('stroke-dashoffset',0); });
+
+      _tgtTimers.push(setTimeout(() => {
+        _jEl('circle', { cx:panelX, cy:kinkY, r:2, fill:ac, opacity:0.85 });
+        const tDrop = 16;
+        _jLine(panelX, kinkY, panelX, kinkY+tDrop, acA(0.7), 0, 80, 1.1);
+
+        _tgtTimers.push(setTimeout(() => {
+          const boxTop = Math.max(4, Math.min(kinkY+tDrop-18, cH-55));
+          box.style.display = 'block';
+          box.style.opacity = '0';
+          box.style.top = boxTop + 'px';
+          box.style.right = 'auto';
+          box.style.left = '0px';
+          const nameEl = document.getElementById('bp-landmark-name');
+          nameEl.textContent = title;
+          box.style.width = 'auto';
+          const bW = box.offsetWidth;
+          box.style.width = bW + 'px';
+          nameEl.textContent = '';
+          const cursor = document.getElementById('bp-scan-cursor');
+          if (cursor) cursor.style.display = 'inline';
+          box.style.transform = `scaleX(0.7) translateX(${goRight ? '-12px' : '12px'})`;
+          box.style.transformOrigin = goRight ? 'left center' : 'right center';
+          requestAnimationFrame(() => {
+            const boxLeft = goRight ? Math.min(panelX+16, cW-bW-4) : Math.max(panelX-bW-16, 4);
+            box.style.left = boxLeft + 'px';
+            requestAnimationFrame(() => {
+              box.style.transition = 'opacity 0.18s ease, transform 0.22s ease';
+              box.style.opacity = '1';
+              box.style.transform = 'scaleX(1) translateX(0)';
+              _tgtTimers.push(setTimeout(() => {
+                let idx = 0;
+                const nameEl2 = document.getElementById('bp-landmark-name');
+                if (_scanInt) clearInterval(_scanInt);
+                _scanInt = setInterval(() => {
+                  if (idx <= title.length) { nameEl2.textContent = title.slice(0, idx); idx++; }
+                  else { clearInterval(_scanInt); _scanInt = null; if (cursor) cursor.style.display = 'none'; }
+                }, 38);
+                _tgtTimers.push(setTimeout(() => {
+                  const bx0 = box.offsetLeft-4, by0 = box.offsetTop-4;
+                  const bx1 = bx0+box.offsetWidth+8, by1 = by0+box.offsetHeight+8;
+                  const bs2 = 10;
+                  [[bx0,by0,1,1],[bx1,by0,-1,1],[bx1,by1,-1,-1],[bx0,by1,1,-1]].forEach(([px,py,sdx,sdy]) => {
+                    _jEl('line',{x1:px,y1:py,x2:px+sdx*bs2,y2:py,stroke:ac,'stroke-width':1.6,opacity:0.8});
+                    _jEl('line',{x1:px,y1:py,x2:px,y2:py+sdy*bs2,stroke:ac,'stroke-width':1.6,opacity:0.8});
+                  });
+                  const midY = by0+4+(box.offsetHeight/2);
+                  const sl = _jEl('line', { x1:bx0+4, y1:midY, x2:bx1-4, y2:midY,
+                    stroke:acA(0.15), 'stroke-width':box.offsetHeight, opacity:1 });
+                  sl.style.transition = 'opacity 1s ease 0.4s';
+                  setTimeout(() => { sl.setAttribute('opacity',0); }, 500);
+                }, 80));
+              }, 100));
+            });
+          });
+        }, 190));
+      }, 195));
+    }, 165));
+  }, 300));
+}
+
+function clearTargetAnim() {
+  if (_scanInt) { clearInterval(_scanInt); _scanInt = null; }
+  _tgtTimers.forEach(t => { clearTimeout(t); clearInterval(t); });
+  _tgtTimers = [];
+  const svg = document.getElementById('bp-target-svg');
+  if (svg) _tgtLines.forEach(l => { try { svg.removeChild(l); } catch(_) {} });
+  _tgtLines = [];
+  const box = document.getElementById('bp-landmark-box');
+  if (box) { box.style.transition='opacity 0.18s'; box.style.opacity='0'; setTimeout(() => { if(box) box.style.display='none'; }, 200); }
+}
+
+// ─── Raycasting ────────────────────────────────────────────────
+function setupRaycasting() {
+  const ray = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+
+  function doRaycast(clientX, clientY) {
+    if (document.fullscreenElement) {
+      closeVillaPanel();
+      closeFloorPanel();
+      clearTargetAnim();
+    }
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+    ray.setFromCamera(mouse, camera);
+    const hits = ray.intersectObjects(interactables, true);
+    if (hits.length > 0 && hits[0].object.userData.title) {
+      const ud = hits[0].object.userData;
+      showZoneInfo(ud);
+      if (document.fullscreenElement) {
+        spawnTargetAnim(clientX, clientY, ud.title, ud.type);
+      } else {
+        clearTargetAnim();
+      }
+    } else {
+      document.getElementById('flat-placeholder').classList.remove('hidden');
+      document.getElementById('flat-details').classList.add('hidden');
+      clearTargetAnim();
+    }
+  }
+
+  // Desktop click
+  renderer.domElement.addEventListener('click', e => doRaycast(e.clientX, e.clientY));
+
+  // Mobile tap — OrbitControls intercepts touch so click doesn't fire reliably
+  let _touchStartX = 0, _touchStartY = 0, _touchStartT = 0;
+  renderer.domElement.addEventListener('touchstart', e => {
+    _touchStartX = e.touches[0].clientX;
+    _touchStartY = e.touches[0].clientY;
+    _touchStartT = Date.now();
+  }, { passive: true });
+  renderer.domElement.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - _touchStartX;
+    const dy = e.changedTouches[0].clientY - _touchStartY;
+    const dt = Date.now() - _touchStartT;
+    // Only treat as tap if finger barely moved (<12px) and lifted quickly (<300ms)
+    if (Math.abs(dx) < 12 && Math.abs(dy) < 12 && dt < 300) {
+      doRaycast(_touchStartX, _touchStartY);
+    }
+  }, { passive: true });
+}
+
+function showZoneInfo(data) {
+  document.getElementById('flat-placeholder').classList.add('hidden');
+  const details = document.getElementById('flat-details');
+  details.classList.remove('hidden');
+  document.getElementById('detail-zone-title').textContent = data.title;
+  document.getElementById('detail-zone-desc').textContent = data.desc;
+  const icon = document.getElementById('zone-icon');
+  icon.className = 'fas ' + (zoneIcons[data.type] || 'fa-map-marker-alt') + ' text-gold-500/70 text-sm';
+  const tags = { villa:'Residential', clubhouse:'Amenity', pool:'Recreation', lawn:'Sports', kids:'Leisure', entry:'Infrastructure', water:'Landscape', plaza:'Leisure', mound:'Landscape', phase3:'Phase 3', hospital:'Healthcare', school:'Education', institute:'Education', heritage:'Heritage', nature:'Nature Reserve', junction:'Transport Hub', bypass:'Transport', direction:'Navigation', metro:'Metro Station', mall:'Retail' };
+  document.getElementById('zone-tag').textContent = tags[data.type] || '';
+  const villaExtra = document.getElementById('villa-extra-info');
+  if (data.type === 'villa' && data.villaNum) {
+    villaExtra.classList.remove('hidden');
+    var bNum2 = PLOT_TO_BROCHURE[data.villaNum];
+    var typeNum2 = bNum2 ? getVillaType(bNum2) : 1;
+    var isUndef2 = (typeNum2 === null);
+    var areas3 = (!isUndef2 && typeNum2) ? (VILLA_TYPE_AREAS[typeNum2] || null) : null;
+    var configStr = isUndef2 ? '—' : ((typeNum2 === 3 || typeNum2 === 4) ? '3.5 BHK' : '4 BHK');
+    var priceStr  = (typeNum2 && VILLA_TYPE_PRICES[typeNum2]) ? VILLA_TYPE_PRICES[typeNum2] : '—';
+    document.getElementById('vei-buildup').textContent = areas3 ? (areas3.buildup !== '—' ? areas3.buildup + ' sq.ft' : '—') : '—';
+    document.getElementById('vei-terrace').textContent = areas3 ? (areas3.terrace !== '—' ? areas3.terrace + ' sq.ft' : '—') : '—';
+    document.getElementById('vei-total').textContent   = areas3 ? (areas3.total   !== '—' ? areas3.total   + ' sq.ft' : '—') : '—';
+    document.getElementById('stat-val-1').textContent = isUndef2 ? '—' : 'Type ' + typeNum2;
+    document.getElementById('stat-lbl-1').textContent = 'Villa Type';
+    document.getElementById('stat-val-2').textContent = 'G+2';
+    document.getElementById('stat-lbl-2').textContent = 'Floors';
+    document.getElementById('stat-val-3').textContent = configStr;
+    document.getElementById('stat-lbl-3').textContent = 'Config';
+    document.getElementById('stat-val-4').textContent = priceStr;
+    document.getElementById('stat-lbl-4').textContent = 'Starting Price';
+  } else {
+    villaExtra.classList.add('hidden');
+    // Restore default project stats
+    document.getElementById('stat-val-1').textContent = '121';
+    document.getElementById('stat-lbl-1').textContent = 'Villa Units';
+    document.getElementById('stat-val-2').textContent = '8.1';
+    document.getElementById('stat-lbl-2').textContent = 'Acres';
+    document.getElementById('stat-val-3').textContent = 'G+2';
+    document.getElementById('stat-lbl-3').textContent = 'Villa Floors';
+    document.getElementById('stat-val-4').textContent = "Oct '29";
+    document.getElementById('stat-lbl-4').textContent = 'Possession';
+  }
+  if (data.type === 'villa' && data.villaNum && document.fullscreenElement) openVillaPanel(data.villaNum);
+  // On mobile (no lg breakpoint = info panel is below canvas), scroll it into view
+  if (window.innerWidth < 1024) {
+    var infoPanel = document.querySelector('.lg\\:sticky');
+    if (infoPanel) setTimeout(function(){ infoPanel.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 150);
+  }
+}
+
+// --------- Villa Jarvis Panel -------------------------------------------------------------------------------
+var _activeFloor = 0, _activeFloorName = 'GROUND FLOOR';
+const _floorFiles = [
+  { video:'/static/videos/floor_ground.mp4', layout:'/static/images/layout_ground.png', label:'GROUND FLOOR · WALKTHROUGH' },
+  { video:'/static/videos/floor_1st.mp4',    layout:'/static/images/layout_1st.png',    label:'1ST FLOOR · WALKTHROUGH' },
+  { video:'/static/videos/floor_2nd.mp4',    layout:'/static/images/layout_2nd.png',    label:'2ND FLOOR · WALKTHROUGH' },
+];
+
+var _villaPanelTimer = null;
+function _startVillaTimer() {
+  clearTimeout(_villaPanelTimer);
+  _villaPanelTimer = setTimeout(function(){ closeVillaPanel(); }, 4000);
+}
+function _pauseVillaTimer() { clearTimeout(_villaPanelTimer); }
+
+function openVillaPanel(villaNum) {
+  var bNum = PLOT_TO_BROCHURE[villaNum];
+  var titleStr = bNum ? 'VILLA PLOT  ·  #' + String(bNum).padStart(3,'0') : 'VILLA PLOT  ·  #' + String(villaNum).padStart(3,'0');
+  document.getElementById('vjp-title').textContent = titleStr;
+  var typeNum = bNum ? getVillaType(bNum) : 1;
+  var isUndefined = (typeNum === null);
+  document.getElementById('vjp-type').textContent    = isUndefined ? '—' : 'VILLA TYPE ' + typeNum;
+  document.getElementById('vjp-config').textContent  = isUndefined ? '—' : ((typeNum === 3 || typeNum === 4) ? '3.5 BHK' : '4 BHK');
+  var areas = typeNum ? (VILLA_TYPE_AREAS[typeNum] || null) : null;
+  document.getElementById('vjp-buildup').textContent      = areas ? (areas.buildup !== '—' ? areas.buildup + ' SQ.FT' : '—') : '—';
+  document.getElementById('vjp-terrace').textContent      = areas ? (areas.terrace !== '—' ? areas.terrace + ' SQ.FT' : '—') : '—';
+  document.getElementById('vjp-superbuildup').textContent = areas ? (areas.total   !== '—' ? areas.total   + ' SQ.FT' : '—') : '—';
+  var price = (typeNum && VILLA_TYPE_PRICES[typeNum]) ? VILLA_TYPE_PRICES[typeNum] : '—';
+  document.getElementById('vjp-price').textContent = price;
+  document.getElementById('villa-jarvis-panel').style.display = 'block';
+  document.getElementById('floor-jarvis-panel').style.display = 'none';
+  _activeFloor = -1;
+  document.querySelectorAll('.vjp-floor-btn').forEach(function(b){
+    b.style.background = 'rgba(0,212,255,0.07)';
+    b.style.borderColor = 'rgba(0,212,255,0.28)';
+  });
+  closeMediaModal();
+  _startVillaTimer();
+}
+
+// Pause timer on hover, restart on leave
+(function(){
+  function addHoverGuard(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('mouseenter', _pauseVillaTimer);
+    el.addEventListener('mouseleave', _startVillaTimer);
+    el.addEventListener('touchstart', _pauseVillaTimer);
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    addHoverGuard('villa-jarvis-panel');
+    addHoverGuard('floor-jarvis-panel');
+    addHoverGuard('media-jarvis-modal');
+  });
+})();
+
+function closeVillaPanel() {
+  document.getElementById('villa-jarvis-panel').style.display = 'none';
+  document.getElementById('floor-jarvis-panel').style.display = 'none';
+  closeMediaModal();
+}
+
+function selectFloor(idx, name) {
+  _activeFloor = idx;
+  _activeFloorName = name;
+  document.getElementById('fjp-floor-name').textContent = name;
+  var fp = document.getElementById('floor-jarvis-panel');
+  fp.style.display = 'block';
+  if (window.innerWidth < 640) {
+    var vp = document.getElementById('villa-jarvis-panel');
+    fp.style.setProperty('bottom', (vp.offsetHeight + 16) + 'px', 'important');
+    fp.style.setProperty('top', 'auto', 'important');
+  }
+  // Highlight active floor button
+  document.querySelectorAll('.vjp-floor-btn').forEach(function(b,i){
+    b.style.background = i===idx ? 'rgba(0,212,255,0.22)' : 'rgba(0,212,255,0.07)';
+    b.style.borderColor = i===idx ? 'rgba(0,212,255,0.7)' : 'rgba(0,212,255,0.28)';
+  });
+}
+
+function closeFloorPanel() {
+  document.getElementById('floor-jarvis-panel').style.display = 'none';
+}
+
+function openFloorVisit() {
+  var f = _floorFiles[_activeFloor];
+  document.getElementById('media-modal-title').textContent = f.label;
+  var vid = document.getElementById('media-video');
+  var img = document.getElementById('media-image');
+  var ph  = document.getElementById('media-placeholder');
+  vid.style.display='block'; img.style.display='none'; ph.style.display='none';
+  vid.src = f.video;
+  vid.onerror = function(){ vid.style.display='none'; ph.style.display='flex'; };
+  document.getElementById('media-jarvis-modal').style.display = 'flex';
+  _hideCanvasUI();
+}
+
+function openFloorLayout() {
+  var f = _floorFiles[_activeFloor];
+  document.getElementById('media-modal-title').textContent = _activeFloorName + '  ·  FLOOR PLAN';
+  var vid = document.getElementById('media-video');
+  var img = document.getElementById('media-image');
+  var ph  = document.getElementById('media-placeholder');
+  vid.style.display='none'; img.style.display='block'; ph.style.display='none';
+  img.src = f.layout;
+  img.onerror = function(){ img.style.display='none'; ph.style.display='flex'; };
+  document.getElementById('media-jarvis-modal').style.display = 'flex';
+  _hideCanvasUI();
+}
+
+var _savedVpDisplay = 'none';
+var _savedFpDisplay = 'none';
+function _hideCanvasUI() {
+  var b = document.getElementById('canvas-ctrl-btns');
+  var c = document.getElementById('canvas-compass');
+  var vp = document.getElementById('villa-jarvis-panel');
+  var fp = document.getElementById('floor-jarvis-panel');
+  if (b) b.style.display = 'none';
+  if (c) c.style.display = 'none';
+  if (vp) { _savedVpDisplay = vp.style.display || 'none'; vp.style.display = 'none'; }
+  if (fp) { _savedFpDisplay = fp.style.display || 'none'; fp.style.display = 'none'; }
+}
+function _showCanvasUI() {
+  var b = document.getElementById('canvas-ctrl-btns');
+  var c = document.getElementById('canvas-compass');
+  var vp = document.getElementById('villa-jarvis-panel');
+  var fp = document.getElementById('floor-jarvis-panel');
+  if (b) b.style.display = '';
+  if (c) c.style.display = '';
+  if (vp) vp.style.display = _savedVpDisplay;
+  if (fp) fp.style.display = _savedFpDisplay;
+}
+
+function closeMediaModal() {
+  var vid = document.getElementById('media-video');
+  if (vid) { vid.pause(); vid.src=''; }
+  var m = document.getElementById('media-jarvis-modal');
+  if (!m) return;
+  var wasOpen = (m.style.display === 'flex');
+  m.style.display = 'none';
+  if (wasOpen) _showCanvasUI();
+}
+
+// ─── Controls ──────────────────────────────────────────────────
+function toggleAutoRot() {
+  controls.autoRotate = !controls.autoRotate;
+  const btn = document.getElementById('autoRotBtn');
+  btn.style.background = controls.autoRotate ? 'rgba(201,168,76,0.25)' : 'rgba(0,0,0,0.4)';
+  btn.style.color = controls.autoRotate ? '#c9a84c' : 'rgba(255,255,255,0.7)';
+}
+window.toggleAutoRot = toggleAutoRot;
+
+function resetCamera() {
+  camera.position.set(12, 135, 115);
+  controls.target.set(12, 0, 8);
+  controls.update();
+}
+window.resetCamera = resetCamera;
+
+// Track manual (CSS) fullscreen for browsers without Fullscreen API (iOS Safari)
+var _manualFS = false;
+
+function _enterManualFS(c, btn) {
+  _manualFS = true;
+  c.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;z-index:9999;border-radius:0;';
+  document.body.style.overflow = 'hidden';
+  btn.innerHTML = '<i class="fas fa-compress text-xs"></i>';
+  setTimeout(() => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight, false);
+  }, 80);
+}
+
+function _exitManualFS(c, btn) {
+  _manualFS = false;
+  c.style.cssText = '';
+  document.body.style.overflow = '';
+  btn.innerHTML = '<i class="fas fa-expand text-xs"></i>';
+  closeVillaPanel(); closeFloorPanel(); clearTargetAnim();
+  setTimeout(() => {
+    camera.aspect = c.clientWidth / c.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(c.clientWidth, c.clientHeight, false);
+  }, 80);
+}
+
+function toggleFullscreen() {
+  const c = document.getElementById('blueprint-canvas');
+  const btn = document.getElementById('btn-fullscreen');
+  // Exit manual FS
+  if (_manualFS) { _exitManualFS(c, btn); return; }
+  // Exit native FS
+  if (document.fullscreenElement || document.webkitFullscreenElement) {
+    (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    return;
+  }
+  // Try native FS (Android Chrome, desktop)
+  const req = c.requestFullscreen || c.webkitRequestFullscreen;
+  if (req) {
+    req.call(c).then(() => {
+      btn.innerHTML = '<i class="fas fa-compress text-xs"></i>';
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight, false);
+    }).catch(() => _enterManualFS(c, btn)); // fallback on rejection
+  } else {
+    // iOS Safari: no Fullscreen API — use CSS fullscreen
+    _enterManualFS(c, btn);
+  }
+}
+
+// Also allow pressing Escape to exit manual FS
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && _manualFS) { const c = document.getElementById('blueprint-canvas'); const btn = document.getElementById('btn-fullscreen'); _exitManualFS(c, btn); } });
+
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+    closeVillaPanel();
+    closeFloorPanel();
+    clearTargetAnim();
+    if (!document.getElementById('plots-overlay').classList.contains('hidden')) return;
+    const btn = document.getElementById('btn-fullscreen');
+    if (btn) btn.innerHTML = '<i class="fas fa-expand text-xs"></i>';
+    const c = document.getElementById('blueprint-canvas');
+    c.style.height = '';
+    setTimeout(() => {
+      camera.aspect = c.clientWidth / c.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(c.clientWidth, c.clientHeight, false);
+    }, 100);
+  }
+});
+
+// ─── Compass ───────────────────────────────────────────────────
+function updateCompass() {
+  const el = document.getElementById('compass-svg');
+  if (el && controls) {
+    const angle = controls.getAzimuthalAngle() * (180 / Math.PI);
+    el.style.transform = `rotate(${angle}deg)`;
+  }
+}
+
+// ─── Animate ───────────────────────────────────────────────────
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+  updateCompass();
+}
+
+function onResize() {
+  const c = document.getElementById('blueprint-canvas');
+  camera.aspect = c.clientWidth / c.clientHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(c.clientWidth, c.clientHeight, false);
+}
+
+document.readyState === 'loading'
+  ? document.addEventListener('DOMContentLoaded', () => { init(); setTimeout(onResize, 200); })
+  : (init(), setTimeout(onResize, 200));
+</script>
+
+<!-- =====================================================================
+     VR WALKTHROUGH FULLSCREEN OVERLAY — COMMENTED OUT FOR FUTURE USE
+     To re-enable: remove the outer comment block below and the closing
+     comment before endblock
+     ===================================================================== -->
+<!--VR_BLOCK_START
+
+<!-- ── PLOT METRICS FULL-SCREEN OVERLAY ── -->
+<div id="plots-overlay" class="hidden fixed inset-0 z-[9998]" style="top:0;left:0;width:100%;height:100%;background:#000">
+  <iframe id="plots-iframe" src="about:blank" style="width:100%;height:100%;border:none;display:block"></iframe>
+</div>
+
+<div id="vr-overlay" class="hidden fixed inset-0 z-[9999]" style="display:none!important;background:#0a1208">
+
+  <!-- Close (X) button — bottom-left corner -->
+  <button onclick="closeVR()" id="vr-close-btn"
+    class="absolute bottom-5 left-5 z-[100] flex items-center gap-2 px-4 py-2 rounded-xl transition-all text-xs font-semibold tracking-widest uppercase"
+    style="background:rgba(0,0,0,0.45);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.45)">
+    <i class="fas fa-sign-out-alt text-xs"></i> Exit
+  </button>
+
+  <!-- Entry blocker -->
+  <div id="vr-blocker" class="absolute inset-0 z-50 flex flex-col items-center justify-center select-none"
+       style="background:linear-gradient(135deg,rgba(10,14,8,0.97) 0%,rgba(18,14,6,0.97) 100%);backdrop-filter:blur(20px)">
+
+    <!-- Decorative top lines -->
+    <div class="absolute top-0 left-0 right-0 h-px" style="background:linear-gradient(90deg,transparent,rgba(201,168,76,0.35),transparent)"></div>
+    <div class="absolute top-0 left-1/2 w-px h-16" style="background:linear-gradient(180deg,rgba(201,168,76,0.4),transparent);transform:translateX(-50%)"></div>
+
+    <!-- Icon -->
+    <div class="relative mb-8">
+      <div class="w-24 h-24 rounded-full flex items-center justify-center" style="background:radial-gradient(circle,rgba(201,168,76,0.12) 0%,rgba(201,168,76,0.03) 100%);border:1px solid rgba(201,168,76,0.25);animation:vrPulse 2.5s ease-in-out infinite">
+        <svg viewBox="0 0 64 64" class="w-12 h-12" fill="none" stroke="#c9a84c" stroke-width="1.8">
+          <rect x="6" y="20" width="52" height="26" rx="8"/>
+          <circle cx="22" cy="33" r="7" fill="rgba(201,168,76,0.10)"/>
+          <circle cx="42" cy="33" r="7" fill="rgba(201,168,76,0.10)"/>
+          <line x1="29" y1="33" x2="35" y2="33"/>
+          <path d="M2 28 Q6 20 6 20" stroke-width="1.5"/>
+          <path d="M62 28 Q58 20 58 20" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <div class="absolute inset-0 rounded-full" style="border:1px solid rgba(201,168,76,0.12);animation:vrPing 2.5s ease-in-out infinite;transform:scale(1.3)"></div>
+    </div>
+
+    <!-- Badge label -->
+    <p class="text-[10px] font-semibold tracking-[0.35em] uppercase mb-4" style="color:rgba(201,168,76,0.6)">Immersive Experience</p>
+
+    <!-- Title -->
+    <h2 class="font-display text-5xl font-bold mb-3 text-center" style="color:#f5f0e8;letter-spacing:-0.01em">Enter Silverwoods</h2>
+
+    <!-- Decorative divider -->
+    <div class="flex items-center gap-3 mb-4" style="width:220px">
+      <div class="flex-1 h-px" style="background:linear-gradient(90deg,transparent,rgba(201,168,76,0.4))"></div>
+      <div class="w-1 h-1 rounded-full" style="background:#c9a84c;opacity:0.6"></div>
+      <div class="flex-1 h-px" style="background:linear-gradient(90deg,rgba(201,168,76,0.4),transparent)"></div>
+    </div>
+
+    <p class="text-sm mb-10 text-center" style="color:rgba(245,240,232,0.35);letter-spacing:0.04em">First-person walkthrough · Starting from the main entry gate</p>
+
+    <!-- Controls grid -->
+    <div class="grid grid-cols-4 gap-3 mb-10" style="width:340px">
+      <div class="flex flex-col items-center gap-2 py-3 px-2 rounded-lg" style="background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.12)">
+        <div class="flex gap-1">
+          <kbd class="w-6 h-6 flex items-center justify-center rounded font-mono text-[9px]" style="background:rgba(245,240,232,0.07);border:1px solid rgba(245,240,232,0.15);color:#c9a84c">W</kbd>
+        </div>
+        <div class="flex gap-1">
+          <kbd class="w-6 h-6 flex items-center justify-center rounded font-mono text-[9px]" style="background:rgba(245,240,232,0.07);border:1px solid rgba(245,240,232,0.15);color:#c9a84c">A</kbd>
+          <kbd class="w-6 h-6 flex items-center justify-center rounded font-mono text-[9px]" style="background:rgba(245,240,232,0.07);border:1px solid rgba(245,240,232,0.15);color:#c9a84c">S</kbd>
+          <kbd class="w-6 h-6 flex items-center justify-center rounded font-mono text-[9px]" style="background:rgba(245,240,232,0.07);border:1px solid rgba(245,240,232,0.15);color:#c9a84c">D</kbd>
+        </div>
+        <span class="text-[9px] tracking-[0.2em] uppercase" style="color:rgba(245,240,232,0.35)">Move</span>
+      </div>
+      <div class="flex flex-col items-center justify-center gap-2 py-3 px-2 rounded-lg" style="background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.12)">
+        <i class="fas fa-mouse text-lg" style="color:#c9a84c;opacity:0.8"></i>
+        <span class="text-[9px] tracking-[0.2em] uppercase text-center" style="color:rgba(245,240,232,0.35)">Look</span>
+      </div>
+      <div class="flex flex-col items-center justify-center gap-2 py-3 px-2 rounded-lg" style="background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.12)">
+        <kbd class="px-2 h-6 flex items-center justify-center rounded font-mono text-[9px]" style="background:rgba(245,240,232,0.07);border:1px solid rgba(245,240,232,0.15);color:#c9a84c">Shift</kbd>
+        <span class="text-[9px] tracking-[0.2em] uppercase" style="color:rgba(245,240,232,0.35)">Run</span>
+      </div>
+      <div class="flex flex-col items-center justify-center gap-2 py-3 px-2 rounded-lg" style="background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.12)">
+        <kbd class="px-2 h-6 flex items-center justify-center rounded font-mono text-[9px]" style="background:rgba(245,240,232,0.07);border:1px solid rgba(245,240,232,0.15);color:#c9a84c">Esc</kbd>
+        <span class="text-[9px] tracking-[0.2em] uppercase" style="color:rgba(245,240,232,0.35)">Pause</span>
+      </div>
+    </div>
+
+    <!-- CTA Button -->
+    <button id="vr-enter-btn"
+      class="group relative px-12 py-4 text-[11px] tracking-[0.3em] uppercase font-semibold transition-all duration-300 overflow-hidden"
+      style="background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.4);color:#c9a84c;letter-spacing:0.3em">
+      <span class="relative z-10 flex items-center gap-3">
+        <i class="fas fa-play text-[8px]"></i>
+        Start Walkthrough
+      </span>
+      <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background:rgba(201,168,76,0.18)"></div>
+    </button>
+
+    <!-- Decorative bottom lines -->
+    <div class="absolute bottom-0 left-0 right-0 h-px" style="background:linear-gradient(90deg,transparent,rgba(201,168,76,0.2),transparent)"></div>
+  </div>
+
+  <!-- Pause overlay (on ESC) -->
+  <div id="vr-pauser" class="absolute inset-0 z-40 hidden items-center justify-center flex-col"
+       style="background:linear-gradient(135deg,rgba(10,14,8,0.88) 0%,rgba(18,14,6,0.88) 100%);backdrop-filter:blur(18px)">
+
+    <!-- Decorative top line -->
+    <div class="absolute top-0 left-0 right-0 h-px" style="background:linear-gradient(90deg,transparent,rgba(201,168,76,0.3),transparent)"></div>
+
+    <!-- Badge -->
+    <p class="text-[9px] font-semibold tracking-[0.35em] uppercase mb-5" style="color:rgba(201,168,76,0.5)">Session Paused</p>
+
+    <h2 class="font-display text-4xl font-bold mb-3" style="color:#f5f0e8;letter-spacing:-0.01em">Paused</h2>
+
+    <!-- Divider -->
+    <div class="flex items-center gap-3 mb-3" style="width:160px">
+      <div class="flex-1 h-px" style="background:linear-gradient(90deg,transparent,rgba(201,168,76,0.4))"></div>
+      <div class="w-1 h-1 rounded-full" style="background:#c9a84c;opacity:0.6"></div>
+      <div class="flex-1 h-px" style="background:linear-gradient(90deg,rgba(201,168,76,0.4),transparent)"></div>
+    </div>
+
+    <p class="text-xs mb-8 tracking-[0.15em]" style="color:rgba(245,240,232,0.3)">Click anywhere to resume</p>
+
+    <!-- Controls grid -->
+    <div class="grid grid-cols-2 gap-3 mb-8" style="width:260px">
+      <div class="rounded-lg p-4 text-center" style="background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.12)">
+        <div class="font-mono text-sm font-bold mb-1.5" style="color:#c9a84c">W A S D</div>
+        <div class="text-[9px] tracking-[0.2em] uppercase" style="color:rgba(245,240,232,0.35)">Move</div>
+      </div>
+      <div class="rounded-lg p-4 text-center" style="background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.12)">
+        <div class="text-lg mb-1.5" style="color:#c9a84c"><i class="fas fa-mouse"></i></div>
+        <div class="text-[9px] tracking-[0.2em] uppercase" style="color:rgba(245,240,232,0.35)">Look Around</div>
+      </div>
+      <div class="rounded-lg p-4 text-center" style="background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.12)">
+        <div class="font-mono text-sm font-bold mb-1.5" style="color:#c9a84c">Shift</div>
+        <div class="text-[9px] tracking-[0.2em] uppercase" style="color:rgba(245,240,232,0.35)">Sprint</div>
+      </div>
+      <div class="rounded-lg p-4 text-center" style="background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.12)">
+        <div class="font-mono text-sm font-bold mb-1.5" style="color:#c9a84c">Esc</div>
+        <div class="text-[9px] tracking-[0.2em] uppercase" style="color:rgba(245,240,232,0.35)">Pause</div>
+      </div>
+    </div>
+
+    <!-- Exit button -->
+    <button onclick="closeVR()" class="group relative px-8 py-3 text-[10px] tracking-[0.3em] uppercase font-semibold transition-all duration-300 overflow-hidden"
+      style="background:transparent;border:1px solid rgba(245,240,232,0.12);color:rgba(245,240,232,0.35)">
+      <span class="relative z-10 flex items-center gap-2.5">
+        <i class="fas fa-times text-[9px]"></i>
+        Exit Walkthrough
+      </span>
+      <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background:rgba(245,240,232,0.04)"></div>
+    </button>
+
+    <!-- Decorative bottom line -->
+    <div class="absolute bottom-0 left-0 right-0 h-px" style="background:linear-gradient(90deg,transparent,rgba(201,168,76,0.2),transparent)"></div>
+  </div>
+
+  <!-- Crosshair -->
+  <div id="vr-crosshair" class="hidden absolute inset-0 z-30 pointer-events-none flex items-center justify-center">
+    <div class="relative w-5 h-5">
+      <div class="absolute top-1/2 left-0 right-0 h-px" style="background:rgba(255,255,255,0.6)"></div>
+      <div class="absolute left-1/2 top-0 bottom-0 w-px" style="background:rgba(255,255,255,0.6)"></div>
+      <div class="absolute top-1/2 left-1/2 w-1.5 h-1.5 rounded-full border" style="border-color:rgba(255,255,255,0.55);transform:translate(-50%,-50%)"></div>
+    </div>
+  </div>
+
+  <!-- Zone HUD -->
+  <div id="vr-zone-hud" class="hidden absolute bottom-6 left-1/2 z-30 pointer-events-none" style="transform:translateX(-50%)">
+    <div class="rounded-xl px-5 py-2.5 text-center" style="background:rgba(0,0,0,0.55);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1)">
+      <div id="vr-zone-name" class="font-display text-sm font-semibold" style="color:#f5f0e8"></div>
+      <div id="vr-zone-desc" class="text-[9px] tracking-widest uppercase mt-0.5" style="color:rgba(201,168,76,0.7)"></div>
+    </div>
+  </div>
+
+  <!-- Minimap -->
+  <div id="vr-minimap-wrap" class="hidden absolute top-4 right-4 z-30 overflow-hidden" style="width:140px;height:140px;border-radius:50%;background:rgba(0,0,0,0.55);backdrop-filter:blur(10px);border:2px solid rgba(201,168,76,0.3);box-shadow:0 0 0 1px rgba(255,255,255,0.05),0 4px 24px rgba(0,0,0,0.4)">
+    <canvas id="vr-minimap" width="140" height="140" style="border-radius:50%"></canvas>
+    <div class="absolute bottom-3 left-0 right-0 text-center text-[7px] tracking-[0.2em] uppercase font-semibold" style="color:rgba(201,168,76,0.5)">MAP</div>
+  </div>
+
+  <!-- Speed HUD -->
+  <div id="vr-speed-hud" class="hidden absolute top-4 left-4 z-30 rounded-xl px-3 py-1.5 text-[10px] tracking-widest font-semibold uppercase" style="background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.07);color:rgba(255,255,255,0.4)">
+    <span id="vr-speed-mode">WALK</span>
+  </div>
+
+  <!-- Three.js canvas for VR -->
+  <div id="vr-canvas-inner" class="absolute inset-0 z-10"></div>
+</div>
+
+<style>
+@keyframes vrPulse { 0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,0.1)}50%{box-shadow:0 0 0 16px rgba(201,168,76,0)} }
+@keyframes ping { 0%{transform:scale(1);opacity:0.5}100%{transform:scale(1.55);opacity:0} }
+
+/* Blueprint control buttons — gold hover on desktop only */
+.ctrl-btn { outline: none; color: rgba(255,255,255,0.55); }
+.ctrl-btn:focus { outline: none; box-shadow: none; }
+@media (hover: hover) {
+  .ctrl-btn:hover {
+    background: rgba(201,168,76,0.18) !important;
+    border-color: rgba(201,168,76,0.4) !important;
+    color: #c9a84c !important;
+  }
+  .ctrl-btn:active {
+    background: rgba(201,168,76,0.28) !important;
+    border-color: rgba(201,168,76,0.55) !important;
+  }
+}
+</style>
+
+<!-- VR only: <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.min.js"></script> -->
+<script>
+/* VR_JS_START — commented out for future use
+// =====================================================================
+// VR WALKTHROUGH - embedded fullscreen overlay
+// =====================================================================
+var vrScene, vrCamera, vrRenderer, vrControls;
+var vrWantsFullscreen = false;
+var vrInited = false;
+var vrIsLocked = false;
+var vrMoveF=false, vrMoveB=false, vrMoveL=false, vrMoveR=false, vrRunning=false;
+var vrVelocity = null, vrDirection = null;
+var vrPrevTime = 0;
+var vrZones = [];
+var vrHudTimeout = null;
+
+function openVR() {
+  function showOverlay() {
+    var overlay = document.getElementById('vr-overlay');
+    overlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    if (!vrInited) { vrInit(); vrInited = true; }
+    // Do NOT request fullscreen here - wait for user to click "Start"
+  }
+  if (document.fullscreenElement) {
+    document.exitFullscreen().then(showOverlay);
+  } else {
+    showOverlay();
+  }
+}
+window.openVR = openVR;
+VR_JS_END */
+
+function openVR() {} // stub — re-enable VR logic above to restore
+function closeVR() {} // stub
+
+function openPlots() {
+  var el = document.getElementById('plots-overlay');
+  document.body.style.overflow = 'hidden';
+  // Show overlay immediately (black background covers the flash)
+  el.classList.remove('hidden');
+  document.getElementById('plots-iframe').src = '/plots/';
+  function enterFs() {
+    var de = document.documentElement;
+    if (!document.fullscreenElement) {
+      if (de.requestFullscreen) de.requestFullscreen().catch(function(){});
+      else if (de.webkitRequestFullscreen) de.webkitRequestFullscreen();
+    }
+  }
+  if (document.fullscreenElement && document.fullscreenElement !== document.documentElement) {
+    document.exitFullscreen().then(enterFs).catch(enterFs);
+  } else {
+    enterFs();
+  }
+}
+window.openPlots = openPlots;
+function closePlots() {
+  document.getElementById('plots-overlay').classList.add('hidden');
+  document.body.style.overflow = '';
+  document.getElementById('plots-iframe').src = 'about:blank';
+}
+window.closePlots = closePlots;
+
+// Auto-open Plot Metrics if navigated via #plots hash
+if (window.location.hash === '#plots') {
+  window.addEventListener('load', function() {
+    setTimeout(openPlots, 600);
+  });
+}
+function switchTo3D() {
+  closePlots();
+  var wrapper = document.getElementById('blueprint-canvas').parentElement;
+  function enterBlueprintFs() {
+    wrapper.requestFullscreen().then(function(){
+      var c = document.getElementById('blueprint-canvas');
+      c.style.height = '100vh';
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      var btn = document.getElementById('btn-fullscreen');
+      if (btn) btn.innerHTML = '<i class="fas fa-compress text-xs"></i>';
+    }).catch(function(){});
+  }
+  if (document.fullscreenElement) {
+    document.exitFullscreen().then(enterBlueprintFs).catch(enterBlueprintFs);
+  } else {
+    enterBlueprintFs();
+  }
+}
+window.switchTo3D = switchTo3D;
+
+/* VR_CLOSEANDWORLD_START — commented out for future use
+function closeVR() {
+  if (vrControls && vrIsLocked) vrControls.unlock();
+  document.getElementById('vr-overlay').classList.add('hidden');
+  document.getElementById('vr-blocker').style.display = 'flex';
+  document.getElementById('vr-pauser').classList.add('hidden');
+  document.getElementById('vr-pauser').classList.remove('flex');
+  document.getElementById('vr-crosshair').classList.add('hidden');
+  document.getElementById('vr-minimap-wrap').classList.add('hidden');
+  document.getElementById('vr-speed-hud').classList.add('hidden');
+  document.getElementById('vr-zone-hud').classList.add('hidden');
+  document.body.style.overflow = '';
+  if (document.fullscreenElement) document.exitFullscreen();
+}
+window.closeVR = closeVR;
+
+document.addEventListener('fullscreenchange', function() {
+  var overlay = document.getElementById('vr-overlay');
+
+  // If VR wants fullscreen and nothing is fullscreen now, re-request on the overlay.
+  // This handles the blueprint-fullscreen → VR-fullscreen transition.
+  if (vrWantsFullscreen && !document.fullscreenElement && overlay && !overlay.classList.contains('hidden')) {
+    vrWantsFullscreen = false;
+    if (overlay.requestFullscreen) overlay.requestFullscreen();
+    else if (overlay.webkitRequestFullscreen) overlay.webkitRequestFullscreen();
+    return;
+  }
+  vrWantsFullscreen = false;
+
+  // Update blueprint fullscreen button icon when fullscreen exits
+  var btn = document.getElementById('btn-fullscreen');
+  if (btn && !document.fullscreenElement) {
+    var icon = btn.querySelector('i');
+    if (icon) { icon.classList.remove('fa-compress'); icon.classList.add('fa-expand'); }
+  }
+});
+
+function vrInit() {
+  var container = document.getElementById('vr-canvas-inner');
+  var W = container.clientWidth, H = container.clientHeight;
+
+  vrRenderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+  vrRenderer.setSize(W, H);
+  vrRenderer.setPixelRatio(window.devicePixelRatio);
+  vrRenderer.shadowMap.enabled = true;
+  vrRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  vrRenderer.shadowMap.autoUpdate = true;
+  vrRenderer.physicallyCorrectLights = true;
+  vrRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+  vrRenderer.toneMappingExposure = 1.1;
+  container.appendChild(vrRenderer.domElement);
+
+  vrScene = new THREE.Scene();
+  vrScene.background = new THREE.Color(0x90c8ec);
+  vrScene.fog = new THREE.Fog(0x90c8ec, 70, 300);
+
+  vrCamera = new THREE.PerspectiveCamera(70, W / H, 0.1, 500);
+
+  vrVelocity  = new THREE.Vector3();
+  vrDirection = new THREE.Vector3();
+
+  vrControls = new THREE.PointerLockControls(vrCamera, vrRenderer.domElement);
+  vrScene.add(vrControls.getObject());
+
+  // Camera spawns outside the gate on the approach road, looking toward the gate
+  vrControls.getObject().position.set(110, 1.7, -18);
+  vrControls.getObject().rotation.y = -Math.PI / 2;
+
+  var blocker  = document.getElementById('vr-blocker');
+  var pauser   = document.getElementById('vr-pauser');
+  var crosshair= document.getElementById('vr-crosshair');
+  var minimap  = document.getElementById('vr-minimap-wrap');
+  var speedHud = document.getElementById('vr-speed-hud');
+
+  document.getElementById('vr-enter-btn').addEventListener('click', function() {
+    // Request fullscreen + pointer lock from the same user gesture
+    var overlay = document.getElementById('vr-overlay');
+    var doLock = function() { vrControls.lock(); };
+    if (!document.fullscreenElement) {
+      if (overlay.requestFullscreen) {
+        overlay.requestFullscreen().then(doLock).catch(doLock);
+      } else if (overlay.webkitRequestFullscreen) {
+        overlay.webkitRequestFullscreen(); doLock();
+      } else { doLock(); }
+    } else { doLock(); }
+  });
+  pauser.addEventListener('click', function(e) { if (e.target !== pauser && !e.target.closest('button[onclick="closeVR()"]')) vrControls.lock(); });
+
+  vrControls.addEventListener('lock', function() {
+    vrIsLocked = true;
+    blocker.style.display = 'none';
+    pauser.classList.add('hidden'); pauser.classList.remove('flex');
+    crosshair.classList.remove('hidden');
+    minimap.classList.remove('hidden');
+    speedHud.classList.remove('hidden');
+    vrPrevTime = performance.now();
+  });
+  vrControls.addEventListener('unlock', function() {
+    vrIsLocked = false;
+    crosshair.classList.add('hidden');
+    speedHud.classList.add('hidden');
+    // Only show pause if overlay still open
+    if (!document.getElementById('vr-overlay').classList.contains('hidden')) {
+      pauser.classList.remove('hidden'); pauser.classList.add('flex');
+    }
+  });
+
+  // Lighting
+  vrScene.add(new THREE.AmbientLight(0xffeedd, 0.7));
+  var sun = new THREE.DirectionalLight(0xfff5d0, 1.8);
+  sun.position.set(80, 180, 60);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(4096, 4096);
+  sun.shadow.camera.left=-160; sun.shadow.camera.right=160;
+  sun.shadow.camera.top=160;   sun.shadow.camera.bottom=-160;
+  sun.shadow.camera.near=0.5;  sun.shadow.camera.far=600;
+  sun.shadow.bias = -0.0005;
+  vrScene.add(sun);
+  var fill = new THREE.DirectionalLight(0x99aaff, 0.25);
+  fill.position.set(-60, 50, -40); vrScene.add(fill);
+
+  var skyGeo = new THREE.SphereGeometry(480, 16, 8);
+  var skyMat = new THREE.MeshBasicMaterial({ color: 0x90c8ec, side: THREE.BackSide });
+  vrScene.add(new THREE.Mesh(skyGeo, skyMat));
+
+  document.addEventListener('keydown', vrKeyDown);
+  document.addEventListener('keyup', vrKeyUp);
+  window.addEventListener('resize', vrOnResize);
+
+  vrBuildWorld();
+  vrDrawMinimap();
+  vrAnimate();
+}
+
+function vrKeyDown(e) {
+  if (document.getElementById('vr-overlay').classList.contains('hidden')) return;
+  switch(e.code) {
+    case 'ArrowUp':    case 'KeyW': vrMoveF=true; break;
+    case 'ArrowLeft':  case 'KeyA': vrMoveL=true; break;
+    case 'ArrowDown':  case 'KeyS': vrMoveB=true; break;
+    case 'ArrowRight': case 'KeyD': vrMoveR=true; break;
+    case 'ShiftLeft':  case 'ShiftRight': vrRunning=true; break;
+  }
+  var el = document.getElementById('vr-speed-mode');
+  if (el) el.textContent = vrRunning ? 'RUN' : 'WALK';
+}
+function vrKeyUp(e) {
+  switch(e.code) {
+    case 'ArrowUp':    case 'KeyW': vrMoveF=false; break;
+    case 'ArrowLeft':  case 'KeyA': vrMoveL=false; break;
+    case 'ArrowDown':  case 'KeyS': vrMoveB=false; break;
+    case 'ArrowRight': case 'KeyD': vrMoveR=false; break;
+    case 'ShiftLeft':  case 'ShiftRight': vrRunning=false; break;
+  }
+  var el = document.getElementById('vr-speed-mode');
+  if (el) el.textContent = vrRunning ? 'RUN' : 'WALK';
+}
+
+// ---- Scene helpers (all prefixed to avoid collision with blueprint JS) ----
+function vrBox(w,h,d,col,x,y,z) {
+  var m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), new THREE.MeshLambertMaterial({color:col}));
+  m.position.set(x,y+h/2,z); m.castShadow=m.receiveShadow=true; vrScene.add(m); return m;
+}
+var vrFlatSeq=0;
+function vrFlat(w,d,col,x,z,yo) {
+  yo=yo||0;
+  var m=new THREE.Mesh(new THREE.BoxGeometry(w,0.18,d), new THREE.MeshLambertMaterial({color:col}));
+  // Tiny unique elevation per flat so overlapping surfaces never z-fight
+  vrFlatSeq++;
+  m.position.set(x,yo+0.09+vrFlatSeq*0.003,z); m.receiveShadow=true; vrScene.add(m); return m;
+}
+function vrTree(x,z,h,r,col) {
+  h=h||6; r=r||2.2; col=col||0x2d6a3f;
+  var g=new THREE.Group();
+  var tr=new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.35,h*0.4,6), new THREE.MeshLambertMaterial({color:0x5c3a1e}));
+  tr.position.y=h*0.2; tr.castShadow=true; g.add(tr);
+  var cn=new THREE.Mesh(new THREE.SphereGeometry(r,8,6), new THREE.MeshLambertMaterial({color:col}));
+  cn.position.y=h*0.58; cn.castShadow=true; g.add(cn);
+  g.position.set(x,0,z); vrScene.add(g);
+}
+function vrPalm(x,z) {
+  var g=new THREE.Group();
+  var tk=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.28,10,6), new THREE.MeshLambertMaterial({color:0x8a6a3a}));
+  tk.position.y=5; g.add(tk);
+  for(var f=0;f<8;f++){
+    var fr=new THREE.Mesh(new THREE.ConeGeometry(1.8,0.3,5), new THREE.MeshLambertMaterial({color:0x2a8c3a}));
+    var ang=(f/8)*Math.PI*2;
+    fr.position.set(Math.cos(ang)*0.7,10.3,Math.sin(ang)*0.7);
+    fr.rotation.z=Math.PI/2.2; fr.rotation.y=ang; g.add(fr);
+  }
+  g.position.set(x,0,z); vrScene.add(g);
+}
+function vrRegZone(x,z,r,name,desc) { vrZones.push({x:x,z:z,r:r,name:name,desc:desc}); }
+
+function vrVilla(x,z) {
+  var stoneMat=new THREE.MeshLambertMaterial({color:0xede8df});
+  var teraMat=new THREE.MeshLambertMaterial({color:0xbe4530});
+  var roofMat=new THREE.MeshLambertMaterial({color:0xcac4ba});
+  var glassMat=new THREE.MeshLambertMaterial({color:0x3a7aaa,transparent:true,opacity:0.72});
+  var poolMat=new THREE.MeshLambertMaterial({color:0x2299dd,transparent:true,opacity:0.88});
+  var deckMat=new THREE.MeshLambertMaterial({color:0x8a6232});
+  var wallMat=new THREE.MeshLambertMaterial({color:0xe8e4de});
+  var darkMat=new THREE.MeshLambertMaterial({color:0x1e1e1c});
+  // GF main body
+  var gf=new THREE.Mesh(new THREE.BoxGeometry(5.8,3.4,5.2),stoneMat);
+  gf.position.set(x,1.7,z); gf.castShadow=true; vrScene.add(gf);
+  // Carport louver screen (z+2.76 keeps back face clear of GF front at z+2.6)
+  for(var ls=0;ls<4;ls++){
+    var lv=new THREE.Mesh(new THREE.BoxGeometry(2.6,0.14,0.1),darkMat);
+    lv.position.set(x-1.2,0.5+ls*0.7,z+2.76); vrScene.add(lv);
+  }
+  // GF glass window right (same clearance)
+  var gw=new THREE.Mesh(new THREE.BoxGeometry(2.2,1.8,0.1),glassMat);
+  gw.position.set(x+1.4,1.6,z+2.76); vrScene.add(gw);
+  // F1 body
+  var f1=new THREE.Mesh(new THREE.BoxGeometry(5.8,3.2,5.2),stoneMat);
+  f1.position.set(x,5.0,z); f1.castShadow=true; vrScene.add(f1);
+  // Terracotta PROJECTING box F1 (pushed 0.25 beyond F1 front face to prevent z-fight)
+  var a1=new THREE.Mesh(new THREE.BoxGeometry(2.2,3.2,1.9),teraMat);
+  a1.position.set(x-1.5,5.0,z+3.8); a1.castShadow=true; vrScene.add(a1);
+  // Louver fins on terracotta box (centered on a1 to stay within its volume)
+  for(var ls2=0;ls2<6;ls2++){
+    var lv2=new THREE.Mesh(new THREE.BoxGeometry(2.0,0.12,1.7),darkMat);
+    lv2.position.set(x-1.5,3.5+ls2*0.52,z+3.9); vrScene.add(lv2);
+  }
+  // F1 balcony slab (z+3.26 keeps back face clear of F1 front at z+2.6)
+  var bslab=new THREE.Mesh(new THREE.BoxGeometry(2.4,0.2,1.1),roofMat);
+  bslab.position.set(x+1.5,3.42,z+3.26); vrScene.add(bslab);
+  var bglass=new THREE.Mesh(new THREE.BoxGeometry(2.2,0.8,0.08),glassMat);
+  bglass.position.set(x+1.5,3.85,z+3.68); vrScene.add(bglass);
+  // F2 body
+  var f2=new THREE.Mesh(new THREE.BoxGeometry(4.4,2.9,4.0),stoneMat);
+  f2.position.set(x,7.95,z); f2.castShadow=true; vrScene.add(f2);
+  // Terracotta projecting box F2 right (pushed 0.3 beyond F2 front face to prevent z-fight)
+  var a2=new THREE.Mesh(new THREE.BoxGeometry(1.8,2.9,1.6),teraMat);
+  a2.position.set(x+1.4,7.95,z+3.1); a2.castShadow=true; vrScene.add(a2);
+  // Flat parapet roof
+  var rf=new THREE.Mesh(new THREE.BoxGeometry(4.4,0.35,4.0),roofMat);
+  rf.position.set(x,10.75,z); vrScene.add(rf);
+  // Wood pergola on terrace corner
+  var pg=new THREE.Mesh(new THREE.BoxGeometry(2.4,0.14,1.8),deckMat);
+  pg.position.set(x-0.8,11.0,z-1.1); vrScene.add(pg);
+  for(var ps=0;ps<4;ps++){
+    var psl=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.9,1.8),deckMat);
+    psl.position.set(x-1.5+ps*0.6,11.55,z-1.1); vrScene.add(psl);
+  }
+  // Glass railing roof terrace
+  var rfGl=new THREE.Mesh(new THREE.BoxGeometry(2.2,0.8,0.08),glassMat);
+  rfGl.position.set(x-0.8,10.45,z-0.15); vrScene.add(rfGl);
+  // White compound wall front + spike rail
+  var bwf=new THREE.Mesh(new THREE.BoxGeometry(7.8,1.2,0.2),wallMat);
+  bwf.position.set(x,0.6,z+3.1); vrScene.add(bwf);
+  var bwl=new THREE.Mesh(new THREE.BoxGeometry(0.2,1.2,6.5),wallMat);
+  bwl.position.set(x-4.0,0.6,z); vrScene.add(bwl);
+  for(var sp=0;sp<8;sp++){
+    var spk=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.45,4),darkMat);
+    spk.position.set(x-3.3+sp*0.95,1.42,z+3.1); vrScene.add(spk);
+  }
+  // Splash pool at back + wood deck
+  var pool=new THREE.Mesh(new THREE.BoxGeometry(2.6,0.2,4.0),poolMat);
+  pool.position.set(x,0.1,z-3.4); vrScene.add(pool);
+  var deck=new THREE.Mesh(new THREE.BoxGeometry(2.6,0.16,1.2),deckMat);
+  deck.position.set(x,0.08,z-1.7); vrScene.add(deck);
+}
+
+function vrGate(cx,cz) {
+  var stoneMat=new THREE.MeshLambertMaterial({color:0xcbc4b8});
+  var woodMat=new THREE.MeshLambertMaterial({color:0x7a5330});
+  var darkMat=new THREE.MeshLambertMaterial({color:0x1e1e1c});
+  var glassMat=new THREE.MeshLambertMaterial({color:0x6a9acc,transparent:true,opacity:0.55});
+  var cabin=new THREE.Mesh(new THREE.BoxGeometry(5.5,5.5,5),stoneMat);
+  cabin.position.set(cx-9.5,2.75,cz); vrScene.add(cabin);
+  var cwin=new THREE.Mesh(new THREE.BoxGeometry(3.0,2.2,0.18),glassMat);
+  cwin.position.set(cx-9.5,3.0,cz+2.5); vrScene.add(cwin);
+  vrBox(6.5,0.3,6,0x7a5330,cx-9.5,5.5,cz);
+  var cpy=new THREE.Mesh(new THREE.BoxGeometry(14,0.55,5.8),woodMat);
+  cpy.position.set(cx-1.5,6.5,cz); vrScene.add(cpy);
+  var cpyTop=new THREE.Mesh(new THREE.BoxGeometry(14,0.25,6.2),darkMat);
+  cpyTop.position.set(cx-1.5,7.05,cz); vrScene.add(cpyTop);
+  for(var s=0;s<2;s++){
+    var post=new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.36,7.5,7), new THREE.MeshLambertMaterial({color:0xb0a898}));
+    post.rotation.z=s===0?0.22:-0.22;
+    post.position.set(cx-5+s*5,3.5,cz); vrScene.add(post);
+  }
+  for(var b=0;b<5;b++){
+    var bar=new THREE.Mesh(new THREE.BoxGeometry(7,0.25,0.18),darkMat);
+    bar.position.set(cx+3.5,0.5+b*0.85,cz+2.2); vrScene.add(bar);
+  }
+  var bwall=new THREE.Mesh(new THREE.BoxGeometry(8,6,4.5),woodMat);
+  bwall.position.set(cx+14,3.0,cz); vrScene.add(bwall);
+  for(var ci=0;ci<3;ci++){
+    var stripe=new THREE.Mesh(new THREE.BoxGeometry(0.6,6,4.6),stoneMat);
+    stripe.position.set(cx+11.2+ci*2.8,3.0,cz); vrScene.add(stripe);
+  }
+  vrBox(22,2.0,0.35,0xc8c2b8,cx+29,0,cz+2.3);
+  vrBox(8,2.0,0.35,0xc8c2b8,cx-16.5,0,cz+2.3);
+  // Colourful flower beds flanking gate (heliconia, reds, oranges, yellows)
+  vrFlat(5,3,0x2a6a2a,cx+10,cz-3,0.05);
+  vrFlat(5,3,0x2a6a2a,cx-4,cz-3,0.05);
+  // Flower clusters — small coloured spheres on top of beds
+  var flowerCols=[0xcc2222,0xee6611,0xddcc11,0xff4444,0xee8833];
+  for(var fi=0;fi<12;fi++){
+    var fc=flowerCols[fi%flowerCols.length];
+    var fs=new THREE.Mesh(new THREE.SphereGeometry(0.35,6,4), new THREE.MeshLambertMaterial({color:fc}));
+    fs.position.set(cx+8+Math.random()*4,0.7,cz-2+Math.random()*2); vrScene.add(fs);
+  }
+  for(var fi2=0;fi2<10;fi2++){
+    var fc2=flowerCols[fi2%flowerCols.length];
+    var fs2=new THREE.Mesh(new THREE.SphereGeometry(0.35,6,4), new THREE.MeshLambertMaterial({color:fc2}));
+    fs2.position.set(cx-5+Math.random()*3,0.7,cz-2+Math.random()*2); vrScene.add(fs2);
+  }
+  vrTree(cx+10,cz-5,5,2.0,0x2d7a36);
+  vrTree(cx+14,cz-4,4.5,1.6,0x2d7a36);
+  vrPalm(cx+18,cz-2); vrPalm(cx+22,cz-4);
+}
+
+function vrClubhouse(cx,cz) {
+  var darkMat=new THREE.MeshLambertMaterial({color:0x1a2636});
+  var glassMat=new THREE.MeshLambertMaterial({color:0x1e4a88,transparent:true,opacity:0.6});
+  var woodMat=new THREE.MeshLambertMaterial({color:0x8a6238});
+  var cladMat=new THREE.MeshLambertMaterial({color:0x2a3040});
+  var mushMat=new THREE.MeshLambertMaterial({color:0x888898});
+  var gf=new THREE.Mesh(new THREE.BoxGeometry(34,5,28),darkMat);
+  gf.position.set(cx,2.5,cz); gf.castShadow=true; vrScene.add(gf);
+  var gfg=new THREE.Mesh(new THREE.BoxGeometry(26,5,0.3),glassMat);
+  gfg.position.set(cx,2.5,cz+14.15); vrScene.add(gfg);
+  var f1=new THREE.Mesh(new THREE.BoxGeometry(32,4.5,26),cladMat);
+  f1.position.set(cx,7.25,cz); vrScene.add(f1);
+  for(var gi=0;gi<2;gi++){
+    var gb=new THREE.Mesh(new THREE.BoxGeometry(28,1.0,0.28),glassMat);
+    gb.position.set(cx,5.8+gi*2.5,cz+13); vrScene.add(gb);
+  }
+  var f2=new THREE.Mesh(new THREE.BoxGeometry(28,4.0,22),cladMat);
+  f2.position.set(cx,11.5,cz); vrScene.add(f2);
+  var canopy=new THREE.Mesh(new THREE.BoxGeometry(34,0.5,8),woodMat);
+  canopy.position.set(cx,13.6,cz+15.5); vrScene.add(canopy);
+  for(var si=0;si<12;si++){
+    var sl=new THREE.Mesh(new THREE.BoxGeometry(34,0.18,0.4), new THREE.MeshLambertMaterial({color:0x7a5428}));
+    sl.position.set(cx,13.9,cz+11.5+si*0.72); vrScene.add(sl);
+  }
+  vrBox(28,0.4,22,0x222830,cx,13.6,cz);
+  for(var mc=0;mc<5;mc++){
+    var stem=new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.7,8.5,12),mushMat);
+    stem.position.set(cx-12+mc*6,4.25,cz+13); vrScene.add(stem);
+    var disc=new THREE.Mesh(new THREE.CylinderGeometry(3.2,0.8,0.7,16),mushMat);
+    disc.position.set(cx-12+mc*6,8.85,cz+13); vrScene.add(disc);
+  }
+  vrBox(20,1.5,1.0,0x224466,cx,0.75,cz+14.5);
+  vrFlat(20,5,0x1a88e8,cx,cz-5,13.8);
+
+  // SILVERWOOD signage wall facing arrival road
+  var sigWall=new THREE.Mesh(new THREE.BoxGeometry(20,2.8,0.5),woodMat);
+  sigWall.position.set(cx,1.6,cz+15.5); vrScene.add(sigWall);
+  var sigPl=new THREE.Mesh(new THREE.BoxGeometry(9,1.4,0.22), new THREE.MeshLambertMaterial({color:0xf0ece4}));
+  sigPl.position.set(cx+3,1.6,cz+15.78); vrScene.add(sigPl);
+  var sigLogo=new THREE.Mesh(new THREE.CylinderGeometry(0.7,0.7,0.18,12), new THREE.MeshLambertMaterial({color:0x2a5a2a}));
+  sigLogo.rotation.x=Math.PI/2; sigLogo.position.set(cx-5,1.8,cz+15.78); vrScene.add(sigLogo);
+  // Marble entrance steps
+  for(var st=0;st<4;st++){
+    var step=new THREE.Mesh(new THREE.BoxGeometry(10,0.22,1.1), new THREE.MeshLambertMaterial({color:0xe8e2da}));
+    step.position.set(cx,0.11+st*0.22,cz+13.0+st*1.1); vrScene.add(step);
+  }
+  // Palm court flanking entrance
+  [-8,-4,4,8].forEach(function(ox){ vrPalm(cx+ox,cz+17); });
+  vrPalm(cx-12,cz+14); vrPalm(cx+12,cz+14);
+}
+
+function vrBuildWorld() {
+  var g=new THREE.Mesh(new THREE.PlaneGeometry(300,250), new THREE.MeshLambertMaterial({color:0x2a4020}));
+  g.rotation.x=-Math.PI/2; g.position.set(10,0,8); g.receiveShadow=true; vrScene.add(g);
+
+  vrFlat(145,7,0x3a3838,65,-18,0.02); // main 33'4" road — entry gate (x=115) to west end (x=-7)
+  vrFlat(6,90,0x3e3e3c,-2,10,0.02);
+  vrFlat(5,70,0x3a3a38,-54,8,0.02); vrFlat(5,70,0x3a3a38,-36,8,0.02); vrFlat(5,70,0x3a3a38,-18,8,0.02);
+  for(var rz=-6;rz<=32;rz+=18) vrFlat(68,5,0x3a3a38,-38,rz,0.02);
+  // East cluster internal connectors
+  for(var erx=60;erx<=110;erx+=10){ vrFlat(5,11,0x3a3a38,erx,-33,0.02); vrFlat(5,12,0x3a3a38,erx,-3,0.02); }
+  vrFlat(18,8,0x484848,8,-13,0.04);
+
+  // Yellow dashed centre lines on main 33'4" road (z=-18, horizontal — full width to gate)
+  for(var ci=0;ci<9;ci++) vrFlat(4,0.38,0xcccc22,-7+ci*17,-18,0.12);
+  // Yellow dashed centre lines on N-S spine road (x=-2, vertical)
+  for(var ri=0;ri<8;ri++) vrFlat(0.38,4,0xcccc22,-2,-8+ri*11,0.12);
+  // Yellow dashes on west internal N-S roads
+  for(var ri2=0;ri2<6;ri2++){
+    vrFlat(0.32,3,0xcccc22,-54,-4+ri2*10,0.12);
+    vrFlat(0.32,3,0xcccc22,-36,-4+ri2*10,0.12);
+    vrFlat(0.32,3,0xcccc22,-18,-4+ri2*10,0.12);
+  }
+  // Yellow dashes on east cluster N-S connectors (between row pairs)
+  for(var ri3=0;ri3<4;ri3++){
+    vrFlat(0.32,3,0xcccc22,65,-30+ri3*3,0.12);
+    vrFlat(0.32,3,0xcccc22,75,-30+ri3*3,0.12);
+    vrFlat(0.32,3,0xcccc22,85,-30+ri3*3,0.12);
+    vrFlat(0.32,3,0xcccc22,95,-30+ri3*3,0.12);
+    vrFlat(0.32,3,0xcccc22,105,-2+ri3*3,0.12);
+  }
+
+  vrGate(115,-18);
+  vrRegZone(115,-18,20,'Main Entry Gate','Silverwoods Arrival — DR BC Roy Road');
+
+  var loopR=new THREE.Mesh(new THREE.RingGeometry(7,10,40), new THREE.MeshLambertMaterial({color:0x484844,side:THREE.DoubleSide}));
+  loopR.rotation.x=-Math.PI/2; loopR.position.set(8,0.35,-3); vrScene.add(loopR);
+  // Planted roundabout island — lush green with colourful ground cover
+  vrFlat(14,14,0x2a5c2a,8,-3,0.05);
+  // Colourful bromeliad/ground cover plants in island
+  var islandCols=[0xcc3333,0xee8822,0xddcc11,0x33aa44,0xcc4488];
+  for(var ip=0;ip<16;ip++){
+    var ang2=(ip/16)*Math.PI*2, ir=vrRng(1.5,4.5);
+    var ic=islandCols[ip%islandCols.length];
+    var isph=new THREE.Mesh(new THREE.SphereGeometry(0.4,6,4), new THREE.MeshLambertMaterial({color:ic}));
+    isph.position.set(8+Math.cos(ang2)*ir, 0.55, -3+Math.sin(ang2)*ir); vrScene.add(isph);
+  }
+  vrTree(6,-5,7,3.0,0x1e5828); vrTree(10,-1,6,2.5,0x236630);
+  vrTree(8,-6,5,2.2,0x226a30); vrTree(5,-1,6,2.8,0x1e6228);
+
+  var mgGeo=new THREE.SphereGeometry(5.5,16,8,0,Math.PI*2,0,Math.PI/2.2);
+  var mm=new THREE.Mesh(mgGeo, new THREE.MeshLambertMaterial({color:0x2d6028}));
+  mm.scale.y=0.45; mm.position.set(18,-0.1,-10); vrScene.add(mm);
+  var leafMat=new THREE.MeshLambertMaterial({color:0xf0f0ec,wireframe:true});
+  for(var ls=0;ls<2;ls++){
+    var leaf=new THREE.Mesh(new THREE.SphereGeometry(3.2,8,6,0,Math.PI*1.1,0,Math.PI*0.7),leafMat);
+    leaf.rotation.z=ls===0?-0.5:0.5; leaf.rotation.y=ls===0?-0.3:0.3;
+    leaf.position.set(18+(ls===0?-1.6:1.6),3.8,-10); vrScene.add(leaf);
+  }
+  vrBox(0.2,3.5,0.2,0xd0ccc4,18,0,-10);
+  vrRegZone(18,-10,15,'Butterfly Leaf Sculpture','Iconic Landmark');
+
+  vrClubhouse(8,18);
+  vrRegZone(8,18,30,'Clubhouse - 50,000 sq.ft','Gym - Pool - Banquet - Bar');
+
+  vrFlat(22,5,0x7a8870,28,14,0.02);
+  vrFlat(20,3.8,0x1a80d4,28,14,0.12);
+  vrFlat(22,0.8,0x8a6030,28,17,0.05);
+  vrRegZone(28,14,14,'Infinity Pool','Resort-style pool with deck');
+
+  vrFlat(18,16,0x2a6030,22,1,0.02);
+  vrFlat(14,12,0x1a6a9a,22,1,0.1);
+  vrRegZone(22,1,12,'Ornamental Water Body','Aquatic landscape feature');
+
+  vrFlat(26,15,0x625850,41,2,0.02);
+  vrCanopy(34,5); vrCanopy(42,0); vrCanopy(49,6);
+  vrRegZone(41,2,16,'Seating Plaza','Canopy sculptures & lounge');
+
+  // Corten steel pergola gateway frames (path to sports area)
+  vrCortenFrame(4,35); vrCortenFrame(-8,40);
+
+  vrFlat(34,24,0x28883a,7,46,0.02);
+  vrRegZone(7,46,20,'Multi-Activity Lawn','Football - Cricket - Volleyball');
+
+  vrFlat(18,16,0x3a8a44,-16,43,0.02);
+  vrBox(2.5,4.5,2,0xcc3333,-19,0,40);
+  vrBox(2,2.2,2,0x3355cc,-14,0,45);
+  vrRegZone(-16,43,14,'Kids Play Area','Slides - Swings - Safety surface');
+
+  [[-68,-15,2,8],[-52,-15,2,8],[-36,-15,2,8],[-68,22,2,5],[-52,22,2,5],[-36,22,2,4],[-20,-15,2,7]].forEach(function(a){
+    for(var ci2=0;ci2<a[2];ci2++) for(var ri=0;ri<a[3];ri++) vrVilla(a[0]+ci2*10,a[1]+ri*9);
+  });
+  vrRegZone(-38,8,45,'West Villa Block','~65 G+2 private villas');
+
+  for(var nr=0;nr<4;nr++) for(var nc=0;nc<6;nc++) vrVilla(-10+nc*10,64+nr*9);
+  vrRegZone(18,73,30,'North Villa Cluster','Premium elevated villas');
+
+  for(var ec=0;ec<2;ec++) for(var er=0;er<9;er++) vrVilla(55+ec*13,-10+er*8);
+  for(var er2=0;er2<8;er2++) vrVilla(70,-6+er2*8);
+  for(var er3=0;er3<6;er3++) vrVilla(85,-2+er3*8);
+  vrRegZone(68,10,30,'East Villa Block','~30 premium villas');
+
+  for(var tz=-80;tz<28;tz+=9){ vrTree(-84,tz,vrRng(5,8),vrRng(2.2,3.0),0x1a5c22); vrTree(-80,tz,vrRng(4,7),vrRng(1.8,2.5),0x236b2c); }
+  for(var tx=-80;tx<104;tx+=9) vrTree(tx,-88,vrRng(5,8),vrRng(2,3),0x1a5c22);
+  for(var tz3=-80;tz3<28;tz3+=10) vrTree(102,tz3,vrRng(5,8),vrRng(2,3),0x1a5c22);
+  for(var tx3=-80;tx3<104;tx3+=10) vrTree(tx3,30,vrRng(4,7),vrRng(1.8,2.5),0x236b2c);
+  for(var tx4=8;tx4<78;tx4+=10){ vrTree(tx4,-16,5,1.8,0x2d7a36); vrTree(tx4,-24,5,1.8,0x2d7a36); }
+  for(var tz4=-10;tz4>-50;tz4-=11) vrTree(-5,tz4,5,1.8,0x2a6a30);
+  [-1,7,15].forEach(function(px){ vrPalm(px,-45); vrPalm(px,-20); });
+  [24,27,30,33,36].forEach(function(px){ vrPalm(px,10); });
+
+  // Surrounding location landmarks
+  vrLandmarks();
+}
+
+function vrRng(a,b){ return a+Math.random()*(b-a); }
+
+// VR landmark pole marker + proximity zone
+function vrLandmarkMarker(x,z,col,name,desc){
+  var poleMat=new THREE.MeshLambertMaterial({color:col});
+  var pole=new THREE.Mesh(new THREE.CylinderGeometry(0.6,0.6,14,8),poleMat);
+  pole.position.set(x,7,z); pole.castShadow=true; vrScene.add(pole);
+  var disc=new THREE.Mesh(new THREE.CylinderGeometry(5,5,2,20),poleMat);
+  disc.position.set(x,14.5,z); vrScene.add(disc);
+  var ring=new THREE.Mesh(new THREE.TorusGeometry(5.5,0.35,6,22), new THREE.MeshLambertMaterial({color:col,transparent:true,opacity:0.55}));
+  ring.rotation.x=Math.PI/2; ring.position.set(x,14.5,z); vrScene.add(ring);
+  vrRegZone(x,z,22,name,desc);
+}
+
+function vrLandmarks(){
+  // Extended context ground
+  var extG=new THREE.Mesh(new THREE.PlaneGeometry(800,750),new THREE.MeshLambertMaterial({color:0x182416}));
+  extG.rotation.x=-Math.PI/2; extG.position.set(-20,-0.28,-50); extG.receiveShadow=true; vrScene.add(extG);
+
+  // Internal N-S spine connecting main road to north cluster (west side of amenity strip)
+  vrFlat(7,108,0x3e3e3c,-2,-74,0.02);
+  for(var i=0;i<5;i++) vrFlat(0.38,7,0xcccc22,-2,-28-i*18,0.12);
+
+  // Southern Bypass
+  vrFlat(660,16,0x3a3838,-10,-128,0.02);
+  for(var i2=0;i2<23;i2++) vrFlat(9,0.42,0xcccc22,-315+i2*30,-128,0.12);
+  vrFlat(660,0.55,0xe0e0dc,-10,-136,0.1);
+  vrFlat(660,0.55,0xe0e0dc,-10,-120,0.1);
+  vrRoadText('SOUTHERN BYPASS',-10,-128,0,52);
+  vrRoadText('SOUTHERN BYPASS',-150,-128,0,48);
+  vrRoadText('SOUTHERN BYPASS',140,-128,0,48);
+  vrRegZone(-10,-128,30,'Southern Bypass','Major E-W highway — connects Kamalgazi (EM Bypass) to Rajpur & Baruipur');
+
+  // Adi Ganga Canal
+  vrFlat(660,13,0x1a6a9a,-10,-150,0.05);
+  vrFlat(660,1.2,0x55ccee,-10,-150,0.2);
+  vrRoadText('ADI GANGA CANAL',-10,-150,0,44,'#44bbff');
+  vrRegZone(-10,-150,20,'Adi Ganga Canal','Historic channel of the Ganges running alongside Southern Bypass');
+
+  // Dr BC Roy Road
+  vrFlat(12,420,0x3a3838,128,-80,0.02);
+  for(var i3=0;i3<15;i3++) vrFlat(0.42,8,0xcccc22,128,-235+i3*28,0.12);
+  vrFlat(0.55,420,0xe0e0dc,122,-80,0.1);
+  vrFlat(0.55,420,0xe0e0dc,134,-80,0.1);
+  vrRoadText('DR BC ROY ROAD',128,-55,Math.PI/2,36);
+  vrRoadText('DR BC ROY ROAD',128,-170,Math.PI/2,36);
+  vrRegZone(128,-60,18,'Dr BC Roy Road','Major N-S road on eastern edge of Silverwoods site');
+
+  // E.M. Bypass (far west, N-S)
+  vrFlat(14,380,0x3a3838,-230,-95,0.02);
+  for(var i5=0;i5<14;i5++) vrFlat(0.42,8,0xcccc22,-230,-220+i5*26,0.12);
+  vrFlat(0.55,380,0xe0e0dc,-236,-95,0.1);
+  vrFlat(0.55,380,0xe0e0dc,-224,-95,0.1);
+  vrRoadText('E.M. BYPASS',-230,-128,Math.PI/2,32);
+  vrRoadText('E.M. BYPASS',-230,-175,Math.PI/2,32);
+  vrRegZone(-230,-110,18,'E.M. Bypass','Eastern Metropolitan Bypass — main highway of South Kolkata. Ruby Crossing (north) to Garia (south).');
+
+  // Bypass Connector to EM Bypass (diagonal)
+  var bcAx=-215,bcAz=-200,bcBx=-85,bcBz=-128;
+  var bcLen=Math.sqrt(Math.pow(bcBx-bcAx,2)+Math.pow(bcBz-bcAz,2));
+  var bcAngle=Math.atan2(bcBz-bcAz,bcBx-bcAx);
+  var bcM=new THREE.Mesh(new THREE.BoxGeometry(bcLen,0.25,10),new THREE.MeshLambertMaterial({color:0x3a3838}));
+  bcM.position.set((bcAx+bcBx)/2,0.25,(bcAz+bcBz)/2);
+  bcM.rotation.y=-bcAngle; vrScene.add(bcM);
+  vrRoadText('BYPASS CONNECTOR TO EM BYPASS',-152,-167,Math.atan2(-128- -200,-85- -215),50,'#ddbb44');
+
+  // NSC Bose Road (far north)
+  vrFlat(700,12,0x343230,-30,-210,0.02);
+  for(var i4=0;i4<23;i4++) vrFlat(9,0.42,0xcccc22,-315+i4*30,-210,0.12);
+  vrRoadText('NARENDRAPUR NSC BOSE ROAD',-30,-210,0,55);
+  vrRoadText('NARENDRAPUR NSC BOSE ROAD',160,-210,0,55);
+  vrRegZone(-30,-210,20,'Narendrapur NSC Bose Road','Arterial connecting Kamalgazi Flyover to Sonarpur Railway Station');
+
+  // Kamalgazi Flyover junction (NW)
+  var kjR=new THREE.Mesh(new THREE.CylinderGeometry(20,20,0.5,32),new THREE.MeshLambertMaterial({color:0x484840}));
+  kjR.position.set(-230,0.28,-210); vrScene.add(kjR);
+  vrFlat(18,18,0x2a6a2a,-230,-210,0.12);
+  vrTree(-228,-210,8,3,0x1e6a28); vrTree(-232,-212,7,2.8,0x226632);
+  vrLandmarkMarker(-230,-210,0xf5a623,'Kamalgazi Flyover','Major flyover junction — E.M. Bypass × NSC Bose Road. ~8 km NW of Silverwoods.');
+  vrRoadText('KAMALGAZI FLYOVER',-230,-210,0,38,'#f5a623');
+
+  // Jagaddal More junction
+  var jRing=new THREE.Mesh(new THREE.CylinderGeometry(14,14,0.5,32),new THREE.MeshLambertMaterial({color:0x484840}));
+  jRing.position.set(108,0.28,-128); vrScene.add(jRing);
+  vrFlat(12,12,0x2a6a2a,108,-128,0.12);
+  vrTree(106,-128,9,3.5,0x1e6a28); vrTree(110,-126,8,3.0,0x226632);
+  vrLandmarkMarker(108,-128,0xf5a623,'Jagaddal More','Primary junction — Southern Bypass & Dr BC Roy Road. Main landmark for Silverwoods access (~500 m from gate)');
+  vrRoadText('JAGADDAL MORE',108,-128,0,26,'#f5a623');
+
+  // Lal Gate More
+  vrFlat(10,10,0x5a5850,32,-128,0.1);
+  vrTree(30,-126,7,2.5,0x226622); vrTree(34,-130,6,2.2,0x1e6a28);
+  vrLandmarkMarker(32,-128,0xdd9933,'Lal Gate More','Junction on Southern Bypass. Local bus and auto interchange point.');
+  vrLabel('Lal Gate More',32,17,-128,'#dd9933',9);
+
+  // Rathtala More (Temple)
+  vrBox(8,10,8,0xe8d8a8,72,0,-126);
+  vrBox(2.8,13,2.8,0xe8d8a8,72,0,-123);
+  vrLandmarkMarker(72,-128,0xd4a040,'Rathtala More (Temple)','Historic temple junction on Southern Bypass between Lal Gate and Jagaddal More.');
+  vrLabel('Rathtala More (Temple)',72,18,-128,'#d4a040',9);
+
+  // Chintamani Kar Bird Sanctuary
+  vrFlat(52,44,0x1a6a20,-48,-152,0.02);
+  for(var ti=0;ti<16;ti++) vrTree(-65+ti*6,-146+(ti%3)*8,vrRng(7,11),vrRng(3,4.5),0x1a6a22);
+  vrFlat(52,44,0x1a7a22,-48,-152,0.04);
+  vrLandmarkMarker(-48,-152,0x28b850,'Chintamani Kar Bird Sanctuary','Protected wetland bird sanctuary NW of Silverwoods on Southern Bypass');
+  vrLabel('Chintamani Kar Bird Sanctuary',-48,18,-152,'#44dd66',9);
+
+  // AARTI Hospital
+  vrBox(20,9,14,0xf8f8f8,-88,0,-120);
+  vrBox(2.5,7,0.6,0xdd2222,-88,4.5,-113); vrBox(0.6,7,2.5,0xdd2222,-88,4.5,-113);
+  vrLandmarkMarker(-88,-128,0xee3344,'AARTI Hospital','Multi-specialty hospital on Southern Bypass. Emergency & specialist care within 5 km');
+  vrLabel('AARTI Hospital',-88,17,-128,'#ff5555',9);
+
+  // Apollo Diagnostics
+  vrBox(12,5,8,0x2266bb,-115,0,-120);
+  vrLandmarkMarker(-115,-128,0x2288ee,'Apollo Diagnostics','Advanced diagnostics & pathology on NSC Bose Road corridor (~6 km)');
+  vrLabel('Apollo Diagnostics',-115,15,-128,'#4488ff',8);
+
+  // Remedy Diagnostics
+  vrBox(10,4,7,0x4488cc,-135,0,-120);
+  vrLandmarkMarker(-135,-128,0x44aaee,'Remedy Diagnostics','Diagnostics centre on Southern Bypass corridor near Kamalgazi area.');
+  vrLabel('Remedy Diagnostics',-135,14,-128,'#55aaff',8);
+
+  // Woodsquare Mall
+  vrBox(22,8,15,0xc8b8e0,-100,0,-118);
+  vrLandmarkMarker(-100,-128,0xaa66dd,'Woodsquare Mall','Popular shopping mall on Southern Bypass near Narendrapur. Retail, dining and entertainment.');
+  vrLabel('Woodsquare Mall',-100,16,-128,'#cc88ff',9);
+
+  // Springfield (residential)
+  vrBox(18,10,13,0xc8d8f0,-150,0,-118);
+  vrLandmarkMarker(-150,-128,0x4488cc,'Springfield','Residential project on Southern Bypass — Narendrapur-Kamalgazi growth corridor.');
+  vrLabel('Springfield',-150,16,-128,'#88ccff',9);
+
+  // Grand Avenue
+  vrBox(16,9,11,0xf0e0c8,-170,0,-118);
+  vrLandmarkMarker(-170,-128,0xee9944,'Grand Avenue','Premium residential project near Kamalgazi Flyover on Southern Bypass.');
+  vrLabel('Grand Avenue',-170,16,-128,'#ffaa55',9);
+
+  // Reliance Fresh (central)
+  vrBox(10,5,8,0x2277aa,-22,0,-121);
+  vrLandmarkMarker(-22,-128,0x2288bb,'Reliance Fresh','Reliance Fresh supermarket on Southern Bypass — daily essentials near Silverwoods.');
+  vrLabel('Reliance Fresh',-22,14,-128,'#44aacc',8);
+
+  // Reliance Fresh (near Kamalgazi)
+  vrBox(10,5,8,0x2277aa,-195,0,-121);
+  vrLandmarkMarker(-195,-128,0x2288bb,'Reliance Fresh (Kamalgazi)','Reliance Fresh near Kamalgazi / E.M. Bypass junction on Southern Bypass.');
+  vrLabel('Reliance Fresh',-195,14,-128,'#44aacc',8);
+
+  // Altitude Grand / Dhalai Bridge Area
+  vrBox(22,13,15,0xd8d0c0,-200,0,-165);
+  vrLandmarkMarker(-200,-172,0xcc8844,'Altitude Grand (Dhalai Bridge Area)','Prominent residential high-rise near Dhalai Bridge / Patuli area on EM Bypass connector.');
+  vrLabel('ALTITUDE GRAND',-200,20,-165,'#ffaa44',10);
+  vrLabel('(Dhalai Bridge Area)',-200,14,-172,'#ddbbaa',8);
+
+  // Hindustan Health Point (EM Bypass)
+  vrBox(13,6,9,0xf8f8f0,-230,0,-157);
+  vrBox(2,5,0.5,0xdd2222,-230,4,-152); vrBox(0.5,5,2,0xdd2222,-230,4,-152);
+  vrLandmarkMarker(-230,-163,0xee5544,'Hindustan Health Point','Healthcare facility on E.M. Bypass near Kamalgazi Flyover area.');
+  vrLabel('Hindustan Health Point',-230,15,-163,'#ff6655',8);
+
+  // BDM International School (EM Bypass)
+  vrBox(20,8,13,0xe8e0b8,-230,0,-147);
+  vrLandmarkMarker(-230,-153,0xe8cc30,'BDM International School','Well-regarded international school near Kamalgazi on E.M. Bypass / NSC Bose Road corridor.');
+  vrLabel('BDM International School',-230,17,-153,'#eecc44',8);
+
+  // BD Memorial School (EM Bypass)
+  vrBox(18,7,12,0xc8e0c8,-230,0,-138);
+  vrLandmarkMarker(-230,-143,0x44aa44,'BD Memorial School','Well-known school near Kamalgazi / E.M. Bypass. Approx. 5 km from Silverwoods.');
+  vrLabel('BD Memorial School',-230,15,-143,'#66cc66',8);
+
+  // Kavi Nazrul Metro Stn. (Garia)
+  vrBox(18,7,11,0x2a3a7a,-230,0,-222);
+  vrBox(0.7,8,13,0x336699,-222,0,-222);
+  vrLandmarkMarker(-230,-225,0x4466cc,'Kavi Nazrul Metro Stn. (Garia)','Purple Line metro. Nearest metro to Silverwoods via E.M. Bypass (~8–10 km).');
+  vrLabel('Kavi Nazrul Metro Stn. (Garia)',-230,19,-225,'#6699ff',9);
+
+  // Shahid Khudiram Metro Stn.
+  vrBox(16,7,10,0x2a3a7a,-225,0,-213);
+  vrLandmarkMarker(-225,-214,0x4466cc,'Shahid Khudiram Metro Stn.','Purple Line metro adjacent to Kavi Nazrul. Serves Garia-Baruipur junction area.');
+  vrLabel('Shahid Khudiram Metro',-225,17,-214,'#6699ff',8);
+
+  // Lions Calcutta Vidya Mandir
+  vrBox(22,8,16,0xdbb858,150,0,-116);
+  vrBox(3,7,0.5,0xcc2222,150,4,-107);
+  vrLandmarkMarker(150,-128,0xf5d020,'Lions Calcutta Vidya Mandir','Reputed school on Dr BC Roy Road — walking distance from Silverwoods');
+  vrLabel('Lions Calcutta Vidya Mandir',150,18,-128,'#ffdd44',9);
+
+  // Reliance Fresh & Galleria Mall (east)
+  vrBox(20,8,13,0xc8b8e0,175,0,-118);
+  vrLandmarkMarker(175,-128,0x9955cc,'Reliance Fresh & Galleria Mall','Shopping mall east of Dr BC Roy Road. Retail, food court and entertainment.');
+  vrLabel('Reliance Fresh & Galleria Mall',175,17,-128,'#bb77ff',9);
+
+  // Swarnim International School
+  vrBox(18,7,12,0xe0e8d0,208,0,-116);
+  vrLandmarkMarker(208,-128,0x88cc44,'Swarnim International School','International school east of Silverwoods towards Rajpur on Southern Bypass.');
+  vrLabel('Swarnim International School',208,16,-128,'#aaee55',8);
+
+  // Rajpur Kalitala (temple)
+  vrBox(9,10,9,0xe8d8a8,238,0,-126);
+  vrBox(2.8,13,2.8,0xe8d8a8,238,0,-123);
+  vrLandmarkMarker(238,-128,0xd4a840,'Rajpur Kalitala','Temple and local landmark at Rajpur Kalitala junction on Southern Bypass.');
+  vrLabel('Rajpur Kalitala',238,16,-128,'#ddbb55',8);
+
+  // Bipattarini Chandi Bari (temple)
+  vrBox(10,11,10,0xf0e0c8,265,0,-126);
+  vrBox(3.2,14,3.2,0xf0e0c8,265,0,-122);
+  vrLandmarkMarker(265,-128,0xcc8833,'Bipattarini Chandi Bari','Revered temple towards Rajpur on Southern Bypass. Important religious site in the region.');
+  vrLabel('Bipattarini Chandi Bari',265,17,-128,'#ddaa44',8);
+
+  // Narendrapur Ramkrishna Mission (NSC Bose Road)
+  vrBox(28,11,22,0xece0bc,-25,0,-218); vrBox(6,15,6,0xe8d8b0,-25,0,-210);
+  vrLandmarkMarker(-25,-225,0xd4a040,'Narendrapur Ramkrishna Mission Ashram','Celebrated RK Mission campus — school, college, hospital & ashram on NSC Bose Road');
+  vrLabel('Narendrapur RK Mission Ashram',-25,20,-225,'#ddaa44',9);
+
+  // Future Institute of Engineering (NSC Bose Road)
+  vrBox(28,12,20,0xd8d0e8,-65,0,-218);
+  vrLandmarkMarker(-65,-225,0x9966cc,'Future Institute of Engineering & Management','Premier engineering college on Narendrapur NSC Bose Road (~7 km from Silverwoods)');
+  vrLabel('Future Institute of Engg. & Mgmt.',-65,19,-225,'#aa77ee',9);
+
+  // Royal Gardens Heights (NSC Bose Road)
+  vrBox(18,13,14,0xe8e0f0,28,0,-218);
+  vrLandmarkMarker(28,-225,0xcc88ee,'Royal Gardens Heights','Premium residential project on Narendrapur NSC Bose Road.');
+  vrLabel('Royal Gardens Heights',28,17,-225,'#ddaaff',8);
+
+  // Luxuria (NSC Bose Road)
+  vrBox(16,15,12,0xf0e0f0,58,0,-218);
+  vrLandmarkMarker(58,-225,0xbb44bb,'Luxuria','Upscale residential project on NSC Bose Road in the Narendrapur growth corridor.');
+  vrLabel('Luxuria',58,17,-225,'#ee66ee',8);
+
+  // Global City (NSC Bose Road)
+  vrBox(22,15,17,0xe0e8f0,95,0,-218);
+  vrLandmarkMarker(95,-225,0x2288cc,'Global City','Large integrated township project on NSC Bose Road. Commercial & residential hub.');
+  vrLabel('Global City',95,18,-225,'#44aaee',9);
+
+  // Direction signs
+  [[-10,-255,0,0x1a4a22,'▲ Towards Kamalgazi Flyover & E.M. Bypass'],
+   [298,-128,Math.PI/2,0x1a3a4a,'▶ Towards Rajpur & Baruipur'],
+   [-310,-128,-Math.PI/2,0x1a3a4a,'◀ Towards Garia & Ruby Crossing'],
+   [-10,160,Math.PI,0x3a2a1a,'▼ Towards Garia (South)'],
+   [-230,-258,0,0x1a2a4a,'▲ Towards Ruby Crossing / Garia Rly. Stn.'],
+   [128,-258,0,0x4a2a1a,'▲ Towards Sonarpur Railway Stn.']].forEach(function(d){
+    var pm=new THREE.MeshLambertMaterial({color:0x2a3a28});
+    var sm=new THREE.MeshLambertMaterial({color:d[3]});
+    var p=new THREE.Mesh(new THREE.CylinderGeometry(0.45,0.45,11,6),pm);
+    p.position.set(d[0],5.5,d[1]); vrScene.add(p);
+    var s=new THREE.Mesh(new THREE.BoxGeometry(22,4.5,0.55),sm);
+    s.rotation.y=d[2]; s.position.set(d[0],12.5,d[1]); vrScene.add(s);
+    vrRegZone(d[0],d[1],22,d[4],'Direction sign — navigation context');
+  });
+
+  // Perimeter trees
+  for(var tt=-320;tt<320;tt+=22){
+    vrTree(tt,-110,vrRng(5,9),vrRng(2,3.2),0x1a5c22);
+    vrTree(tt,-170,vrRng(5,8),vrRng(2,3),0x236b2c);
+  }
+  for(var tz5=-235;tz5<-30;tz5+=22){
+    vrTree(-118,tz5,vrRng(5,8),vrRng(2,3),0x1a5c22);
+    vrTree(148,tz5,vrRng(5,8),vrRng(2,3),0x226b2c);
+  }
+}
+
+function vrCortenFrame(x,z) {
+  var mat=new THREE.MeshLambertMaterial({color:0x8b3a1a});
+  [[-1.4,-1.4],[1.4,-1.4],[-1.4,1.4],[1.4,1.4]].forEach(function(off){
+    var p=new THREE.Mesh(new THREE.BoxGeometry(0.28,5.5,0.28),mat);
+    p.position.set(x+off[0],2.75,z+off[1]); p.castShadow=true; vrScene.add(p);
+  });
+  [[-1.4,0],[1.4,0]].forEach(function(off){
+    var b=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.2,3.0),mat);
+    b.position.set(x+off[0],5.5,z+off[1]); vrScene.add(b);
+  });
+  [[0,-1.4],[0,1.4]].forEach(function(off){
+    var b=new THREE.Mesh(new THREE.BoxGeometry(3.0,0.2,0.2),mat);
+    b.position.set(x+off[0],5.5,z+off[1]); vrScene.add(b);
+  });
+  var cb=new THREE.Mesh(new THREE.BoxGeometry(3.0,0.18,0.18),mat);
+  cb.position.set(x,3.5,z-1.4); vrScene.add(cb);
+  var cb2=new THREE.Mesh(new THREE.BoxGeometry(3.0,0.18,0.18),mat);
+  cb2.position.set(x,3.5,z+1.4); vrScene.add(cb2);
+}
+
+// Flat disc canopy on pole (VR version matching blueprint)
+function vrCanopy(x,z) {
+  var poleMat=new THREE.MeshLambertMaterial({color:0xa8a49c});
+  var discMat=new THREE.MeshLambertMaterial({color:0xd4d0c8,transparent:true,opacity:0.85});
+  var pole=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.22,7.5,8),poleMat);
+  pole.position.set(x,3.75,z); pole.castShadow=true; vrScene.add(pole);
+  var disc=new THREE.Mesh(new THREE.CylinderGeometry(5.5,5.5,0.18,24),discMat);
+  disc.position.set(x,7.6,z); vrScene.add(disc);
+  var ring=new THREE.Mesh(new THREE.TorusGeometry(3.8,0.1,6,24), new THREE.MeshLambertMaterial({color:0xb8b4ac}));
+  ring.rotation.x=Math.PI/2; ring.position.set(x,7.5,z); vrScene.add(ring);
+  for(var i=0;i<10;i++){
+    var ang=(i/10)*Math.PI*2;
+    var sp=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,5.5,4), new THREE.MeshLambertMaterial({color:0xb8b4ac}));
+    sp.position.set(x+Math.cos(ang)*2.75,7.5,z+Math.sin(ang)*2.75);
+    sp.rotation.z=Math.PI/2; sp.rotation.y=ang; vrScene.add(sp);
+  }
+}
+
+function vrDrawMinimap() {
+  var c=document.getElementById('vr-minimap');
+  if(!c) return;
+  var ctx=c.getContext('2d');
+  // Clip to circle
+  ctx.clearRect(0,0,140,140);
+  ctx.save();
+  ctx.beginPath(); ctx.arc(70,70,70,0,Math.PI*2); ctx.clip();
+  ctx.fillStyle='#0d1a0f'; ctx.fillRect(0,0,140,140);
+  var sx=140/200, sz=140/130;
+  function tx(x){ return (x+90)*sx; } function tz(z){ return (z+35)*sz; }
+  ctx.fillStyle='#2a3a28';
+  ctx.fillRect(tx(-2)-2,0,4,140);
+  ctx.fillRect(tx(8),tz(-18)-2,tx(83)-tx(8),4);
+  ctx.fillStyle='#2a7a38'; ctx.fillRect(tx(-10),tz(35),tx(24)-tx(-10),tz(57)-tz(35));
+  ctx.fillStyle='#1a80d4'; ctx.fillRect(tx(18),tz(11),tx(38)-tx(18),tz(18)-tz(11));
+  ctx.fillStyle='#1a2636'; ctx.fillRect(tx(-9),tz(4),tx(25)-tx(-9),tz(32)-tz(4));
+  ctx.fillStyle='#e4ddd4';
+  ctx.fillRect(tx(-78),tz(-24),tx(-12)-tx(-78),tz(38)-tz(-24));
+  ctx.fillRect(tx(-18),tz(63),tx(42)-tx(-18),tz(100)-tz(63));
+  ctx.fillRect(tx(48),tz(-16),tx(92)-tx(48),tz(62)-tz(-16));
+  ctx.fillStyle='#c9a84c'; ctx.fillRect(tx(74),tz(-22),5,8);
+  ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.font='bold 6px sans-serif';
+  ctx.fillText('GATE',tx(75),tz(-15));
+  ctx.fillText('CLUB',tx(-5),tz(16));
+  ctx.restore();
+}
+
+function vrUpdateMinimap() {
+  var c=document.getElementById('vr-minimap');
+  if(!c) return;
+  vrDrawMinimap();
+  var ctx=c.getContext('2d');
+  // Re-clip for player dot
+  ctx.save();
+  ctx.beginPath(); ctx.arc(70,70,70,0,Math.PI*2); ctx.clip();
+  var ctx=c.getContext('2d');
+  var px=vrControls.getObject().position.x, pz=vrControls.getObject().position.z;
+  var sx=140/200, sz=140/130;
+  var mx=(px+90)*sx, mz=(pz+35)*sz;
+  // Player dot with glow
+  ctx.shadowColor='#c9a84c'; ctx.shadowBlur=6;
+  ctx.beginPath(); ctx.arc(mx,mz,4,0,Math.PI*2);
+  ctx.fillStyle='#c9a84c'; ctx.fill();
+  ctx.shadowBlur=0;
+  // Direction arrow
+  var yaw=vrControls.getObject().rotation.y;
+  ctx.beginPath(); ctx.moveTo(mx,mz);
+  ctx.lineTo(mx+Math.sin(-yaw)*10,mz+Math.cos(-yaw)*10);
+  ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.restore();
+}
+
+var vrLastProx=0;
+function vrCheckProximity() {
+  var px=vrControls.getObject().position.x, pz=vrControls.getObject().position.z;
+  var hud=document.getElementById('vr-zone-hud');
+  for(var i=0;i<vrZones.length;i++){
+    var z=vrZones[i];
+    var dx=px-z.x, dz=pz-z.z;
+    if(Math.sqrt(dx*dx+dz*dz)<z.r){
+      document.getElementById('vr-zone-name').textContent=z.name;
+      document.getElementById('vr-zone-desc').textContent=z.desc;
+      hud.classList.remove('hidden');
+      clearTimeout(vrHudTimeout);
+      vrHudTimeout=setTimeout(function(){ hud.classList.add('hidden'); },3000);
+      return;
+    }
+  }
+}
+
+function vrAnimate() {
+  requestAnimationFrame(vrAnimate);
+  var time=performance.now();
+  if(vrIsLocked){
+    var delta=Math.min((time-vrPrevTime)/1000,0.1);
+    vrVelocity.x-=vrVelocity.x*10.0*delta;
+    vrVelocity.z-=vrVelocity.z*10.0*delta;
+    vrDirection.z=Number(vrMoveF)-Number(vrMoveB);
+    vrDirection.x=Number(vrMoveR)-Number(vrMoveL);
+    vrDirection.normalize();
+    var speed=vrRunning?28.0:14.0;
+    if(vrMoveF||vrMoveB) vrVelocity.z-=vrDirection.z*speed*delta;
+    if(vrMoveL||vrMoveR) vrVelocity.x-=vrDirection.x*speed*delta;
+    vrControls.moveRight(-vrVelocity.x*delta);
+    vrControls.moveForward(-vrVelocity.z*delta);
+    vrControls.getObject().position.y=1.7;
+    if(time-vrLastProx>500){ vrCheckProximity(); vrLastProx=time; }
+    vrUpdateMinimap();
+  }
+  vrPrevTime=time;
+  vrRenderer.render(vrScene,vrCamera);
+}
+
+function vrOnResize() {
+  if(!vrRenderer) return;
+  var c=document.getElementById('vr-canvas-inner');
+  vrCamera.aspect=c.clientWidth/c.clientHeight;
+  vrCamera.updateProjectionMatrix();
+  vrRenderer.setSize(c.clientWidth,c.clientHeight);
+}
+VR_CLOSEANDWORLD_END */
+</script>
+{% endblock %}

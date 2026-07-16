@@ -3,6 +3,8 @@ gunicorn
 whitenoise
 python-decouple
 django-cors-headers
+django-cloudinary-storage
+cloudinary
 openpyxl
 reportlab
 Pillow

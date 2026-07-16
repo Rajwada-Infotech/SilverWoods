@@ -100,8 +100,10 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # Automatically use Cloudinary if credentials are provided in env vars
-if config('CLOUDINARY_URL', default=None):
+import os as _os
+if _os.environ.get('CLOUDINARY_URL') or config('CLOUDINARY_URL', default=None):
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    CLOUDINARY_STORAGE = {'CLOUDINARY_URL': _os.environ.get('CLOUDINARY_URL') or config('CLOUDINARY_URL')}
 
 # ── Misc ──────────────────────────────────────────────────────────────
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

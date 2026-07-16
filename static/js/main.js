@@ -188,6 +188,9 @@ function showPopup(popup) {
     overlay.classList.add('flex');
     overlay.dataset.popupId = popup.id;
 
+    const chatWrap = document.getElementById('sw-chat-wrap');
+    if (chatWrap) { chatWrap.style.pointerEvents = 'none'; chatWrap.style.zIndex = '50'; }
+
     requestAnimationFrame(() => {
         content.style.transform = 'scale(1)';
         content.style.opacity = '1';
@@ -202,6 +205,8 @@ function closePopup() {
     setTimeout(() => {
         overlay.classList.add('hidden');
         overlay.classList.remove('flex');
+        const chatWrap = document.getElementById('sw-chat-wrap');
+        if (chatWrap) { chatWrap.style.pointerEvents = ''; chatWrap.style.zIndex = ''; chatWrap.style.opacity = ''; }
     }, 300);
     sessionStorage.setItem('lastPopupTime', Date.now());
     if (window._pendingPopupNext) {

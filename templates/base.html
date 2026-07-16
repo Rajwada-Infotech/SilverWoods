@@ -281,7 +281,7 @@
             <circle id="drop-click-area" cx="38" cy="38" r="44"
                     fill="#fff" fill-opacity="0.001" pointer-events="all"
                     style="cursor:pointer;"
-                    onclick="(function(e){e.stopPropagation();var m=document.getElementById('liquid-drop-menu');var o=document.getElementById('ldi-overlay');if(!m)return;var open=m.style.display==='block';var show=open?'none':'block';m.style.display=show;['cloud-dot1','cloud-dot2','cloud-dot3','cloud-dot4'].forEach(function(id){var d=document.getElementById(id);if(d)d.style.display=show;});if(o)o.style.display=show;})(event)"/>
+                    onclick="(function(e){e.stopPropagation();var m=document.getElementById('liquid-drop-menu');var o=document.getElementById('ldi-overlay');if(!m)return;var open=m.style.display==='block';var show=open?'none':'block';m.style.display=show;['cloud-dot1','cloud-dot2','cloud-dot3','cloud-dot4'].forEach(function(id){var d=document.getElementById(id);if(d)d.style.display=show;});if(o)o.style.display=show;if(show==='block'&&typeof swCloseChat==='function')swCloseChat();})(event)"/>
 
 
             <!-- Base — drum shape -->
@@ -394,103 +394,305 @@
 
     <!-- ═══ SILVERWOODS CONCIERGE CHATBOT ═══ -->
     <style>
-    #sw-chat-wrap{position:fixed;bottom:24px;right:24px;z-index:9990;font-family:'Inter',sans-serif;}
-    #sw-chat-btn{width:54px;height:54px;border-radius:50%;background:#c9a84c;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(201,168,76,0.35);position:relative;transition:transform .2s;}
+    #sw-chat-wrap{position:fixed;bottom:24px;right:24px;z-index:10100;font-family:'Inter',sans-serif;user-select:none;}
+    #sw-chat-btn{
+      width:100px;height:100px;
+      background:transparent;border:none;cursor:grab;
+      display:flex;align-items:center;justify-content:center;
+      position:relative;z-index:1;padding:0;
+      transition:transform .2s;
+    }
     #sw-chat-btn:hover{transform:scale(1.08);}
-    #sw-chat-btn .pulse{position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(201,168,76,0.4);animation:sw-pulse 2s ease-in-out infinite;}
-    @keyframes sw-pulse{0%,100%{transform:scale(1);opacity:.6;}50%{transform:scale(1.15);opacity:0;}}
-    #sw-chat-btn svg{width:24px;height:24px;fill:#fff;transition:transform .3s;}
-    #sw-chat-btn.open svg{transform:rotate(90deg);}
+    #sw-chat-btn:active{cursor:grabbing;}
+    /* Pulse image — same shape as icon, gold tint, expands & fades */
+    .sw-pulse-img{
+      position:absolute;
+      width:96px;height:96px;
+      object-fit:contain;
+      filter:sepia(1) saturate(10) hue-rotate(-10deg) brightness(2);
+      transform-origin:center;
+      animation:sw-pulse 2.2s ease-in-out infinite;
+      pointer-events:none;
+    }
+    @keyframes sw-pulse{0%{transform:scale(1);opacity:.35;}50%{transform:scale(1.22);opacity:0;}100%{transform:scale(1);opacity:.35;}}
+    #sw-chat-btn img#sw-icon-chat{width:92px;height:92px;object-fit:contain;position:relative;z-index:1;}
+    #sw-chat-btn.open img#sw-icon-chat{display:none;}
+    #sw-chat-btn.open .sw-pulse-img{display:none;}
+    #sw-chat-btn svg#sw-icon-close{display:none;}
+    #sw-close-btn{
+      display:flex;
+      width:26px;height:26px;border-radius:50%;
+      background:#c9a84c;
+      border:none;
+      align-items:center;justify-content:center;
+      align-self:center;
+      cursor:pointer;
+      transition:background .2s,transform .2s;
+      position:relative;z-index:2;
+      padding:0;
+      flex-shrink:0;
+    }
+    #sw-close-btn:hover{background:#a8813a;transform:scale(1.08);}
+    #sw-close-btn svg{width:12px;height:12px;display:block;}
+    #sw-close-btn::after{content:'Close';position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.72);color:#fff;font-size:9px;padding:2px 7px;border-radius:4px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;}
+    #sw-close-btn:hover::after{opacity:1;}
+    #sw-send{position:relative;}
+    #sw-send::after{content:'Send';position:absolute;top:-26px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.72);color:#fff;font-size:9px;padding:2px 7px;border-radius:4px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;}
+    #sw-send:hover::after{opacity:1;}
     #sw-chat-badge{position:absolute;top:-3px;right:-3px;width:18px;height:18px;background:#ef4444;border-radius:50%;border:2px solid #fff;font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;}
-    #sw-chat-panel{position:absolute;bottom:66px;right:0;width:320px;max-height:480px;background:#111118;border:1px solid rgba(201,168,76,0.22);border-radius:20px;overflow:hidden;display:none;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.5);}
+    /* Panel — transparent wrapper, allows deer to float above */
+    #sw-chat-panel{position:absolute;bottom:110px;right:0;width:320px;display:none;flex-direction:column;}
     #sw-chat-panel.open{display:flex;}
-    .sw-header{padding:14px 16px;background:linear-gradient(135deg,rgba(201,168,76,0.18),rgba(201,168,76,0.06));border-bottom:1px solid rgba(201,168,76,0.15);display:flex;align-items:center;gap:10px;}
-    .sw-avatar{width:36px;height:36px;border-radius:50%;background:rgba(201,168,76,0.15);border:1.5px solid rgba(201,168,76,0.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-    .sw-avatar svg{width:18px;height:18px;fill:#c9a84c;}
-    .sw-hinfo{flex:1;}
-    .sw-hname{font-size:13px;font-weight:600;color:#f5f0e8;letter-spacing:.3px;}
-    .sw-hstatus{font-size:10px;color:rgba(201,168,76,0.7);display:flex;align-items:center;gap:4px;margin-top:1px;}
-    .sw-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;display:inline-block;}
-    .sw-body{flex:1;overflow-y:auto;padding:14px 14px 10px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth;}
+    /* Inner card — this has the visual styling + overflow:hidden */
+    #sw-panel-inner{background:#ffffff;border:1px solid #e8e8e8;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;height:480px;max-height:75vh;box-shadow:0 12px 40px rgba(0,0,0,0.15);}
+    /* Floating deer icon — half outside left edge of panel */
+    .sw-float-deer{
+      position:absolute;top:-42px;left:-38px;
+      width:76px;height:84px;pointer-events:none;z-index:5;
+    }
+    .sw-float-deer .sw-pulse-img{
+      position:absolute;top:0;left:0;width:76px;height:84px;
+      filter:sepia(1) saturate(10) hue-rotate(-10deg) brightness(2);
+      animation:sw-pulse 2.2s ease-in-out infinite;
+      transform-origin:center;
+      object-fit:contain;
+    }
+    .sw-float-deer img.sw-deer-icon{
+      position:relative;z-index:1;width:76px;height:84px;object-fit:contain;
+    }
+    .sw-header{padding:0 16px 0 66px;background:#0a0a0a;border-bottom:2px solid #c9a84c;display:flex;flex-direction:row;align-items:center;gap:8px;height:70px;flex-shrink:0;}
+    .sw-hinfo{flex:1;display:flex;flex-direction:column;gap:4px;}
+    .sw-avatar{display:none;}
+    .sw-hname{font-size:13px;font-weight:700;letter-spacing:.3px;background:linear-gradient(90deg,#ffffff 0%,#c9a84c 55%,#e0ba5a 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .sw-hstatus{font-size:10px;color:#c9a84c;display:flex;align-items:center;gap:4px;margin-top:1px;}
+    .sw-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;}
+    .sw-body{flex:1;min-height:0;overflow-y:auto;padding:14px 14px 10px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth;background:#ffffff;}
     .sw-body::-webkit-scrollbar{width:3px;}
     .sw-body::-webkit-scrollbar-track{background:transparent;}
-    .sw-body::-webkit-scrollbar-thumb{background:rgba(201,168,76,0.2);border-radius:10px;}
+    .sw-body::-webkit-scrollbar-thumb{background:rgba(201,168,76,0.35);border-radius:10px;}
     .sw-msg{max-width:85%;animation:sw-fadein .25s ease;}
     @keyframes sw-fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
-    .sw-bot-msg{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:4px 14px 14px 14px;padding:10px 13px;font-size:12.5px;color:rgba(245,240,232,0.9);line-height:1.5;align-self:flex-start;}
-    .sw-user-msg{background:rgba(201,168,76,0.18);border:1px solid rgba(201,168,76,0.25);border-radius:14px 4px 14px 14px;padding:10px 13px;font-size:12.5px;color:#f5f0e8;line-height:1.5;align-self:flex-end;}
+    .sw-bot-msg{background:#f8f8f8;border:1px solid #e8e8e8;border-radius:4px 14px 14px 14px;padding:10px 13px;font-size:12.5px;color:#1a1a1a;line-height:1.5;align-self:flex-start;}
+    .sw-user-msg{background:#c9a84c;border:1px solid #b8932a;border-radius:14px 4px 14px 14px;padding:10px 13px;font-size:12.5px;color:#fff;line-height:1.5;align-self:flex-end;}
     .sw-suggestions{display:flex;flex-direction:column;gap:6px;margin-top:4px;}
-    .sw-suggestion{background:transparent;border:1px solid rgba(201,168,76,0.25);border-radius:10px;padding:8px 12px;font-size:11.5px;color:rgba(201,168,76,0.85);cursor:pointer;text-align:left;transition:all .15s;line-height:1.4;}
-    .sw-suggestion:hover{background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.5);color:#c9a84c;}
-    .sw-typing{display:flex;align-items:center;gap:4px;padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:4px 14px 14px 14px;width:fit-content;}
-    .sw-typing span{width:6px;height:6px;border-radius:50%;background:rgba(201,168,76,0.5);animation:sw-bounce 1.2s ease-in-out infinite;}
+    .sw-suggestion{background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.35);border-radius:10px;padding:8px 12px;font-size:11.5px;color:#7a5120;cursor:pointer;text-align:left;transition:all .15s;line-height:1.4;}
+    .sw-suggestion:hover{background:rgba(201,168,76,0.14);border-color:#c9a84c;color:#0a0a0a;}
+    .sw-typing{display:flex;align-items:center;gap:4px;padding:8px 12px;background:#f8f8f8;border:1px solid #e8e8e8;border-radius:4px 14px 14px 14px;width:fit-content;}
+    .sw-typing span{width:6px;height:6px;border-radius:50%;background:#c9a84c;animation:sw-bounce 1.2s ease-in-out infinite;}
     .sw-typing span:nth-child(2){animation-delay:.2s;}
     .sw-typing span:nth-child(3){animation-delay:.4s;}
     @keyframes sw-bounce{0%,80%,100%{transform:scale(0.6);opacity:.4;}40%{transform:scale(1);opacity:1;}}
-    .sw-contact-card{background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:12px;font-size:12px;color:rgba(245,240,232,0.8);line-height:1.8;}
-    .sw-contact-card a{color:#c9a84c;text-decoration:none;}
+    .sw-contact-card{background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.25);border-radius:12px;padding:12px;font-size:12px;color:#1a1a1a;line-height:1.8;}
+    .sw-contact-card a{color:#7a5120;text-decoration:none;}
     .sw-contact-card a:hover{text-decoration:underline;}
-    .sw-footer{padding:10px 12px;border-top:1px solid rgba(201,168,76,0.1);display:flex;gap:8px;align-items:center;}
-    #sw-input{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:9px 13px;font-size:12.5px;color:#f5f0e8;outline:none;font-family:'Inter',sans-serif;transition:border-color .2s;}
-    #sw-input::placeholder{color:rgba(255,255,255,0.2);}
-    #sw-input:focus{border-color:rgba(201,168,76,0.4);}
-    #sw-send{width:34px;height:34px;border-radius:50%;background:#c9a84c;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s;}
-    #sw-send:hover{background:#a8813a;}
-    #sw-send svg{width:14px;height:14px;fill:#fff;}
-    @media(max-width:400px){#sw-chat-panel{width:calc(100vw - 24px);right:-8px;}}
+    .sw-footer{padding:10px 12px;border-top:1px solid #e8e8e8;display:flex;gap:8px;align-items:center;flex-shrink:0;background:#f8f8f8;}
+    #sw-input{flex:1;background:#fff;border:1px solid #ddd;border-radius:12px;padding:9px 13px;font-size:12.5px;color:#0a0a0a;outline:none;font-family:'Inter',sans-serif;transition:border-color .2s;}
+    #sw-input::placeholder{color:#aaa;}
+    #sw-input:focus{border-color:#c9a84c;}
+    #sw-send{width:34px;height:34px;border-radius:50%;background:transparent;border:2px solid #c9a84c;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;}
+    #sw-send:hover{background:rgba(201,168,76,0.12);border-color:#e0ba5a;}
+    #sw-send svg{width:14px;height:14px;fill:none;stroke:#c9a84c;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+    @media(max-width:520px){
+      #sw-chat-wrap{bottom:16px;right:16px;}
+      #sw-chat-panel{width:calc(100vw - 32px);right:-8px;left:auto;}
+      #sw-panel-inner{height:58vh;max-height:58vh;border-radius:16px;}
+      .sw-header{border-radius:16px 16px 0 0;}
+      #sw-chat-btn{width:76px;height:76px;}
+      #sw-chat-btn img#sw-icon-chat{width:70px;height:70px;}
+      #sw-chat-btn .sw-pulse-img{width:74px;height:74px;}
+      .sw-float-deer{top:-32px;left:-28px;}
+      .sw-float-deer .sw-pulse-img,.sw-float-deer img.sw-deer-icon{width:60px;height:68px;}
+    }
+
+    /* ── Dark theme: Jet Black + Carbon + Gold ── */
+    .dark #sw-panel-inner{background:#000000 !important;border-color:#2a2a2a !important;box-shadow:0 12px 40px rgba(0,0,0,0.9) !important;}
+    .dark .sw-header{background:#000000 !important;border-bottom:1px solid #c9a84c !important;}
+    .dark .sw-hname{color:#ffffff !important;}
+    .dark .sw-hstatus{color:#aaaaaa !important;}
+    .dark #sw-close-btn{background:#c9a84c !important;}
+    .dark #sw-close-btn:hover{background:#a8813a !important;}
+    .dark #sw-close-btn svg path{fill:#000 !important;}
+    .dark .sw-body{background:#222222 !important;}
+    .dark .sw-body::-webkit-scrollbar-thumb{background:rgba(201,168,76,0.35) !important;}
+    .dark .sw-bot-msg{background:#2e2e2e !important;border-color:#3a3a3a !important;color:#ffffff !important;}
+    .dark .sw-user-msg{background:#c9a84c !important;border-color:#b8932a !important;color:#000000 !important;}
+    .dark .sw-suggestion{background:#2e2e2e !important;border-color:rgba(201,168,76,0.35) !important;color:#ffffff !important;}
+    .dark .sw-suggestion:hover{background:#383838 !important;border-color:rgba(201,168,76,0.65) !important;color:#ffffff !important;}
+    .dark .sw-typing{background:#2e2e2e !important;border-color:#3a3a3a !important;}
+    .dark .sw-typing span{background:#c9a84c !important;}
+    .dark .sw-contact-card{background:#2e2e2e !important;border-color:#3a3a3a !important;color:#e0e0e0 !important;}
+    .dark .sw-contact-card a{color:#c9a84c !important;}
+    .dark .sw-footer{background:#000000 !important;border-top-color:#2a2a2a !important;}
+    .dark #sw-input{background:#3a3a3a !important;border-color:#444 !important;color:#f0f0f0 !important;}
+    .dark #sw-input::placeholder{color:#888 !important;}
+    .dark #sw-input:focus{border-color:#c9a84c !important;}
+    .dark #sw-send{background:transparent !important;border:2px solid #c9a84c !important;}
+    .dark #sw-send:hover{background:rgba(201,168,76,0.12) !important;border-color:#e0ba5a !important;}
+    .dark #sw-send svg{fill:none !important;stroke:#c9a84c !important;}
     </style>
 
     <div id="sw-chat-wrap">
         <div id="sw-chat-panel">
-            <div class="sw-header">
-                <div class="sw-avatar">
-                    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-                </div>
-                <div class="sw-hinfo">
-                    <div class="sw-hname">Silverwoods Concierge</div>
-                    <div class="sw-hstatus"><span class="sw-dot"></span> Online — Ask me anything</div>
-                </div>
+            <!-- Deer icon floating half above the panel -->
+            <div class="sw-float-deer">
+                <img class="sw-pulse-img" src="{% static 'images/chatbot-icon.png' %}" alt="" aria-hidden="true">
+                <img class="sw-deer-icon" src="{% static 'images/chatbot-icon.png' %}" alt="Silverwoods">
             </div>
-            <div class="sw-body" id="sw-body"></div>
-            <div class="sw-footer">
-                <input type="text" id="sw-input" placeholder="Type your question…" autocomplete="off">
-                <button id="sw-send">
-                    <svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-                </button>
+            <!-- Inner card with overflow:hidden for proper clipping -->
+            <div id="sw-panel-inner">
+                <div class="sw-header">
+                    <div class="sw-hinfo">
+                        <div class="sw-hname">MARICHA</div>
+                        <div class="sw-hstatus"><span class="sw-dot"></span> Online — Ask me anything</div>
+                    </div>
+                    <button id="sw-close-btn" aria-label="Close chat">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M12 17 L4 9 Q3 7 5.5 7 L18.5 7 Q21 7 20 9 Z" fill="#000000"/></svg>
+                    </button>
+                </div>
+                <div class="sw-body" id="sw-body"></div>
+                <div class="sw-footer">
+                    <input type="text" id="sw-input" placeholder="Type your question…" autocomplete="off">
+                    <button id="sw-send">
+                        <svg viewBox="0 0 24 24" fill="none"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    </button>
+                </div>
             </div>
         </div>
         <button id="sw-chat-btn">
-            <span class="pulse"></span>
-            <svg id="sw-icon-chat" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-            <svg id="sw-icon-close" viewBox="0 0 24 24" style="display:none;"><path d="M18 6L6 18M6 6l12 12" stroke="#fff" stroke-width="2.5" stroke-linecap="round" fill="none"/></svg>
+            <img class="sw-pulse-img" src="{% static 'images/chatbot-icon.png' %}" alt="" aria-hidden="true">
+            <img id="sw-icon-chat" src="{% static 'images/chatbot-icon.png' %}" alt="Chat">
         </button>
+
     </div>
 
     <script>
     (function(){
+        var wrap=document.getElementById('sw-chat-wrap');
         var btn=document.getElementById('sw-chat-btn');
         var panel=document.getElementById('sw-chat-panel');
         var body=document.getElementById('sw-body');
         var input=document.getElementById('sw-input');
         var send=document.getElementById('sw-send');
         var iconChat=document.getElementById('sw-icon-chat');
-        var iconClose=document.getElementById('sw-icon-close');
+        var closeBtn=document.getElementById('sw-close-btn');
         var debTimer=null;
         var isOpen=false;
         var awaitingMore=false;
+        var userDragged=false;
 
+        /* ── Draggable (btn + header) ── */
+        var dragging=false, didDrag=false, ox=0, oy=0;
+        var header=document.querySelector('.sw-header');
+
+        function startDrag(cx,cy){
+            dragging=true; didDrag=false;
+            ox=cx-(wrap.getBoundingClientRect().left);
+            oy=cy-(wrap.getBoundingClientRect().top);
+        }
+        function moveDrag(cx,cy){
+            if(!dragging) return;
+            var x=cx-ox, y=cy-oy;
+            wrap.style.left=x+'px'; wrap.style.top=y+'px';
+            wrap.style.right='auto'; wrap.style.bottom='auto';
+            didDrag=true; userDragged=true;
+        }
+
+        var panelInner=document.getElementById('sw-panel-inner');
+        function isInteractive(el){
+            var tag=el.tagName;
+            if(tag==='INPUT'||tag==='BUTTON'||tag==='TEXTAREA'||tag==='A') return true;
+            if(el.classList&&(el.classList.contains('sw-suggestion')||el.classList.contains('sw-contact-card'))) return true;
+            return false;
+        }
+        function canDrag(e){
+            var el=e.target;
+            while(el&&el!==panelInner){if(isInteractive(el)) return false; el=el.parentElement;}
+            return true;
+        }
+
+        btn.addEventListener('mousedown',function(e){startDrag(e.clientX,e.clientY);e.preventDefault();});
+        header.addEventListener('mousedown',function(e){if(e.target===closeBtn||closeBtn.contains(e.target)) return; startDrag(e.clientX,e.clientY);e.preventDefault();});
+        panelInner.addEventListener('mousedown',function(e){if(!canDrag(e)) return; startDrag(e.clientX,e.clientY);e.preventDefault();});
+        document.addEventListener('mousemove',function(e){moveDrag(e.clientX,e.clientY);});
+        document.addEventListener('mouseup',function(){dragging=false;});
+
+        btn.addEventListener('touchstart',function(e){var t=e.touches[0];startDrag(t.clientX,t.clientY);},{passive:true});
+        header.addEventListener('touchstart',function(e){if(e.target===closeBtn||closeBtn.contains(e.target)) return; var t=e.touches[0];startDrag(t.clientX,t.clientY);},{passive:true});
+        panelInner.addEventListener('touchstart',function(e){if(!canDrag(e)) return; var t=e.touches[0];startDrag(t.clientX,t.clientY);},{passive:true});
+        document.addEventListener('touchmove',function(e){if(!dragging) return; var t=e.touches[0];moveDrag(t.clientX,t.clientY);},{passive:true});
+        document.addEventListener('touchend',function(){dragging=false;});
+
+        function positionPanel(){
+            var wRect=wrap.getBoundingClientRect();
+            var isMobile=window.innerWidth<=520;
+            var panelW=isMobile?(window.innerWidth-32):320;
+            var panelH=490;
+            var gap=8;
+
+            /* vertical: open above (panel is below chat btn on mobile) */
+            var spaceAbove=wRect.top;
+            var spaceBelow=window.innerHeight-wRect.bottom;
+            if(spaceBelow>=spaceAbove || spaceAbove<panelH){
+                panel.style.bottom='auto';
+                panel.style.top=(wrap.offsetHeight+gap)+'px';
+            } else {
+                panel.style.top='auto';
+                panel.style.bottom=(wrap.offsetHeight+gap)+'px';
+            }
+
+            /* horizontal: only shift wrap if panel would clip left edge of viewport */
+            if(!isMobile){
+                var panelLeft=wRect.right-panelW;
+                if(panelLeft<8){
+                    wrap.style.left=Math.max(8,wRect.left+(8-panelLeft))+'px';
+                    wrap.style.right='auto';
+                }
+            }
+        }
+
+        function swCloseMenu(){
+            var m=document.getElementById('liquid-drop-menu');
+            var o=document.getElementById('ldi-overlay');
+            if(m) m.style.display='none';
+            ['cloud-dot1','cloud-dot2','cloud-dot3','cloud-dot4'].forEach(function(id){var d=document.getElementById(id);if(d)d.style.display='none';});
+            if(o) o.style.display='none';
+        }
+        window.swCloseChat=function(){
+            if(!isOpen) return;
+            isOpen=false;
+            panel.classList.remove('open');
+            btn.classList.remove('open');
+        };
         function togglePanel(){
+            if(didDrag){didDrag=false;return;}
             isOpen=!isOpen;
             panel.classList.toggle('open',isOpen);
             btn.classList.toggle('open',isOpen);
-            iconChat.style.display=isOpen?'none':'block';
-            iconClose.style.display=isOpen?'block':'none';
-            if(isOpen && body.children.length===0) greet();
+            if(isOpen){
+                swCloseMenu();
+                var sy=window.scrollY||window.pageYOffset;
+                positionPanel();
+                window.scrollTo(0,sy);
+                requestAnimationFrame(function(){
+                    window.scrollTo(0,sy);
+                    requestAnimationFrame(function(){ window.scrollTo(0,sy); });
+                });
+                if(body.children.length===0) greet();
+            }
         }
 
         btn.addEventListener('click',togglePanel);
+        closeBtn.addEventListener('click',function(){
+            isOpen=false;
+            panel.classList.remove('open');
+            btn.classList.remove('open');
+            if(!userDragged){
+                wrap.style.left=''; wrap.style.right='';
+                wrap.style.top=''; wrap.style.bottom='';
+            }
+        });
 
-        function scroll(){body.scrollTop=body.scrollHeight;}
+        function scroll(){if(lockScroll) return; setTimeout(function(){if(!lockScroll) body.scrollTop=body.scrollHeight;},50);}
 
         function addMsg(text,cls){
             var d=document.createElement('div');
@@ -510,12 +712,15 @@
             return d;
         }
 
+        var lockScroll=false;
         function greet(){
             var t=typing();
             setTimeout(function(){
                 t.remove();
-                addMsg('Welcome to <strong style="color:#c9a84c">Silverwoods</strong>! 🏡<br>I\'m your virtual concierge. Type anything or pick a topic below.','sw-bot-msg');
+                lockScroll=true;
+                addMsg('Hi! I\'m <strong style="color:#c9a84c">MARICHA</strong>, your SILVERWOODS virtual concierge. 🏡<br>Ask me anything about the project, or pick a topic below.','sw-bot-msg');
                 showDefaultSuggestions();
+                setTimeout(function(){ body.scrollTop=0; lockScroll=false; },200);
             },600);
         }
 
@@ -555,8 +760,30 @@
             .then(function(data){
                 t.remove();
                 addMsg(data.answer.replace(/\n/g,'<br>'),'sw-bot-msg');
-                setTimeout(askMore,400);
+                if(data.follow_up && data.follow_up.length){
+                    setTimeout(function(){ showFollowUp(data.follow_up); },300);
+                } else {
+                    setTimeout(askMore,400);
+                }
             });
+        }
+
+        function showFollowUp(items){
+            var w=document.createElement('div');
+            w.className='sw-suggestions';
+            items.forEach(function(item){
+                var b=document.createElement('button');
+                b.className='sw-suggestion';
+                b.textContent=item.question;
+                b.addEventListener('click',function(){
+                    w.remove();
+                    addMsg(item.question,'sw-user-msg');
+                    fetchAnswer(item.id);
+                });
+                w.appendChild(b);
+            });
+            body.appendChild(w);
+            scroll();
         }
 
         function askMore(){
@@ -672,5 +899,6 @@
     })();
     </script>
     <!-- ═══ END CHATBOT ═══ -->
+
 </body>
 </html>

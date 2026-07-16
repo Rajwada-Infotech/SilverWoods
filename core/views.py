@@ -742,7 +742,27 @@ def chatbot_search(request):
 
 def chatbot_answer(request, qa_id):
     qa = get_object_or_404(ChatbotQA, pk=qa_id, is_active=True)
-    return JsonResponse({'question': qa.question, 'answer': qa.answer})
+    answer = qa.answer
+    if '{{PRICING_TABLE}}' in answer:
+        types = FlatType.objects.filter(is_available=True).order_by('order')
+        rows = []
+        for ft in types:
+            rows.append(
+                f"• <strong>{ft.name}</strong> ({ft.bhk} BHK) — "
+                f"Buildup: {ft.buildup_area} | Terrace: {ft.terrace_area} | "
+                f"Price: ₹{ft.price:,.0f} (₹{ft.price_per_sqft:,.0f}/sq.ft)"
+            )
+        answer = answer.replace('{{PRICING_TABLE}}', '<br>'.join(rows) if rows else 'Contact us for latest pricing.')
+    if '{{AVAILABLE_PLOTS}}' in answer:
+        available = VillaPlot.objects.filter(status='available').count()
+        total = VillaPlot.objects.count()
+        answer = answer.replace('{{AVAILABLE_PLOTS}}', f'{available} out of {total}')
+    response = {'question': qa.question, 'answer': answer}
+    # After pricing overview, offer villa-type follow-up chips
+    if qa.order == 1:
+        villa_qas = ChatbotQA.objects.filter(order__in=range(101, 107), is_active=True).order_by('order')
+        response['follow_up'] = [{'id': v.id, 'question': v.question} for v in villa_qas]
+    return JsonResponse(response)
 
 
 def chatbot_contact(request):

@@ -621,31 +621,51 @@ def admin_profile(request):
         elif action == 'upload_photo':
             photo = request.FILES.get('photo')
             if photo:
-                from django.core.files.storage import default_storage
-                import time as _t
-                file_path = f'admin_photos/{user.username}.jpg'
-                try:
-                    default_storage.delete(file_path)
-                except Exception:
-                    pass
-                saved = default_storage.save(file_path, photo)
+                import os
+                public_id = f'admin_photos/{user.username}'
+                if os.environ.get('CLOUDINARY_URL'):
+                    import cloudinary.uploader
+                    result = cloudinary.uploader.upload(
+                        photo,
+                        public_id=public_id,
+                        overwrite=True,
+                        invalidate=True,
+                        resource_type='image',
+                    )
+                    # Store the returned secure_url so we can display it
+                    msg_detail = result.get('secure_url', '')
+                else:
+                    from django.core.files.storage import default_storage
+                    file_path = f'{public_id}.jpg'
+                    try:
+                        default_storage.delete(file_path)
+                    except Exception:
+                        pass
+                    default_storage.save(file_path, photo)
                 msg = 'Photo uploaded successfully.'
                 msg_type = 'success'
 
     photo_url = ''
     has_photo = False
+    import os, time
+    public_id = f'admin_photos/{user.username}'
     try:
-        from django.core.files.storage import default_storage
-        import time
-        file_path = f'admin_photos/{user.username}.jpg'
-        url = default_storage.url(file_path)
-        # Strip any .jpg that Cloudinary may not recognise in public_id
-        # cloudinary-storage returns the correct CDN URL already
-        photo_url = f"{url}?v={int(time.time())}"
-        has_photo = True
+        if os.environ.get('CLOUDINARY_URL'):
+            import cloudinary
+            # Build URL from known public_id — guaranteed to match what was uploaded
+            cloud_name = cloudinary.config().cloud_name
+            ts = int(time.time())
+            photo_url = f'https://res.cloudinary.com/{cloud_name}/image/upload/v{ts}/{public_id}.jpg'
+            has_photo = True
+        else:
+            from django.core.files.storage import default_storage
+            file_path = f'{public_id}.jpg'
+            if default_storage.exists(file_path):
+                photo_url = default_storage.url(file_path)
+                has_photo = True
     except Exception as e:
         import logging
-        logging.getLogger(__name__).error('Profile photo error: %s', e, exc_info=True)
+        logging.getLogger(__name__).error('Profile photo URL error: %s', e, exc_info=True)
         has_photo = False
         photo_url = ''
 

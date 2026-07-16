@@ -2,6 +2,7 @@ django>=5.0
 gunicorn
 whitenoise
 python-decouple
+django-cors-headers
 openpyxl
 reportlab
 Pillow

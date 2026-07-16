@@ -8,6 +8,5 @@ cloudinary
 openpyxl
 reportlab
 Pillow
-mysqlclient
+PyMySQL
 dj-database-url
-

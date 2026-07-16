@@ -12,7 +12,10 @@ __pycache__/
 # Django
 db.sqlite3
 staticfiles/
-media/
+
+# Media — allow small files, exclude huge brochure PNGs and PDFs
+media/brochure/
+media/brochure_pdf/
 
 # Node / Tailwind build
 node_modules/

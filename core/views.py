@@ -621,32 +621,35 @@ def admin_profile(request):
         elif action == 'upload_photo':
             photo = request.FILES.get('photo')
             if photo:
-                import os, cloudinary, cloudinary.uploader
-                # Upload directly via Cloudinary API with a fixed public_id (no extension)
+                import os
                 public_id = f'admin_photos/{user.username}'
-                cloudinary.uploader.upload(
-                    photo,
-                    public_id=public_id,
-                    overwrite=True,
-                    invalidate=True,
-                    resource_type='image',
-                )
+                if os.environ.get('CLOUDINARY_URL'):
+                    import cloudinary.uploader
+                    cloudinary.uploader.upload(
+                        photo,
+                        public_id=public_id,
+                        overwrite=True,
+                        invalidate=True,
+                        resource_type='image',
+                    )
+                else:
+                    from django.core.files.storage import default_storage
+                    file_path = f'{public_id}.jpg'
+                    if default_storage.exists(file_path):
+                        default_storage.delete(file_path)
+                    default_storage.save(file_path, photo)
                 msg = 'Photo uploaded successfully.'
                 msg_type = 'success'
 
-    import time
-    from django.conf import settings as django_settings
+    import os, time
     public_id = f'admin_photos/{user.username}'
-    if getattr(django_settings, 'DEFAULT_FILE_STORAGE', '').find('cloudinary') != -1 or \
-       __import__('decouple', fromlist=['config']).config('CLOUDINARY_URL', default=None):
-        # On Cloudinary: build URL directly from public_id
+    if os.environ.get('CLOUDINARY_URL'):
         import cloudinary.utils
         photo_url, _ = cloudinary.utils.cloudinary_url(
             public_id, format='jpg', version=int(time.time()),
         )
-        has_photo = True  # let onerror in template handle missing image gracefully
+        has_photo = True  # onerror in template shows fallback if no photo uploaded yet
     else:
-        # Local filesystem
         from django.core.files.storage import default_storage
         file_path = f'{public_id}.jpg'
         if default_storage.exists(file_path):

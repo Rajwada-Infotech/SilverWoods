@@ -64,12 +64,15 @@ DATABASES = {
     }
 }
 
-# Use Railway persistent volume for SQLite in production
-if not DEBUG:
-    import os
-    # Ensure the directory exists (it will be mounted by Railway at /app/db)
-    os.makedirs(BASE_DIR / 'db', exist_ok=True)
-    DATABASES['default']['NAME'] = BASE_DIR / 'db' / 'db.sqlite3'
+# Use PostgreSQL if DATABASE_URL is provided (production)
+if config('DATABASE_URL', default=None):
+    import dj_database_url
+    DATABASES['default'] = dj_database_url.config(
+        default=config('DATABASE_URL'),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+
 
 
 # ── Password Validation ───────────────────────────────────────────────

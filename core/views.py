@@ -625,6 +625,8 @@ def admin_profile(request):
                 file_path = f'admin_photos/{user.username}.jpg'
                 if default_storage.exists(file_path):
                     default_storage.delete(file_path)
+                
+                # Cloudinary may alter the filename slightly, so we rely on the exact requested path
                 default_storage.save(file_path, photo)
                 msg = 'Photo uploaded successfully.'
                 msg_type = 'success'
@@ -632,10 +634,13 @@ def admin_profile(request):
     from django.core.files.storage import default_storage
     import time
     file_path = f'admin_photos/{user.username}.jpg'
-    has_photo = default_storage.exists(file_path)
-    if has_photo:
+    
+    # Try getting the URL directly. Cloudinary doesn't always play nice with exists()
+    try:
         photo_url = f"{default_storage.url(file_path)}?v={int(time.time())}"
-    else:
+        has_photo = True
+    except Exception:
+        has_photo = False
         photo_url = ''
 
     return render(request, 'admin_panel/profile.html', {

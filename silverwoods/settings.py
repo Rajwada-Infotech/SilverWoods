@@ -64,6 +64,14 @@ DATABASES = {
     }
 }
 
+# Use Railway persistent volume for SQLite in production
+if not DEBUG:
+    import os
+    # Ensure the directory exists (it will be mounted by Railway at /app/db)
+    os.makedirs(BASE_DIR / 'db', exist_ok=True)
+    DATABASES['default']['NAME'] = BASE_DIR / 'db' / 'db.sqlite3'
+
+
 # ── Password Validation ───────────────────────────────────────────────
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},

@@ -8,5 +8,6 @@ cloudinary
 openpyxl
 reportlab
 Pillow
-psycopg2-binary
+mysqlclient
 dj-database-url
+

@@ -1,0 +1,81 @@
+Daily Development Report · Silverwoods
+Date: 5 July 2026
+Blueprint: 3D + VR sync · 7 changes applied
+
+──────────────────────────────────────────
+STATS
+──────────────────────────────────────────
+Changes:       7
+Villa moves:   4
+VR sync:       1
+Roads removed: 2
+
+──────────────────────────────────────────
+RIGHT WING — VILLAS (z = -143 / -157 / -122)
+──────────────────────────────────────────
+
+[fix] Shift right wing 12 villas (z=-143 & z=-157) eastward
+Moved all 6+6 villas in the right wing rows from x = 90+i×12
+to x = 98+i×12 (+8 units east) to create proper spacing from
+the divider road and align with the updated layout.
+File: templates/blueprint.html — mkVilla lines z=-143 & z=-157 right wing
+
+[fix] Shift right wing z=-122 row (4 villas) eastward
+The 4-villa row at z=-122 in the right wing shifted from
+x = 90+i×12 to x = 98+i×12 to keep consistent east-side spacing.
+File: templates/blueprint.html — mkVilla line z=-122 right group
+
+[fix] Extra eastward shift on right wing bottom row (z=-157)
+The bottom row of the right wing (z=-157, 6 villas) shifted an
+additional +8 units east — now at x = 106+i×12 — to visually
+separate it from the top row and give the pair a staggered offset.
+File: templates/blueprint.html — mkVilla line z=-157 right wing
+
+──────────────────────────────────────────
+LEFT WING — VILLAS (z = -157)
+──────────────────────────────────────────
+
+[fix] Shift left wing bottom row (z=-157) eastward
+Left wing bottom row (4 villas) shifted from x = 30+i×12
+to x = 38+i×12 (+8 units) to match spacing intent of the
+right wing bottom row change.
+File: templates/blueprint.html — mkVilla line z=-157 left wing
+
+──────────────────────────────────────────
+ROADS
+──────────────────────────────────────────
+
+[infra] Removed 2 small vertical (N-S) roads in wing zone
+Deleted the N-S divider road between left and right wing
+(x=78, z=-150) and the bridge connector road (x=48, z=-132)
+which were visually cluttering the wing layout with no
+functional purpose after the villa repositioning.
+File: templates/blueprint.html — mkFlat roads x=78,z=-150 and x=48,z=-132
+
+──────────────────────────────────────────
+VR WALKTHROUGH
+──────────────────────────────────────────
+
+[feat] VR villa layout rebuilt to exactly mirror 3D blueprint
+Replaced all fictional VR villa clusters (West Block 56,
+North Cluster 36, Entry columns) with exact blueprint positions
+using VR_z = blueprint_z + 91 offset. Villa groups now match:
+
+  - 12 entry/bottom villas (z=-91, z=-108)
+  - 9 mid-zone villas (z=-122 left + right groups)
+  - 10 north wing villas (z=-143 left 4 + right 6)
+  - 10 bottom row villas (z=-157 left 4 + right 6, with correct shifts)
+  - 24-villa section (6×4 rows, z=-240 to -282)
+  - 25-villa section (5×5 rows + z=-296 row, z=-296 to -368)
+
+All VR roads (E-W main, E-W wing, N-S dividers, connector road,
+east side road) added to match blueprint geometry. Ground plane
+extended from 360 to 420 units to cover full blueprint depth.
+All existing VR theme & graphics (clubhouse, pool, canopies,
+gate, trees, lighting) kept unchanged.
+File: templates/blueprint.html — vrBuildWorld() villa & road section
+
+──────────────────────────────────────────
+Blueprint: 3D & VR scenes synced · No render errors
+Silverwoods Real Estate · blueprint.html
+──────────────────────────────────────────

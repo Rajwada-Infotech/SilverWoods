@@ -1,4 +1,7 @@
 django>=5.0
+gunicorn
+whitenoise
+python-decouple
 openpyxl
 reportlab
-mysqlclient
+Pillow

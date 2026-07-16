@@ -621,27 +621,40 @@ def admin_profile(request):
         elif action == 'upload_photo':
             photo = request.FILES.get('photo')
             if photo:
-                from django.core.files.storage import default_storage
-                file_path = f'admin_photos/{user.username}.jpg'
-                if default_storage.exists(file_path):
-                    default_storage.delete(file_path)
-                
-                # Cloudinary may alter the filename slightly, so we rely on the exact requested path
-                default_storage.save(file_path, photo)
+                import os, cloudinary, cloudinary.uploader
+                # Upload directly via Cloudinary API with a fixed public_id (no extension)
+                public_id = f'admin_photos/{user.username}'
+                cloudinary.uploader.upload(
+                    photo,
+                    public_id=public_id,
+                    overwrite=True,
+                    invalidate=True,
+                    resource_type='image',
+                )
                 msg = 'Photo uploaded successfully.'
                 msg_type = 'success'
 
-    from django.core.files.storage import default_storage
     import time
-    file_path = f'admin_photos/{user.username}.jpg'
-    
-    # Try getting the URL directly. Cloudinary doesn't always play nice with exists()
-    try:
-        photo_url = f"{default_storage.url(file_path)}?v={int(time.time())}"
-        has_photo = True
-    except Exception:
-        has_photo = False
-        photo_url = ''
+    from django.conf import settings as django_settings
+    public_id = f'admin_photos/{user.username}'
+    if getattr(django_settings, 'DEFAULT_FILE_STORAGE', '').find('cloudinary') != -1 or \
+       __import__('decouple', fromlist=['config']).config('CLOUDINARY_URL', default=None):
+        # On Cloudinary: build URL directly from public_id
+        import cloudinary.utils
+        photo_url, _ = cloudinary.utils.cloudinary_url(
+            public_id, format='jpg', version=int(time.time()),
+        )
+        has_photo = True  # let onerror in template handle missing image gracefully
+    else:
+        # Local filesystem
+        from django.core.files.storage import default_storage
+        file_path = f'{public_id}.jpg'
+        if default_storage.exists(file_path):
+            photo_url = f"{default_storage.url(file_path)}?v={int(time.time())}"
+            has_photo = True
+        else:
+            has_photo = False
+            photo_url = ''
 
     return render(request, 'admin_panel/profile.html', {
         'msg': msg, 'msg_type': msg_type,

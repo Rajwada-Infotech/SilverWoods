@@ -17,7 +17,7 @@
             {% if has_photo %}
             <img id="profile-photo-img" src="{{ photo_url }}" alt="Profile"
                  class="w-28 h-28 rounded-full object-cover border-4 border-cream-200 dark:border-brown-700 shadow-lg"
-                 onerror="this.style.display='none';document.getElementById('profile-photo-fallback').style.display='flex';">
+                 onerror="console.error('PHOTO LOAD FAILED. URL was: '+this.src);this.style.display='none';document.getElementById('profile-photo-fallback').style.display='flex';">
             <div id="profile-photo-fallback" class="w-28 h-28 rounded-full bg-gold-500/10 dark:bg-gold-500/20 items-center justify-center border-4 border-cream-200 dark:border-brown-700 shadow-lg" style="display:none">
                 <span class="text-4xl font-bold text-gold-600 dark:text-gold-400" style="font-family:'Playfair Display',serif">{{ request.user.username|first|upper }}</span>
             </div>

@@ -621,24 +621,20 @@ def admin_profile(request):
         elif action == 'upload_photo':
             photo = request.FILES.get('photo')
             if photo:
-                import os
-                from django.conf import settings
-                path = os.path.join(settings.MEDIA_ROOT, 'admin_photos')
-                os.makedirs(path, exist_ok=True)
-                filepath = os.path.join(path, f'{user.username}.jpg')
-                with open(filepath, 'wb+') as f:
-                    for chunk in photo.chunks():
-                        f.write(chunk)
+                from django.core.files.storage import default_storage
+                file_path = f'admin_photos/{user.username}.jpg'
+                if default_storage.exists(file_path):
+                    default_storage.delete(file_path)
+                default_storage.save(file_path, photo)
                 msg = 'Photo uploaded successfully.'
                 msg_type = 'success'
 
-    import os
-    from django.conf import settings
-    photo_path = os.path.join(settings.MEDIA_ROOT, 'admin_photos', f'{user.username}.jpg')
-    has_photo = os.path.exists(photo_path)
+    from django.core.files.storage import default_storage
+    import time
+    file_path = f'admin_photos/{user.username}.jpg'
+    has_photo = default_storage.exists(file_path)
     if has_photo:
-        mtime = int(os.path.getmtime(photo_path))
-        photo_url = f'{settings.MEDIA_URL}admin_photos/{user.username}.jpg?v={mtime}'
+        photo_url = f"{default_storage.url(file_path)}?v={int(time.time())}"
     else:
         photo_url = ''
 

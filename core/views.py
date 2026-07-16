@@ -642,22 +642,34 @@ def admin_profile(request):
                 msg_type = 'success'
 
     import os, time
+    photo_url = ''
+    has_photo = False
     public_id = f'admin_photos/{user.username}'
-    if os.environ.get('CLOUDINARY_URL'):
-        import cloudinary.utils
-        photo_url, _ = cloudinary.utils.cloudinary_url(
-            public_id, format='jpg', version=int(time.time()),
-        )
-        has_photo = True  # onerror in template shows fallback if no photo uploaded yet
-    else:
-        from django.core.files.storage import default_storage
-        file_path = f'{public_id}.jpg'
-        if default_storage.exists(file_path):
-            photo_url = f"{default_storage.url(file_path)}?v={int(time.time())}"
+    try:
+        if os.environ.get('CLOUDINARY_URL'):
+            import cloudinary
+            import cloudinary.utils
+            # cloudinary SDK auto-reads CLOUDINARY_URL from env on import
+            url_result = cloudinary.utils.cloudinary_url(
+                public_id, format='jpg', version=int(time.time()),
+            )
+            # cloudinary_url returns either a (url, opts) tuple or just a url string
+            if isinstance(url_result, tuple):
+                photo_url = url_result[0]
+            else:
+                photo_url = str(url_result)
             has_photo = True
         else:
-            has_photo = False
-            photo_url = ''
+            from django.core.files.storage import default_storage
+            file_path = f'{public_id}.jpg'
+            if default_storage.exists(file_path):
+                photo_url = f"{default_storage.url(file_path)}?v={int(time.time())}"
+                has_photo = True
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Profile photo URL error: {e}")
+        has_photo = False
+        photo_url = ''
 
     return render(request, 'admin_panel/profile.html', {
         'msg': msg, 'msg_type': msg_type,

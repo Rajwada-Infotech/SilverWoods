@@ -64,11 +64,12 @@ DATABASES = {
     }
 }
 
-# Use PostgreSQL if DATABASE_URL is provided (production)
-if config('DATABASE_URL', default=None):
+# Use MySQL/PostgreSQL if URL is provided (production)
+db_url = config('DATABASE_URL', default=config('MYSQL_URL', default=None))
+if db_url:
     import dj_database_url
     DATABASES['default'] = dj_database_url.config(
-        default=config('DATABASE_URL'),
+        default=db_url,
         conn_max_age=600,
         conn_health_checks=True,
     )

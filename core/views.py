@@ -42,7 +42,10 @@ def _cloudinary_url(file_field):
             cloud_name = cloudinary.config().cloud_name
             ext = name.lower().rsplit('.', 1)[-1] if '.' in name else ''
             resource_type = 'video' if ext in ('mp4', 'webm', 'mov', 'avi') else 'image'
-            return f'https://res.cloudinary.com/{cloud_name}/{resource_type}/upload/{name}'
+            # f_auto → best format per browser (WebP/WebM for modern, JPG/MP4 for old)
+            # q_auto → Cloudinary picks optimal quality automatically
+            transform = 'f_auto,q_auto'
+            return f'https://res.cloudinary.com/{cloud_name}/{resource_type}/upload/{transform}/{name}'
         return file_field.url
     except Exception:
         return ''

@@ -654,6 +654,8 @@ def admin_profile(request):
                     default_storage.save(file_path, photo)
                 msg = 'Photo uploaded successfully.'
                 msg_type = 'success'
+                import time as _t
+                request.session['photo_version'] = int(_t.time())
 
     photo_url = ''
     has_photo = False

@@ -192,27 +192,23 @@ def submit_review(request):
 
 
 def download_brochure(request):
-    import os
-    pdf_path = os.path.join(settings.MEDIA_ROOT, 'brochure_pdf', 'silverwoods_brochure.pdf')
-    if os.path.exists(pdf_path):
-        with open(pdf_path, 'rb') as f:
-            response = HttpResponse(f.read(), content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment; filename="Silverwoods-Brochure.pdf"'
-            return response
-    return HttpResponse("Brochure not found", status=404)
+    from django.contrib.staticfiles.storage import staticfiles_storage
+    pdf_url = staticfiles_storage.url('brochure/silverwoods_brochure.pdf')
+    from django.http import HttpResponseRedirect
+    return HttpResponseRedirect(pdf_url)
 
 
 def brochure(request):
     import os
-    brochure_dir = os.path.join(settings.MEDIA_ROOT, 'brochure')
+    brochure_dir = os.path.join(settings.BASE_DIR, 'static', 'brochure')
     image_urls = []
     if os.path.isdir(brochure_dir):
         files = sorted(
-            [f for f in os.listdir(brochure_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp'))],
+            [f for f in os.listdir(brochure_dir) if f.lower().endswith('.webp')],
             key=lambda x: int(''.join(filter(str.isdigit, x)) or 0)
         )
         for f in files:
-            image_urls.append(settings.MEDIA_URL + 'brochure/' + f)
+            image_urls.append(settings.STATIC_URL + 'brochure/' + f)
     return render(request, 'brochure.html', {'image_urls': image_urls})
 
 

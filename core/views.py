@@ -563,10 +563,16 @@ def _admin_popups_inner(request):
                     instance.order = max_order + 1
                 instance.save()
             return redirect('admin_popups')
+    import logging as _log
+    _lg = _log.getLogger(__name__)
     enriched = []
     for p in popups:
         p.logo_url_cdn = _cloudinary_url(p.project_logo)
         p.image_url_cdn = _cloudinary_url(p.image)
+        _lg.error('POPUP_URL id=%s logo=%r img=%r logo_name=%r img_name=%r',
+                  p.pk, p.logo_url_cdn, p.image_url_cdn,
+                  p.project_logo.name if p.project_logo else None,
+                  p.image.name if p.image else None)
         enriched.append(p)
     return render(request, 'admin_panel/popups.html', {
         'popups': enriched, 'form': PopupAdForm(), 'popup_error': popup_error,

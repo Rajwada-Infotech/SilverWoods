@@ -18,6 +18,24 @@ from .models import (
 from .forms import LeadForm, PopupAdForm, FlatTypeForm, ReviewForm
 
 
+def _cloudinary_url(file_field):
+    """Build correct Cloudinary URL from a FileField/ImageField value."""
+    import os
+    if not file_field:
+        return ''
+    name = file_field.name if hasattr(file_field, 'name') else str(file_field)
+    if not name:
+        return ''
+    try:
+        if os.environ.get('CLOUDINARY_URL'):
+            import cloudinary
+            cloud_name = cloudinary.config().cloud_name
+            return f'https://res.cloudinary.com/{cloud_name}/image/upload/{name}'
+        return file_field.url
+    except Exception:
+        return ''
+
+
 def track_visitor(request):
     pass
 
@@ -503,24 +521,6 @@ def admin_delete_flat_type(request, pk):
     flat = get_object_or_404(FlatType, pk=pk)
     flat.delete()
     return redirect('admin_pricing')
-
-
-def _cloudinary_url(file_field):
-    """Build correct Cloudinary URL from a FileField/ImageField value."""
-    import os
-    if not file_field:
-        return ''
-    name = file_field.name if hasattr(file_field, 'name') else str(file_field)
-    if not name:
-        return ''
-    try:
-        if os.environ.get('CLOUDINARY_URL'):
-            import cloudinary
-            cloud_name = cloudinary.config().cloud_name
-            return f'https://res.cloudinary.com/{cloud_name}/image/upload/{name}'
-        return file_field.url
-    except Exception:
-        return ''
 
 
 @login_required

@@ -289,19 +289,18 @@ def get_popups(request):
     ).order_by('order', '-created_at')
     data = []
     for p in popups:
-        img_url = p.image.url if p.image else ''
         img_name = p.image.name.lower() if p.image else ''
         is_video = any(img_name.endswith(ext) for ext in ['.mp4', '.webm', '.mov'])
         data.append({
             'id': p.id,
             'title': p.title,
             'description': p.description,
-            'image': img_url,
+            'image': _cloudinary_url(p.image),
             'is_video': is_video,
             'flat_type': p.flat_type,
             'link': p.link,
             'is_external': p.is_external,
-            'project_logo': p.project_logo.url if p.project_logo else '',
+            'project_logo': _cloudinary_url(p.project_logo),
         })
     return JsonResponse({'popups': data})
 
@@ -506,6 +505,24 @@ def admin_delete_flat_type(request, pk):
     return redirect('admin_pricing')
 
 
+def _cloudinary_url(file_field):
+    """Build correct Cloudinary URL from a FileField/ImageField value."""
+    import os
+    if not file_field:
+        return ''
+    name = file_field.name if hasattr(file_field, 'name') else str(file_field)
+    if not name:
+        return ''
+    try:
+        if os.environ.get('CLOUDINARY_URL'):
+            import cloudinary
+            cloud_name = cloudinary.config().cloud_name
+            return f'https://res.cloudinary.com/{cloud_name}/image/upload/{name}'
+        return file_field.url
+    except Exception:
+        return ''
+
+
 @login_required
 def admin_popups(request):
     popups = PopupAd.objects.all()
@@ -516,8 +533,13 @@ def admin_popups(request):
         for f in request.FILES.values():
             if f.size > 20 * 1024 * 1024:
                 popup_error = f'"{f.name}" is too large ({f.size // (1024*1024)} MB). Maximum file size is 20 MB.'
+                _enriched = []
+                for p in popups:
+                    p._logo_url = _cloudinary_url(p.project_logo)
+                    p._image_url = _cloudinary_url(p.image)
+                    _enriched.append(p)
                 return render(request, 'admin_panel/popups.html', {
-                    'popups': popups, 'form': PopupAdForm(), 'popup_error': popup_error,
+                    'popups': _enriched, 'form': PopupAdForm(), 'popup_error': popup_error,
                 })
         if popup_id:
             popup = get_object_or_404(PopupAd, pk=popup_id)
@@ -539,8 +561,14 @@ def admin_popups(request):
                     instance.order = max_order + 1
                 instance.save()
             return redirect('admin_popups')
+    # Enrich each popup with pre-built Cloudinary URLs so template never calls .url
+    enriched = []
+    for p in popups:
+        p._logo_url = _cloudinary_url(p.project_logo)
+        p._image_url = _cloudinary_url(p.image)
+        enriched.append(p)
     return render(request, 'admin_panel/popups.html', {
-        'popups': popups, 'form': PopupAdForm(), 'popup_error': popup_error,
+        'popups': enriched, 'form': PopupAdForm(), 'popup_error': popup_error,
     })
 
 

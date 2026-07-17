@@ -8,8 +8,8 @@
     <div class="absolute inset-0">
         <div class="absolute inset-0 bg-gradient-to-r from-cream-100/95 via-cream-100/70 to-cream-100/30 dark:from-dark-900/95 dark:via-dark-900/70 dark:to-dark-900/30 z-10"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-cream-100 via-transparent to-cream-100/50 dark:from-dark-900 dark:via-transparent dark:to-dark-900/50 z-10"></div>
-        <img src="{% static 'images/hero-bg-day.png' %}" alt="" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-70'">
-        <img src="{% static 'images/hero-bg-night.png' %}" alt="" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-50' : 'opacity-0'">
+        <img src="{% static 'images/hero-bg-day.webp' %}" alt="" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-70'">
+        <img src="{% static 'images/hero-bg-night.webp' %}" alt="" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-50' : 'opacity-0'">
     </div>
     <div class="relative z-20 max-w-7xl mx-auto px-6 lg:px-8 w-full py-20 md:py-32">
         <div class="max-w-3xl">
@@ -40,15 +40,15 @@
             <!-- Frame -->
             <div class="relative bg-white p-3 rounded-2xl shadow-2xl shadow-brown-800/20 dark:shadow-black/40 border border-cream-300">
                 <div class="w-60 h-80 rounded-xl overflow-hidden relative">
-                    <img src="{% static 'images/hero1-day.png' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-100'" alt="">
-                    <img src="{% static 'images/hero1-night.png' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-100' : 'opacity-0'" alt="">
+                    <img src="{% static 'images/hero1-day.webp' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-100'" alt="">
+                    <img src="{% static 'images/hero1-night.webp' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-100' : 'opacity-0'" alt="">
                 </div>
             </div>
             <!-- Small accent frame offset -->
             <div class="absolute -bottom-12 -left-20 bg-white p-2.5 rounded-xl shadow-2xl shadow-brown-800/20 dark:shadow-black/40 border border-cream-300 z-10">
                 <div class="w-36 h-44 rounded-lg overflow-hidden relative">
-                    <img src="{% static 'images/hero2-day.png' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-100'" alt="">
-                    <img src="{% static 'images/hero2-night.png' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-100' : 'opacity-0'" alt="">
+                    <img src="{% static 'images/hero2-day.webp' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-100'" alt="">
+                    <img src="{% static 'images/hero2-night.webp' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-100' : 'opacity-0'" alt="">
                 </div>
             </div>
         </div>
@@ -156,7 +156,7 @@
                 <!-- Developer Card -->
                 <div class="glass-warm rounded-2xl p-8 glass-hover">
                     <div class="flex items-center gap-5 mb-4">
-                        <img src="{% static 'images/logo.png' %}" loading="lazy" alt="" class="w-14 h-14 rounded-xl object-cover border border-brown-700/[0.05] dark:border-white/[0.06]" onerror="this.outerHTML='<div class=\'w-14 h-14 rounded-xl bg-brown-700/10 dark:bg-gold-500/10 flex items-center justify-center\'><i class=\'fas fa-building text-brown-400 dark:text-gold-500\'></i></div>'">
+                        <img src="{% static 'images/logo.webp' %}" loading="lazy" alt="" class="w-14 h-14 rounded-xl object-cover border border-brown-700/[0.05] dark:border-white/[0.06]" onerror="this.outerHTML='<div class=\'w-14 h-14 rounded-xl bg-brown-700/10 dark:bg-gold-500/10 flex items-center justify-center\'><i class=\'fas fa-building text-brown-400 dark:text-gold-500\'></i></div>'">
                         <div>
                             <div class="font-display text-lg font-bold text-brown-800 dark:text-cream-100">{{ project.director_name }}</div>
                             <div class="text-[10px] tracking-[0.15em] uppercase text-brown-400 dark:text-gold-500/60">{{ project.director_title }}</div>
@@ -169,8 +169,8 @@
         <!-- About Image -->
         <div class="mt-10 md:mt-20 section-reveal">
             <div class="rounded-2xl overflow-hidden h-[35vh] md:h-[50vh] relative">
-                <img src="{% static 'images/gate_light.png' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-100'" loading="lazy" alt="Silverwoods Gate">
-                <img src="{% static 'images/gate_night.png' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-100' : 'opacity-0'" loading="lazy" alt="Silverwoods Gate Night">
+                <img src="{% static 'images/gate_light.webp' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-100'" loading="lazy" alt="Silverwoods Gate">
+                <img src="{% static 'images/gate_night.webp' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-100' : 'opacity-0'" loading="lazy" alt="Silverwoods Gate Night">
             </div>
         </div>
     </div>
@@ -228,8 +228,8 @@
             </div>
             <div class="section-reveal">
                 <div class="rounded-2xl overflow-hidden h-[280px] md:h-[400px] lg:h-[500px] relative">
-                    <img src="{% static 'images/clubhouse-light.png' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-100'" loading="lazy" alt="Villa Interior">
-                    <img src="{% static 'images/clubhouse-dark.png' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-100' : 'opacity-0'" loading="lazy" alt="Villa Interior">
+                    <img src="{% static 'images/clubhouse-light.webp' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-100'" loading="lazy" alt="Villa Interior">
+                    <img src="{% static 'images/clubhouse-dark.webp' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-100' : 'opacity-0'" loading="lazy" alt="Villa Interior">
                 </div>
             </div>
         </div>
@@ -390,22 +390,22 @@
         </div>
         <div class="grid grid-cols-12 gap-3 md:gap-4">
             <div class="col-span-12 md:col-span-7 rounded-2xl overflow-hidden group section-reveal h-[220px] md:h-[400px]">
-                <img src="{% static 'images/gallery1.png' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
+                <img src="{% static 'images/gallery1.webp' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
             </div>
             <div class="col-span-12 md:col-span-5 rounded-2xl overflow-hidden group section-reveal h-[220px] md:h-[400px]">
-                <img src="{% static 'images/gallery2.png' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
+                <img src="{% static 'images/gallery2.webp' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
             </div>
             <div class="col-span-6 md:col-span-4 rounded-2xl overflow-hidden group section-reveal h-[160px] md:h-[300px]">
-                <img src="{% static 'images/gallery3.png' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
+                <img src="{% static 'images/gallery3.webp' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
             </div>
             <div class="col-span-6 md:col-span-4 rounded-2xl overflow-hidden group section-reveal h-[160px] md:h-[300px]">
-                <img src="{% static 'images/gallery4.png' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
+                <img src="{% static 'images/gallery4.webp' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
             </div>
             <div class="col-span-12 md:col-span-4 rounded-2xl overflow-hidden group section-reveal h-[160px] md:h-[300px]">
-                <img src="{% static 'images/gallery5.png' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
+                <img src="{% static 'images/gallery5.webp' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
             </div>
             <div class="col-span-12 rounded-2xl overflow-hidden group section-reveal h-[35vh] md:h-[50vh]">
-                <img src="{% static 'images/gallery6.png' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
+                <img src="{% static 'images/gallery6.webp' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
             </div>
         </div>
     </div>
@@ -591,8 +591,8 @@
                 </a>
             </div>
             <div class="section-reveal rounded-2xl overflow-hidden h-[220px] md:h-[350px] relative">
-                <img src="{% static 'images/office-light.png' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-100'" loading="lazy" alt="Contact">
-                <img src="{% static 'images/office-dark.png' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-100' : 'opacity-0'" loading="lazy" alt="Contact">
+                <img src="{% static 'images/office-light.webp' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-100'" loading="lazy" alt="Contact">
+                <img src="{% static 'images/office-dark.webp' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-100' : 'opacity-0'" loading="lazy" alt="Contact">
             </div>
         </div>
 
@@ -716,7 +716,7 @@
         <div class="divider mb-8"></div>
         <div class="flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                <img src="{% static 'images/logo.png' %}" alt="Silverwoods" class="h-8 w-8 rounded-lg object-cover" onerror="this.style.display='none'">
+                <img src="{% static 'images/logo.webp' %}" alt="Silverwoods" class="h-8 w-8 rounded-lg object-cover" onerror="this.style.display='none'">
                 <div>
                     <span class="font-display text-sm font-bold tracking-[0.1em] uppercase block"><span class="text-brown-800 dark:text-cream-100">SILVER</span><span class="text-gold-500">WOODS</span></span>
                     <span class="italic text-[9px] tracking-[0.05em] text-brown-400 dark:text-gold-500/50 block -mt-0.5">Live the Villa Life</span>

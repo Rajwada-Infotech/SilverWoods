@@ -213,63 +213,124 @@ function calcEndDate(startInput, durationInput, endInput) {
     durationInput.addEventListener('input', update);
 }
 
-// Direct-to-Cloudinary upload — bypasses Railway server for file uploads
+// Direct-to-Cloudinary upload with progress bar
 {% if cloudinary_active %}
 (function() {
     var SIGN_URL = '{% url "cloudinary_sign_upload" %}';
 
-    function showPreview(previewEl, file, publicId, secureUrl) {
+    function fmtBytes(b) {
+        if (b < 1024) return b + ' B';
+        if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+        return (b/1048576).toFixed(1) + ' MB';
+    }
+
+    function showPreview(previewEl, file, secureUrl) {
         var isVideo = file.type.startsWith('video/');
         previewEl.innerHTML = isVideo
-            ? '<video src="' + secureUrl + '" class="w-full h-24 object-cover rounded-lg mb-1" muted autoplay loop playsinline></video>'
-            : '<img src="' + secureUrl + '" class="w-full h-24 object-cover rounded-lg mb-1 rounded-lg" alt="">';
-        previewEl.classList.remove('hidden');
+            ? '<video src="' + secureUrl + '" class="w-full h-28 object-cover rounded-xl mt-1" muted autoplay loop playsinline></video>'
+            : '<img src="' + secureUrl + '" class="w-full h-28 object-cover rounded-xl mt-1" alt="">';
+    }
+
+    function makeProgressUI(container) {
+        var wrap = document.createElement('div');
+        wrap.className = 'mt-2 hidden';
+        wrap.innerHTML = [
+            '<div class="flex justify-between text-[10px] font-semibold mb-1">',
+            '  <span class="prog-label text-brown-500 dark:text-cream-300/50">Uploading…</span>',
+            '  <span class="prog-speed text-brown-400 dark:text-cream-300/30"></span>',
+            '</div>',
+            '<div class="w-full h-2 bg-brown-100 dark:bg-white/[0.06] rounded-full overflow-hidden">',
+            '  <div class="prog-bar h-full bg-gold-500 rounded-full transition-all duration-150" style="width:0%"></div>',
+            '</div>',
+            '<div class="prog-pct text-[10px] text-right mt-0.5 text-brown-400 dark:text-cream-300/30">0%</div>'
+        ].join('');
+        container.appendChild(wrap);
+        return {
+            wrap: wrap,
+            bar: wrap.querySelector('.prog-bar'),
+            pct: wrap.querySelector('.prog-pct'),
+            label: wrap.querySelector('.prog-label'),
+            speed: wrap.querySelector('.prog-speed'),
+        };
     }
 
     function wireInput(input) {
+        var hiddenEl = document.getElementById(input.dataset.hidden);
+        var previewEl = document.getElementById(input.dataset.preview);
+        var ui = makeProgressUI(input.parentElement);
+
         input.addEventListener('change', function() {
             var file = input.files[0];
             if (!file) return;
             var folder = input.dataset.folder || 'popups';
-            var hiddenEl = document.getElementById(input.dataset.hidden);
-            var previewEl = document.getElementById(input.dataset.preview);
 
-            // Show uploading state
             input.disabled = true;
-            var progEls = input.parentElement.querySelectorAll('[class*="hidden"]');
-            var progText = input.nextElementSibling ? input.nextElementSibling.nextElementSibling : null;
-            if (progText) { progText.textContent = 'Uploading…'; progText.classList.remove('hidden'); }
+            ui.wrap.classList.remove('hidden');
+            ui.bar.style.width = '0%';
+            ui.pct.textContent = '0%';
+            ui.label.textContent = 'Getting upload key…';
+            ui.speed.textContent = '';
 
             fetch(SIGN_URL + '?folder=' + encodeURIComponent(folder))
-                .then(function(r) { return r.json(); })
-                .then(function(params) {
-                    var fd = new FormData();
-                    fd.append('file', file);
-                    fd.append('api_key', params.api_key);
-                    fd.append('timestamp', params.timestamp);
-                    fd.append('signature', params.signature);
-                    fd.append('folder', params.folder);
-                    return fetch('https://api.cloudinary.com/v1_1/' + params.cloud_name + '/auto/upload', {
-                        method: 'POST', body: fd
-                    });
-                })
-                .then(function(r) { return r.json(); })
-                .then(function(result) {
-                    if (result.public_id) {
-                        // Append original extension so _cloudinary_url can pick correct resource_type
-                        var ext = file.name.split('.').pop().toLowerCase();
-                        hiddenEl.value = result.public_id + '.' + ext;
-                        if (previewEl) showPreview(previewEl, file, result.public_id, result.secure_url);
-                        if (progText) { progText.textContent = '✓ Uploaded'; }
-                    } else {
-                        if (progText) { progText.textContent = 'Upload failed — try again'; }
+            .then(function(r) { return r.json(); })
+            .then(function(params) {
+                var fd = new FormData();
+                fd.append('file', file);
+                fd.append('api_key', params.api_key);
+                fd.append('timestamp', params.timestamp);
+                fd.append('signature', params.signature);
+                fd.append('folder', params.folder);
+
+                var startTime = Date.now();
+                var xhr = new XMLHttpRequest();
+
+                xhr.upload.addEventListener('progress', function(e) {
+                    if (!e.lengthComputable) return;
+                    var pct = Math.round(e.loaded / e.total * 100);
+                    var elapsed = (Date.now() - startTime) / 1000;
+                    var speed = elapsed > 0 ? e.loaded / elapsed : 0;
+                    ui.bar.style.width = pct + '%';
+                    ui.pct.textContent = pct + '%';
+                    ui.label.textContent = 'Uploading ' + fmtBytes(e.loaded) + ' / ' + fmtBytes(e.total);
+                    ui.speed.textContent = fmtBytes(speed) + '/s';
+                });
+
+                xhr.addEventListener('load', function() {
+                    try {
+                        var result = JSON.parse(xhr.responseText);
+                        if (result.public_id) {
+                            var ext = file.name.split('.').pop().toLowerCase();
+                            hiddenEl.value = result.public_id + '.' + ext;
+                            if (previewEl) showPreview(previewEl, file, result.secure_url);
+                            ui.bar.style.width = '100%';
+                            ui.bar.classList.replace('bg-gold-500', 'bg-green-500');
+                            ui.pct.textContent = '100%';
+                            ui.label.textContent = '✓ Upload complete';
+                            ui.speed.textContent = '';
+                        } else {
+                            ui.label.textContent = '✗ Upload failed — try again';
+                            ui.bar.classList.replace('bg-gold-500', 'bg-red-400');
+                            input.disabled = false;
+                        }
+                    } catch(e) {
+                        ui.label.textContent = '✗ Error — try again';
                         input.disabled = false;
                     }
-                })
-                .catch(function() {
-                    if (progText) { progText.textContent = 'Upload failed — try again'; }
+                });
+
+                xhr.addEventListener('error', function() {
+                    ui.label.textContent = '✗ Network error — try again';
+                    ui.bar.classList.replace('bg-gold-500', 'bg-red-400');
                     input.disabled = false;
                 });
+
+                xhr.open('POST', 'https://api.cloudinary.com/v1_1/' + params.cloud_name + '/auto/upload');
+                xhr.send(fd);
+            })
+            .catch(function() {
+                ui.label.textContent = '✗ Could not get upload key';
+                input.disabled = false;
+            });
         });
     }
 

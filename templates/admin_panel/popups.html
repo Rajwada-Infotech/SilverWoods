@@ -22,19 +22,19 @@
                         </div>
                         <span class="text-[10px] font-bold text-brown-300 dark:text-cream-300/20 w-5 text-center pos-label flex-shrink-0">{{ forloop.counter }}</span>
                         <div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden bg-cream-200 dark:bg-white/[0.04] flex items-center justify-center flex-shrink-0">
-                            {% if popup._image_url %}
+                            {% if popup.image_url_cdn %}
                                 {% with popup.image.name|lower as fname %}
                                     {% if ".mp4" in fname or ".webm" in fname or ".mov" in fname %}
-                                        <video src="{{ popup._image_url }}" class="w-full h-full object-cover" muted autoplay loop playsinline onerror="this.style.display='none'"></video>
+                                        <video src="{{ popup.image_url_cdn }}" class="w-full h-full object-cover" muted autoplay loop playsinline onerror="this.style.display='none'"></video>
                                     {% else %}
-                                        <img src="{{ popup._image_url }}" class="w-full h-full object-cover" alt="" onerror="this.style.display='none'">
+                                        <img src="{{ popup.image_url_cdn }}" class="w-full h-full object-cover" alt="" onerror="this.style.display='none'">
                                     {% endif %}
                                 {% endwith %}
                             {% else %}
                                 <i class="fas fa-photo-video text-brown-300 dark:text-cream-300/20 text-2xl"></i>
                             {% endif %}
-                            {% if popup._logo_url %}
-                                <img src="{{ popup._logo_url }}" class="absolute bottom-1 left-1 w-5 h-5 rounded-md object-contain bg-white/80 p-0.5 shadow" alt="logo" onerror="this.style.display='none'">
+                            {% if popup.logo_url_cdn %}
+                                <img src="{{ popup.logo_url_cdn }}" class="absolute bottom-1 left-1 w-5 h-5 rounded-md object-contain bg-white/80 p-0.5 shadow" alt="logo" onerror="this.style.display='none'">
                             {% endif %}
                         </div>
                         <div>
@@ -57,17 +57,17 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Project Logo</label>
-                            {% if popup._logo_url %}<img src="{{ popup._logo_url }}" class="h-24 w-24 object-contain rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" alt="Current logo" onerror="this.style.display='none'">{% else %}<div class="h-24"></div>{% endif %}
+                            {% if popup.logo_url_cdn %}<img src="{{ popup.logo_url_cdn }}" class="h-24 w-24 object-contain rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" alt="Current logo" onerror="this.style.display='none'">{% else %}<div class="h-24"></div>{% endif %}
                             <input type="file" name="project_logo" accept="image/*" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm text-brown-500 dark:text-cream-300/40">
                         </div>
                         <div>
                             <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Image / Video</label>
-                            {% if popup._image_url %}
+                            {% if popup.image_url_cdn %}
                                 {% with popup.image.name|lower as fname %}
                                     {% if ".mp4" in fname or ".webm" in fname or ".mov" in fname %}
-                                        <video src="{{ popup._image_url }}" class="w-full h-24 object-cover rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" muted autoplay loop playsinline onerror="this.style.display='none'"></video>
+                                        <video src="{{ popup.image_url_cdn }}" class="w-full h-24 object-cover rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" muted autoplay loop playsinline onerror="this.style.display='none'"></video>
                                     {% else %}
-                                        <img src="{{ popup._image_url }}" class="w-full h-24 object-cover rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" alt="" onerror="this.style.display='none'">
+                                        <img src="{{ popup.image_url_cdn }}" class="w-full h-24 object-cover rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" alt="" onerror="this.style.display='none'">
                                     {% endif %}
                                 {% endwith %}
                             {% endif %}

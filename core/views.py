@@ -545,8 +545,8 @@ def _admin_popups_inner(request):
                 popup_error = f'"{f.name}" is too large ({f.size // (1024*1024)} MB). Maximum file size is 20 MB.'
                 _enriched = []
                 for p in popups:
-                    p._logo_url = _cloudinary_url(p.project_logo)
-                    p._image_url = _cloudinary_url(p.image)
+                    p.logo_url_cdn = _cloudinary_url(p.project_logo)
+                    p.image_url_cdn = _cloudinary_url(p.image)
                     _enriched.append(p)
                 return render(request, 'admin_panel/popups.html', {
                     'popups': _enriched, 'form': PopupAdForm(), 'popup_error': popup_error,
@@ -574,8 +574,8 @@ def _admin_popups_inner(request):
     # Enrich each popup with pre-built Cloudinary URLs so template never calls .url
     enriched = []
     for p in popups:
-        p._logo_url = _cloudinary_url(p.project_logo)
-        p._image_url = _cloudinary_url(p.image)
+        p.logo_url_cdn = _cloudinary_url(p.project_logo)
+        p.image_url_cdn = _cloudinary_url(p.image)
         enriched.append(p)
     return render(request, 'admin_panel/popups.html', {
         'popups': enriched, 'form': PopupAdForm(), 'popup_error': popup_error,

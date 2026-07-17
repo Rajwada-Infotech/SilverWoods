@@ -574,10 +574,16 @@ def _admin_popups_inner(request):
                 instance.save()
             return redirect('admin_popups')
     # Enrich each popup with pre-built Cloudinary URLs so template never calls .url
+    import logging as _log
+    _logger = _log.getLogger(__name__)
     enriched = []
     for p in popups:
+        logo_name = p.project_logo.name if p.project_logo else None
+        image_name = p.image.name if p.image else None
         p.logo_url_cdn = _cloudinary_url(p.project_logo)
         p.image_url_cdn = _cloudinary_url(p.image)
+        _logger.error('POPUP_DEBUG id=%s logo_name=%r image_name=%r logo_url=%r image_url=%r',
+                      p.pk, logo_name, image_name, p.logo_url_cdn, p.image_url_cdn)
         enriched.append(p)
     return render(request, 'admin_panel/popups.html', {
         'popups': enriched, 'form': PopupAdForm(), 'popup_error': popup_error,

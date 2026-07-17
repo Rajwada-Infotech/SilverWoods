@@ -99,16 +99,32 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# Automatically use Cloudinary if credentials are provided in env vars
+# Automatically use Cloudinary for media storage if credentials are set
 import os as _os
-if _os.environ.get('CLOUDINARY_URL') or config('CLOUDINARY_URL', default=None):
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-    CLOUDINARY_STORAGE = {'CLOUDINARY_URL': _os.environ.get('CLOUDINARY_URL') or config('CLOUDINARY_URL')}
+_cloudinary_url_val = _os.environ.get('CLOUDINARY_URL') or config('CLOUDINARY_URL', default=None)
+if _cloudinary_url_val:
+    CLOUDINARY_STORAGE = {'CLOUDINARY_URL': _cloudinary_url_val}
+    STORAGES = {
+        "default": {
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+else:
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
 
 # ── Misc ──────────────────────────────────────────────────────────────
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

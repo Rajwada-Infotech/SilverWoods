@@ -19,11 +19,21 @@ from .forms import LeadForm, PopupAdForm, FlatTypeForm, ReviewForm
 
 
 def _cloudinary_url(file_field):
-    """Return the correct URL for a FileField/ImageField, letting Django storage resolve it."""
+    """Build the correct Cloudinary URL, using extension to pick video vs image resource type."""
+    import os
     if not file_field:
         return ''
+    name = file_field.name if hasattr(file_field, 'name') else str(file_field)
+    if not name:
+        return ''
     try:
-        return file_field.url or ''
+        if os.environ.get('CLOUDINARY_URL'):
+            import cloudinary
+            cloud_name = cloudinary.config().cloud_name
+            ext = name.lower().rsplit('.', 1)[-1] if '.' in name else ''
+            resource_type = 'video' if ext in ('mp4', 'webm', 'mov', 'avi') else 'image'
+            return f'https://res.cloudinary.com/{cloud_name}/{resource_type}/upload/{name}'
+        return file_field.url
     except Exception:
         return ''
 

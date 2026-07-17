@@ -256,7 +256,9 @@ function calcEndDate(startInput, durationInput, endInput) {
                 .then(function(r) { return r.json(); })
                 .then(function(result) {
                     if (result.public_id) {
-                        hiddenEl.value = result.public_id;
+                        // Append original extension so _cloudinary_url can pick correct resource_type
+                        var ext = file.name.split('.').pop().toLowerCase();
+                        hiddenEl.value = result.public_id + '.' + ext;
                         if (previewEl) showPreview(previewEl, file, result.public_id, result.secure_url);
                         if (progText) { progText.textContent = '✓ Uploaded'; }
                     } else {

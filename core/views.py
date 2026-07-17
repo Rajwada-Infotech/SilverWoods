@@ -44,20 +44,40 @@ def track_visitor(request):
 
 def index(request):
     track_visitor(request)
-    project = ProjectInfo.load()
-    flat_types = FlatType.objects.filter(is_available=True)
+    from django.core.cache import cache
 
-    # Compute min/max buildup area from DB for display on home page
-    def _parse_area(s):
-        try: return float(s.replace(',', ''))
-        except: return None
-    villa_fts = FlatType.objects.filter(name__icontains='villa type')
-    buildup_vals = [v for v in (_parse_area(ft.buildup_area) for ft in villa_fts) if v]
-    area_range = f"{min(buildup_vals):,.2f} to {max(buildup_vals):,.2f} sq. ft." if buildup_vals else "—"
+    project = cache.get('index_project')
+    if project is None:
+        project = ProjectInfo.load()
+        cache.set('index_project', project, 300)
 
-    amenities = Amenity.objects.all()
-    reviews = Review.objects.filter(is_approved=True, rating=5).order_by('-created_at')[:3]
-    popups = PopupAd.objects.filter(is_active=True)
+    flat_types = cache.get('index_flat_types')
+    area_range = cache.get('index_area_range')
+    if flat_types is None or area_range is None:
+        flat_types = list(FlatType.objects.filter(is_available=True))
+        def _parse_area(s):
+            try: return float(s.replace(',', ''))
+            except: return None
+        villa_fts = FlatType.objects.filter(name__icontains='villa type')
+        buildup_vals = [v for v in (_parse_area(ft.buildup_area) for ft in villa_fts) if v]
+        area_range = f"{min(buildup_vals):,.2f} to {max(buildup_vals):,.2f} sq. ft." if buildup_vals else "—"
+        cache.set('index_flat_types', flat_types, 300)
+        cache.set('index_area_range', area_range, 300)
+
+    amenities = cache.get('index_amenities')
+    if amenities is None:
+        amenities = list(Amenity.objects.all())
+        cache.set('index_amenities', amenities, 300)
+
+    reviews = cache.get('index_reviews')
+    if reviews is None:
+        reviews = list(Review.objects.filter(is_approved=True, rating=5).order_by('-created_at')[:3])
+        cache.set('index_reviews', reviews, 300)
+
+    popups = cache.get('index_popups')
+    if popups is None:
+        popups = list(PopupAd.objects.filter(is_active=True))
+        cache.set('index_popups', popups, 300)
     lead_form = LeadForm()
     review_form = ReviewForm()
 
@@ -294,6 +314,7 @@ def api_plots(request):
 
 def get_popups(request):
     from django.db.models import Q
+    from django.core.cache import cache
     today = timezone.localdate()
     expired = PopupAd.objects.filter(is_active=True, end_date__lt=today)
     if expired.exists():
@@ -302,6 +323,12 @@ def get_popups(request):
             ad.is_active = False
             ad.order = max_order + i
             ad.save(update_fields=['is_active', 'order'])
+        cache.delete('api_popups')
+
+    cached = cache.get('api_popups')
+    if cached is not None:
+        return JsonResponse({'popups': cached})
+
     popups = PopupAd.objects.filter(is_active=True).filter(
         Q(start_date__isnull=True) | Q(start_date__lte=today)
     ).filter(
@@ -322,6 +349,7 @@ def get_popups(request):
             'is_external': p.is_external,
             'project_logo': _cloudinary_url(p.project_logo),
         })
+    cache.set('api_popups', data, 120)
     return JsonResponse({'popups': data})
 
 
@@ -618,6 +646,9 @@ def _admin_popups_inner(request):
             if logo_public_id:
                 instance.project_logo = logo_public_id
             instance.save()
+            from django.core.cache import cache
+            cache.delete('api_popups')
+            cache.delete('index_popups')
             return redirect('admin_popups')
     enriched = []
     for p in popups:
@@ -649,6 +680,9 @@ def admin_toggle_popup(request, pk):
         max_order = PopupAd.objects.aggregate(m=Max('order'))['m'] or 0
         popup.order = max_order + 1
     popup.save()
+    from django.core.cache import cache
+    cache.delete('api_popups')
+    cache.delete('index_popups')
     return redirect('admin_popups')
 
 
@@ -656,6 +690,9 @@ def admin_toggle_popup(request, pk):
 def admin_delete_popup(request, pk):
     popup = get_object_or_404(PopupAd, pk=pk)
     popup.delete()
+    from django.core.cache import cache
+    cache.delete('api_popups')
+    cache.delete('index_popups')
     return redirect('admin_popups')
 
 

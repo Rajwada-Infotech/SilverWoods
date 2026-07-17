@@ -7,7 +7,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ── Security ──────────────────────────────────────────────────────────
 SECRET_KEY = config('SECRET_KEY', default='build-phase-placeholder-not-used-in-production')
 DEBUG = config('DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = ["*"]
+# config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
 
 # Limit uploads to 10 MB to prevent gunicorn worker timeouts on large files
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
@@ -125,6 +126,14 @@ else:
             "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
         },
     }
+
+# ── Cache (in-memory, per-process) ────────────────────────────────────
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "TIMEOUT": 300,  # 5 minutes
+    }
+}
 
 # ── Misc ──────────────────────────────────────────────────────────────
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

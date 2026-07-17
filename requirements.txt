@@ -1,6 +1,5 @@
 django>=5.0
 gunicorn
-gevent
 whitenoise
 python-decouple
 django-cors-headers

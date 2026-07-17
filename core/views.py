@@ -509,8 +509,16 @@ def admin_delete_flat_type(request, pk):
 @login_required
 def admin_popups(request):
     popups = PopupAd.objects.all()
+    popup_error = ''
     if request.method == 'POST':
         popup_id = request.POST.get('popup_id')
+        # Reject files over 20 MB to prevent gunicorn timeout on large videos
+        for f in request.FILES.values():
+            if f.size > 20 * 1024 * 1024:
+                popup_error = f'"{f.name}" is too large ({f.size // (1024*1024)} MB). Maximum file size is 20 MB.'
+                return render(request, 'admin_panel/popups.html', {
+                    'popups': popups, 'form': PopupAdForm(), 'popup_error': popup_error,
+                })
         if popup_id:
             popup = get_object_or_404(PopupAd, pk=popup_id)
             form = PopupAdForm(request.POST, request.FILES, instance=popup)
@@ -531,7 +539,9 @@ def admin_popups(request):
                     instance.order = max_order + 1
                 instance.save()
             return redirect('admin_popups')
-    return render(request, 'admin_panel/popups.html', {'popups': popups, 'form': PopupAdForm()})
+    return render(request, 'admin_panel/popups.html', {
+        'popups': popups, 'form': PopupAdForm(), 'popup_error': popup_error,
+    })
 
 
 @login_required

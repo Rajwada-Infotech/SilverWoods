@@ -128,10 +128,12 @@
                     </button>
                     <span class="hidden sm:inline text-sm text-brown-400 dark:text-cream-400/40">Welcome, <strong class="text-brown-700 dark:text-cream-100">{% if request.user.first_name %}{{ request.user.first_name }}{% else %}{{ request.user.username }}{% endif %}</strong></span>
                     <a href="{% url 'admin_profile' %}" class="block flex-shrink-0">
-                        <img src="{{ MEDIA_URL }}admin_photos/{{ request.user.username }}.jpg?v={% now 'U' %}" alt=""
+                        {% if admin_photo_url %}
+                        <img src="{{ admin_photo_url }}" alt=""
                              class="w-9 h-9 rounded-full object-cover border border-gold-500/20"
                              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                        <div class="w-9 h-9 bg-gold-500/10 dark:bg-gold-500/20 rounded-full items-center justify-center text-gold-700 dark:text-gold-400 font-bold text-sm border border-gold-500/20 hidden">{{ request.user.username|first|upper }}</div>
+                        {% endif %}
+                        <div class="w-9 h-9 bg-gold-500/10 dark:bg-gold-500/20 rounded-full items-center justify-center text-gold-700 dark:text-gold-400 font-bold text-sm border border-gold-500/20 {% if admin_photo_url %}hidden{% else %}flex{% endif %}">{{ request.user.username|first|upper }}</div>
                     </a>
                 </div>
             </header>

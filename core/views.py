@@ -525,6 +525,16 @@ def admin_delete_flat_type(request, pk):
 
 @login_required
 def admin_popups(request):
+    import traceback as _tb
+    try:
+        return _admin_popups_inner(request)
+    except Exception as _e:
+        import logging
+        logging.getLogger(__name__).error('admin_popups 500: %s\n%s', _e, _tb.format_exc())
+        raise
+
+
+def _admin_popups_inner(request):
     popups = PopupAd.objects.all()
     popup_error = ''
     if request.method == 'POST':

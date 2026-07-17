@@ -1,1 +1,1 @@
-web: gunicorn silverwoods.wsgi --log-file - --timeout 120 --workers 2
+web: gunicorn silverwoods.wsgi --log-file - --worker-class gevent --workers 2 --timeout 300

@@ -16,6 +16,12 @@ from .models import (
     PopupAd, Review, BuildingFlat, BrochureImage, VillaPlot, ChatbotQA
 )
 from .forms import LeadForm, PopupAdForm, FlatTypeForm, ReviewForm
+import os as _os
+from decouple import config as _decouple_config
+
+def _cloudinary_active():
+    """Return True if Cloudinary is configured — checks both os.environ and .env via decouple."""
+    return bool(_os.environ.get('CLOUDINARY_URL') or _decouple_config('CLOUDINARY_URL', default=None))
 
 
 def _cloudinary_url(file_field):
@@ -27,7 +33,7 @@ def _cloudinary_url(file_field):
     if not name:
         return ''
     try:
-        if os.environ.get('CLOUDINARY_URL'):
+        if _cloudinary_active():
             import cloudinary
             cloud_name = cloudinary.config().cloud_name
             ext = name.lower().rsplit('.', 1)[-1] if '.' in name else ''
@@ -568,7 +574,7 @@ def admin_popups(request):
 def cloudinary_sign_upload(request):
     """Return signed params for a direct browser-to-Cloudinary upload."""
     import os, time
-    if not os.environ.get('CLOUDINARY_URL'):
+    if not _cloudinary_active():
         return JsonResponse({'error': 'Cloudinary not configured'}, status=400)
     import cloudinary, cloudinary.utils
     folder = request.GET.get('folder', 'popups')
@@ -596,7 +602,7 @@ def cloudinary_sign_upload(request):
 
 def _admin_popups_inner(request):
     import os as _os
-    cloudinary_active = bool(_os.environ.get('CLOUDINARY_URL'))
+    cloudinary_active = _cloudinary_active()
     popups = PopupAd.objects.all()
     popup_error = ''
     if request.method == 'POST':
@@ -755,7 +761,7 @@ def admin_profile(request):
             import os
             photo_public_id = request.POST.get('photo_public_id', '').strip()
             photo = request.FILES.get('photo')
-            if photo_public_id and os.environ.get('CLOUDINARY_URL'):
+            if photo_public_id and _cloudinary_active():
                 # Direct upload already done — public_id stored by browser
                 import time as _t
                 msg = 'Photo uploaded successfully.'
@@ -768,7 +774,7 @@ def admin_profile(request):
                     photo = None
                 if photo:
                     public_id = f'admin_photos/{user.username}'
-                    if os.environ.get('CLOUDINARY_URL'):
+                    if _cloudinary_active():
                         import cloudinary.uploader
                         cloudinary.uploader.upload(
                             photo,
@@ -795,7 +801,7 @@ def admin_profile(request):
     import os, time
     public_id = f'admin_photos/{user.username}'
     try:
-        if os.environ.get('CLOUDINARY_URL'):
+        if _cloudinary_active():
             import cloudinary
             # Build URL from known public_id — guaranteed to match what was uploaded
             cloud_name = cloudinary.config().cloud_name
@@ -817,7 +823,7 @@ def admin_profile(request):
     return render(request, 'admin_panel/profile.html', {
         'msg': msg, 'msg_type': msg_type,
         'photo_url': photo_url, 'has_photo': has_photo,
-        'cloudinary_active': bool(os.environ.get('CLOUDINARY_URL')),
+        'cloudinary_active': _cloudinary_active(),
     })
 
 

@@ -238,13 +238,14 @@ function calcEndDate(startInput, durationInput, endInput) {
     function makeProgressUI(container) {
         var wrap = document.createElement('div');
         wrap.className = 'mt-1 hidden';
+        wrap.style.maxWidth = '260px';
         wrap.innerHTML = [
             '<div class="flex justify-between text-[10px] mb-0.5">',
             '  <span class="prog-label text-brown-500 dark:text-cream-300/50"></span>',
             '  <span class="prog-speed text-brown-400 dark:text-cream-300/30"></span>',
             '</div>',
             '<div class="flex items-center gap-2">',
-            '  <div class="flex-1 h-1 bg-brown-100 dark:bg-white/[0.06] rounded-full overflow-hidden">',
+            '  <div class="flex-1 h-2 bg-brown-100 dark:bg-white/[0.06] rounded-full overflow-hidden">',
             '    <div class="prog-bar h-full bg-gold-500 rounded-full transition-all duration-150" style="width:0%"></div>',
             '  </div>',
             '  <span class="prog-pct text-[10px] text-brown-400 dark:text-cream-300/30 w-8 text-right">0%</span>',

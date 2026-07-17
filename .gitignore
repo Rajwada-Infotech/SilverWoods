@@ -17,6 +17,14 @@ staticfiles/
 media/brochure/
 media/brochure_pdf/
 
+# Static images — block PNG/JPG originals (pre-commit hook converts them to WebP)
+# Exception: chatbot-icon.png and favicon files are allowed
+static/images/*.png
+static/images/*.jpg
+static/images/*.jpeg
+!static/images/chatbot-icon.png
+!static/images/favicon*.png
+
 # Node / Tailwind build
 node_modules/
 package-lock.json

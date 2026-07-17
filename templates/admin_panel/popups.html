@@ -228,11 +228,15 @@ function calcEndDate(startInput, durationInput, endInput) {
         return (b/1048576).toFixed(1) + ' MB';
     }
 
-    function showPreview(previewEl, file, secureUrl) {
+    function showPreview(previewEl, file, secureUrl, isLogo) {
         var isVideo = file.type.startsWith('video/');
-        previewEl.innerHTML = isVideo
-            ? '<video src="' + secureUrl + '" class="w-full h-28 object-cover rounded-xl mt-1" muted autoplay loop playsinline></video>'
-            : '<img src="' + secureUrl + '" class="w-full h-28 object-cover rounded-xl mt-1" alt="">';
+        if (isLogo) {
+            previewEl.innerHTML = '<img src="' + secureUrl + '" class="h-24 w-24 object-contain rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" alt="">';
+        } else {
+            previewEl.innerHTML = isVideo
+                ? '<video src="' + secureUrl + '" class="w-full h-28 object-cover rounded-xl mt-1" muted autoplay loop playsinline></video>'
+                : '<img src="' + secureUrl + '" class="w-full h-28 object-cover rounded-xl mt-1" alt="">';
+        }
     }
 
     function makeProgressUI(container) {
@@ -327,7 +331,7 @@ function calcEndDate(startInput, durationInput, endInput) {
                         if (result.public_id) {
                             var ext = file.name.split('.').pop().toLowerCase();
                             hiddenEl.value = result.public_id + '.' + ext;
-                            if (previewEl) showPreview(previewEl, file, result.secure_url);
+                            if (previewEl) showPreview(previewEl, file, result.secure_url, folder.indexOf('logos') !== -1);
                             ui.bar.style.width = '100%';
                             ui.bar.classList.replace('bg-gold-500', 'bg-green-500');
                             ui.pct.textContent = '100%';

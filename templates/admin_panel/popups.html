@@ -237,16 +237,18 @@ function calcEndDate(startInput, durationInput, endInput) {
 
     function makeProgressUI(container) {
         var wrap = document.createElement('div');
-        wrap.className = 'mt-2 hidden';
+        wrap.className = 'mt-1 hidden';
         wrap.innerHTML = [
-            '<div class="flex justify-between text-[10px] font-semibold mb-1">',
-            '  <span class="prog-label text-brown-500 dark:text-cream-300/50">Uploading…</span>',
+            '<div class="flex justify-between text-[10px] mb-0.5">',
+            '  <span class="prog-label text-brown-500 dark:text-cream-300/50"></span>',
             '  <span class="prog-speed text-brown-400 dark:text-cream-300/30"></span>',
             '</div>',
-            '<div class="w-full h-2 bg-brown-100 dark:bg-white/[0.06] rounded-full overflow-hidden">',
-            '  <div class="prog-bar h-full bg-gold-500 rounded-full transition-all duration-150" style="width:0%"></div>',
-            '</div>',
-            '<div class="prog-pct text-[10px] text-right mt-0.5 text-brown-400 dark:text-cream-300/30">0%</div>'
+            '<div class="flex items-center gap-2">',
+            '  <div class="flex-1 h-1 bg-brown-100 dark:bg-white/[0.06] rounded-full overflow-hidden">',
+            '    <div class="prog-bar h-full bg-gold-500 rounded-full transition-all duration-150" style="width:0%"></div>',
+            '  </div>',
+            '  <span class="prog-pct text-[10px] text-brown-400 dark:text-cream-300/30 w-8 text-right">0%</span>',
+            '</div>'
         ].join('');
         container.appendChild(wrap);
         return {
@@ -271,6 +273,8 @@ function calcEndDate(startInput, durationInput, endInput) {
             input.disabled = true;
             ui.wrap.classList.remove('hidden');
             ui.bar.style.width = '0%';
+            ui.bar.classList.remove('bg-green-500', 'bg-red-400');
+            ui.bar.classList.add('bg-gold-500');
             ui.pct.textContent = '0%';
             ui.label.textContent = 'Preparing ' + fmtBytes(file.size) + '…';
             ui.speed.textContent = '';
@@ -316,6 +320,7 @@ function calcEndDate(startInput, durationInput, endInput) {
                             ui.pct.textContent = '100%';
                             ui.label.textContent = '✓ Upload complete';
                             ui.speed.textContent = '';
+                            input.disabled = false;
                         } else {
                             var errMsg = result.error && result.error.message ? result.error.message : 'Upload failed — try again';
                             ui.label.textContent = '✗ ' + errMsg;

@@ -258,7 +258,7 @@ def plots(request):
     existing = set(VillaPlot.objects.values_list('villa_no', flat=True))
     missing = [i for i in all_plot_nos if i not in existing]
     if missing:
-        VillaPlot.objects.bulk_create([VillaPlot(villa_no=i) for i in missing])
+        VillaPlot.objects.bulk_create([VillaPlot(villa_no=i) for i in missing], ignore_conflicts=True)
     # Auto-expire reservations whose time has passed
     VillaPlot.objects.filter(status='reserved', reserved_until__lt=timezone.now()).update(
         status='available', reserved_by='', reserved_until=None)
@@ -755,8 +755,8 @@ def admin_profile(request):
             user.email = request.POST.get('email', '')
             if msg_type != 'error':
                 user.save()
-            msg = 'Profile updated successfully.'
-            msg_type = 'success'
+                msg = 'Profile updated successfully.'
+                msg_type = 'success'
 
         elif action == 'change_password':
             old_pw = request.POST.get('old_password', '')
@@ -855,7 +855,7 @@ def admin_plots(request):
     existing = set(VillaPlot.objects.values_list('villa_no', flat=True))
     missing = [i for i in all_plot_nos if i not in existing]
     if missing:
-        VillaPlot.objects.bulk_create([VillaPlot(villa_no=i) for i in missing])
+        VillaPlot.objects.bulk_create([VillaPlot(villa_no=i) for i in missing], ignore_conflicts=True)
     # Auto-expire reservations
     VillaPlot.objects.filter(status='reserved', reserved_until__lt=timezone.now()).update(
         status='available', reserved_by='', reserved_until=None)

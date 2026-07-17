@@ -1,16 +1,19 @@
 // Silverwoods Main JS - Animations & Interactions
 
-// Preloader
-window.addEventListener('load', () => {
+// Preloader — hide on DOMContentLoaded (don't wait for images/Cloudinary assets)
+function hidePreloader() {
     const preloader = document.getElementById('preloader');
-    if (preloader) {
-        preloader.style.opacity = '0';
-        setTimeout(() => {
-            preloader.style.display = 'none';
-            animateHero();
-        }, 500);
-    }
-});
+    if (!preloader || preloader.dataset.hidden) return;
+    preloader.dataset.hidden = '1';
+    preloader.style.opacity = '0';
+    setTimeout(() => {
+        preloader.style.display = 'none';
+        animateHero();
+    }, 500);
+}
+document.addEventListener('DOMContentLoaded', hidePreloader);
+// Safety cap: force-hide after 2s even if DOMContentLoaded already fired
+setTimeout(hidePreloader, 2000);
 
 // Smooth Scroll
 function smoothScroll(e, id) {
@@ -206,7 +209,7 @@ function closePopup() {
         overlay.classList.add('hidden');
         overlay.classList.remove('flex');
         const chatWrap = document.getElementById('sw-chat-wrap');
-        if (chatWrap) { chatWrap.style.pointerEvents = ''; chatWrap.style.zIndex = ''; chatWrap.style.opacity = ''; }
+        if (chatWrap) { chatWrap.style.pointerEvents = ''; chatWrap.style.zIndex = '10100'; chatWrap.style.opacity = ''; }
     }, 300);
     sessionStorage.setItem('lastPopupTime', Date.now());
     if (window._pendingPopupNext) {

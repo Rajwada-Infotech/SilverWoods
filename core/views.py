@@ -544,16 +544,26 @@ def cloudinary_sign_upload(request):
         return JsonResponse({'error': 'Cloudinary not configured'}, status=400)
     import cloudinary, cloudinary.utils
     folder = request.GET.get('folder', 'popups')
+    public_id = request.GET.get('public_id', '').strip()
     timestamp = int(time.time())
-    params = {'folder': folder, 'timestamp': timestamp}
+    params = {'timestamp': timestamp}
+    if public_id:
+        params['public_id'] = public_id
+        params['overwrite'] = True
+        params['invalidate'] = True
+    else:
+        params['folder'] = folder
     signature = cloudinary.utils.api_sign_request(params, cloudinary.config().api_secret)
-    return JsonResponse({
+    resp = {
         'cloud_name': cloudinary.config().cloud_name,
         'api_key': cloudinary.config().api_key,
         'timestamp': timestamp,
         'signature': signature,
         'folder': folder,
-    })
+    }
+    if public_id:
+        resp['public_id'] = public_id
+    return JsonResponse(resp)
 
 
 def _admin_popups_inner(request):

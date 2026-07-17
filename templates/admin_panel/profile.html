@@ -181,7 +181,8 @@
         label.textContent = 'Preparing ' + fmtBytes(file.size) + '…';
         input.disabled = true;
 
-        fetch(SIGN_URL + '?folder=admin_photos')
+        var photoPublicId = 'admin_photos/{{ request.user.username }}';
+        fetch(SIGN_URL + '?folder=admin_photos&public_id=' + encodeURIComponent(photoPublicId) + '&overwrite=true')
         .then(function(r) { return r.json(); })
         .then(function(params) {
             var fd = new FormData();
@@ -189,7 +190,10 @@
             fd.append('api_key', params.api_key);
             fd.append('timestamp', params.timestamp);
             fd.append('signature', params.signature);
-            fd.append('folder', params.folder);
+            if (params.public_id) fd.append('public_id', params.public_id);
+            else fd.append('folder', params.folder);
+            fd.append('overwrite', 'true');
+            fd.append('invalidate', 'true');
 
             var lastLoaded = 0, lastTime = Date.now();
             var xhr = new XMLHttpRequest();

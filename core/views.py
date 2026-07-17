@@ -192,23 +192,15 @@ def submit_review(request):
 
 
 def download_brochure(request):
-    from django.contrib.staticfiles.storage import staticfiles_storage
-    pdf_url = staticfiles_storage.url('brochure/silverwoods_brochure.pdf')
     from django.http import HttpResponseRedirect
-    return HttpResponseRedirect(pdf_url)
+    from django.templatetags.static import static
+    return HttpResponseRedirect(static('brochure/silverwoods_brochure.pdf'))
 
 
 def brochure(request):
-    import os
-    brochure_dir = os.path.join(settings.BASE_DIR, 'static', 'brochure')
-    image_urls = []
-    if os.path.isdir(brochure_dir):
-        files = sorted(
-            [f for f in os.listdir(brochure_dir) if f.lower().endswith('.webp')],
-            key=lambda x: int(''.join(filter(str.isdigit, x)) or 0)
-        )
-        for f in files:
-            image_urls.append(settings.STATIC_URL + 'brochure/' + f)
+    from django.templatetags.static import static
+    # Brochure pages are 1.webp to 25.webp in static/brochure/
+    image_urls = [static(f'brochure/{i}.webp') for i in range(1, 26)]
     return render(request, 'brochure.html', {'image_urls': image_urls})
 
 

@@ -526,7 +526,29 @@ def admin_popups(request):
         raise
 
 
+@login_required
+def cloudinary_sign_upload(request):
+    """Return signed params for a direct browser-to-Cloudinary upload."""
+    import os, time
+    if not os.environ.get('CLOUDINARY_URL'):
+        return JsonResponse({'error': 'Cloudinary not configured'}, status=400)
+    import cloudinary, cloudinary.utils
+    folder = request.GET.get('folder', 'popups')
+    timestamp = int(time.time())
+    params = {'folder': folder, 'timestamp': timestamp}
+    signature = cloudinary.utils.api_sign_request(params, cloudinary.config().api_secret)
+    return JsonResponse({
+        'cloud_name': cloudinary.config().cloud_name,
+        'api_key': cloudinary.config().api_key,
+        'timestamp': timestamp,
+        'signature': signature,
+        'folder': folder,
+    })
+
+
 def _admin_popups_inner(request):
+    import os as _os
+    cloudinary_active = bool(_os.environ.get('CLOUDINARY_URL'))
     popups = PopupAd.objects.all()
     popup_error = ''
     if request.method == 'POST':
@@ -543,39 +565,48 @@ def _admin_popups_inner(request):
                 return render(request, 'admin_panel/popups.html', {
                     'popups': _enriched, 'form': PopupAdForm(), 'popup_error': popup_error,
                 })
+        # Check for direct-upload public_ids (browser uploaded straight to Cloudinary)
+        image_public_id = request.POST.get('image_public_id', '').strip()
+        logo_public_id = request.POST.get('logo_public_id', '').strip()
+
+        # Remove files from FILES if we have a direct-upload public_id (avoid double upload)
+        files = request.FILES.copy()
+        if image_public_id:
+            files.pop('image', None)
+        if logo_public_id:
+            files.pop('project_logo', None)
+
         if popup_id:
             popup = get_object_or_404(PopupAd, pk=popup_id)
-            form = PopupAdForm(request.POST, request.FILES, instance=popup)
+            form = PopupAdForm(request.POST, files, instance=popup)
         else:
-            form = PopupAdForm(request.POST, request.FILES)
+            form = PopupAdForm(request.POST, files)
         if form.is_valid():
             if not popup_id:
-                # New ad: shift all existing ads down, place new one at top
                 PopupAd.objects.all().update(order=models.F('order') + 1)
                 instance = form.save(commit=False)
                 instance.order = 0
-                instance.save()
             else:
                 instance = form.save(commit=False)
                 was_active = PopupAd.objects.filter(pk=popup_id).values_list('is_active', flat=True).first()
                 if was_active and not instance.is_active:
                     max_order = PopupAd.objects.aggregate(m=Max('order'))['m'] or 0
                     instance.order = max_order + 1
-                instance.save()
+            # Apply direct-upload paths (bypass Django file storage for these)
+            if image_public_id:
+                instance.image = image_public_id
+            if logo_public_id:
+                instance.project_logo = logo_public_id
+            instance.save()
             return redirect('admin_popups')
-    import logging as _log
-    _lg = _log.getLogger(__name__)
     enriched = []
     for p in popups:
         p.logo_url_cdn = _cloudinary_url(p.project_logo)
         p.image_url_cdn = _cloudinary_url(p.image)
-        _lg.error('POPUP_URL id=%s logo=%r img=%r logo_name=%r img_name=%r',
-                  p.pk, p.logo_url_cdn, p.image_url_cdn,
-                  p.project_logo.name if p.project_logo else None,
-                  p.image.name if p.image else None)
         enriched.append(p)
     return render(request, 'admin_panel/popups.html', {
-        'popups': enriched, 'form': PopupAdForm(), 'popup_error': popup_error,
+        'popups': enriched, 'form': PopupAdForm(),
+        'popup_error': popup_error, 'cloudinary_active': cloudinary_active,
     })
 
 

@@ -57,21 +57,17 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Project Logo</label>
-                            {% if popup.logo_url_cdn %}<img src="{{ popup.logo_url_cdn }}" class="h-24 w-24 object-contain rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" alt="Current logo" onerror="this.style.display='none'">{% else %}<div class="h-24"></div>{% endif %}
-                            <input type="file" name="project_logo" accept="image/*" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm text-brown-500 dark:text-cream-300/40">
+                            <div id="edit-logo-preview-{{ popup.pk }}">{% if popup.logo_url_cdn %}<img src="{{ popup.logo_url_cdn }}" class="h-24 w-24 object-contain rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" alt="Current logo" onerror="this.style.display='none'">{% else %}<div class="h-24"></div>{% endif %}</div>
+                            <input type="file" accept="image/*" class="sw-direct-upload w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm text-brown-500 dark:text-cream-300/40" data-folder="popups/logos" data-hidden="edit-logo-pid-{{ popup.pk }}" data-preview="edit-logo-preview-{{ popup.pk }}">
+                            <input type="hidden" name="logo_public_id" id="edit-logo-pid-{{ popup.pk }}">
+                            <div class="text-xs text-gold-600 edit-logo-prog-{{ popup.pk }} hidden">Uploading...</div>
                         </div>
                         <div>
                             <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Image / Video</label>
-                            {% if popup.image_url_cdn %}
-                                {% with popup.image.name|lower as fname %}
-                                    {% if ".mp4" in fname or ".webm" in fname or ".mov" in fname %}
-                                        <video src="{{ popup.image_url_cdn }}" class="w-full h-24 object-cover rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" muted autoplay loop playsinline onerror="this.style.display='none'"></video>
-                                    {% else %}
-                                        <img src="{{ popup.image_url_cdn }}" class="w-full h-24 object-cover rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" alt="" onerror="this.style.display='none'">
-                                    {% endif %}
-                                {% endwith %}
-                            {% endif %}
-                            <input type="file" name="image" accept="image/*,video/mp4,video/webm,video/quicktime" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm text-brown-500 dark:text-cream-300/40">
+                            <div id="edit-img-preview-{{ popup.pk }}">{% if popup.image_url_cdn %}{% with popup.image.name|lower as fname %}{% if ".mp4" in fname or ".webm" in fname or ".mov" in fname %}<video src="{{ popup.image_url_cdn }}" class="w-full h-24 object-cover rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" muted autoplay loop playsinline onerror="this.style.display='none'"></video>{% else %}<img src="{{ popup.image_url_cdn }}" class="w-full h-24 object-cover rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" alt="" onerror="this.style.display='none'">{% endif %}{% endwith %}{% endif %}</div>
+                            <input type="file" accept="image/*,video/mp4,video/webm,video/quicktime" class="sw-direct-upload w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm text-brown-500 dark:text-cream-300/40" data-folder="popups" data-hidden="edit-img-pid-{{ popup.pk }}" data-preview="edit-img-preview-{{ popup.pk }}">
+                            <input type="hidden" name="image_public_id" id="edit-img-pid-{{ popup.pk }}">
+                            <div class="text-xs text-gold-600 edit-img-prog-{{ popup.pk }} hidden">Uploading...</div>
                         </div>
                     </div>
 
@@ -170,11 +166,17 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                     <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Image / Video</label>
-                    <input type="file" name="image" accept="image/*,video/mp4,video/webm,video/quicktime" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm text-brown-500 dark:text-cream-300/40">
+                    <input type="file" id="create-image-file" accept="image/*,video/mp4,video/webm,video/quicktime" class="sw-direct-upload w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm text-brown-500 dark:text-cream-300/40" data-folder="popups" data-hidden="create-image-public-id" data-preview="create-image-preview">
+                    <input type="hidden" name="image_public_id" id="create-image-public-id">
+                    <div id="create-image-preview" class="mt-1 hidden"></div>
+                    <div id="create-image-progress" class="mt-1 text-xs text-gold-600 hidden">Uploading...</div>
                 </div>
                 <div>
                     <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Project Logo</label>
-                    <input type="file" name="project_logo" accept="image/*" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm text-brown-500 dark:text-cream-300/40">
+                    <input type="file" id="create-logo-file" accept="image/*" class="sw-direct-upload w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm text-brown-500 dark:text-cream-300/40" data-folder="popups/logos" data-hidden="create-logo-public-id" data-preview="create-logo-preview">
+                    <input type="hidden" name="logo_public_id" id="create-logo-public-id">
+                    <div id="create-logo-preview" class="mt-1 hidden"></div>
+                    <div id="create-logo-progress" class="mt-1 text-xs text-gold-600 hidden">Uploading...</div>
                 </div>
             </div>
 
@@ -210,6 +212,68 @@ function calcEndDate(startInput, durationInput, endInput) {
     startInput.addEventListener('change', update);
     durationInput.addEventListener('input', update);
 }
+
+// Direct-to-Cloudinary upload — bypasses Railway server for file uploads
+{% if cloudinary_active %}
+(function() {
+    var SIGN_URL = '{% url "cloudinary_sign_upload" %}';
+
+    function showPreview(previewEl, file, publicId, secureUrl) {
+        var isVideo = file.type.startsWith('video/');
+        previewEl.innerHTML = isVideo
+            ? '<video src="' + secureUrl + '" class="w-full h-24 object-cover rounded-lg mb-1" muted autoplay loop playsinline></video>'
+            : '<img src="' + secureUrl + '" class="w-full h-24 object-cover rounded-lg mb-1 rounded-lg" alt="">';
+        previewEl.classList.remove('hidden');
+    }
+
+    function wireInput(input) {
+        input.addEventListener('change', function() {
+            var file = input.files[0];
+            if (!file) return;
+            var folder = input.dataset.folder || 'popups';
+            var hiddenEl = document.getElementById(input.dataset.hidden);
+            var previewEl = document.getElementById(input.dataset.preview);
+
+            // Show uploading state
+            input.disabled = true;
+            var progEls = input.parentElement.querySelectorAll('[class*="hidden"]');
+            var progText = input.nextElementSibling ? input.nextElementSibling.nextElementSibling : null;
+            if (progText) { progText.textContent = 'Uploading…'; progText.classList.remove('hidden'); }
+
+            fetch(SIGN_URL + '?folder=' + encodeURIComponent(folder))
+                .then(function(r) { return r.json(); })
+                .then(function(params) {
+                    var fd = new FormData();
+                    fd.append('file', file);
+                    fd.append('api_key', params.api_key);
+                    fd.append('timestamp', params.timestamp);
+                    fd.append('signature', params.signature);
+                    fd.append('folder', params.folder);
+                    return fetch('https://api.cloudinary.com/v1_1/' + params.cloud_name + '/auto/upload', {
+                        method: 'POST', body: fd
+                    });
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(result) {
+                    if (result.public_id) {
+                        hiddenEl.value = result.public_id;
+                        if (previewEl) showPreview(previewEl, file, result.public_id, result.secure_url);
+                        if (progText) { progText.textContent = '✓ Uploaded'; }
+                    } else {
+                        if (progText) { progText.textContent = 'Upload failed — try again'; }
+                        input.disabled = false;
+                    }
+                })
+                .catch(function() {
+                    if (progText) { progText.textContent = 'Upload failed — try again'; }
+                    input.disabled = false;
+                });
+        });
+    }
+
+    document.querySelectorAll('.sw-direct-upload').forEach(wireInput);
+})();
+{% endif %}
 
 // Create form
 calcEndDate(

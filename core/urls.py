@@ -24,6 +24,7 @@ urlpatterns = [
     path('admin-panel/pricing/', views.admin_pricing, name='admin_pricing'),
     path('admin-panel/pricing/delete/<int:pk>/', views.admin_delete_flat_type, name='admin_delete_flat_type'),
     path('admin-panel/popups/', views.admin_popups, name='admin_popups'),
+    path('admin-panel/cloudinary-sign/', views.cloudinary_sign_upload, name='cloudinary_sign_upload'),
     path('admin-panel/popups/toggle/<int:pk>/', views.admin_toggle_popup, name='admin_toggle_popup'),
     path('admin-panel/popups/delete/<int:pk>/', views.admin_delete_popup, name='admin_delete_popup'),
     path('admin-panel/popups/reorder/', views.admin_reorder_popups, name='admin_reorder_popups'),

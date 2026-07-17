@@ -268,7 +268,7 @@ function calcEndDate(startInput, durationInput, endInput) {
             ui.wrap.classList.remove('hidden');
             ui.bar.style.width = '0%';
             ui.pct.textContent = '0%';
-            ui.label.textContent = 'Getting upload key…';
+            ui.label.textContent = 'Preparing ' + fmtBytes(file.size) + '…';
             ui.speed.textContent = '';
 
             fetch(SIGN_URL + '?folder=' + encodeURIComponent(folder))
@@ -282,17 +282,22 @@ function calcEndDate(startInput, durationInput, endInput) {
                 fd.append('folder', params.folder);
 
                 var startTime = Date.now();
+                var lastLoaded = 0;
+                var lastTime = Date.now();
                 var xhr = new XMLHttpRequest();
 
                 xhr.upload.addEventListener('progress', function(e) {
                     if (!e.lengthComputable) return;
                     var pct = Math.round(e.loaded / e.total * 100);
-                    var elapsed = (Date.now() - startTime) / 1000;
-                    var speed = elapsed > 0 ? e.loaded / elapsed : 0;
+                    var now = Date.now();
+                    var chunkTime = (now - lastTime) / 1000;
+                    var speed = chunkTime > 0 ? (e.loaded - lastLoaded) / chunkTime : 0;
+                    lastLoaded = e.loaded;
+                    lastTime = now;
                     ui.bar.style.width = pct + '%';
                     ui.pct.textContent = pct + '%';
                     ui.label.textContent = 'Uploading ' + fmtBytes(e.loaded) + ' / ' + fmtBytes(e.total);
-                    ui.speed.textContent = fmtBytes(speed) + '/s';
+                    ui.speed.textContent = speed > 0 ? fmtBytes(speed) + '/s' : '';
                 });
 
                 xhr.addEventListener('load', function() {
@@ -308,7 +313,8 @@ function calcEndDate(startInput, durationInput, endInput) {
                             ui.label.textContent = '✓ Upload complete';
                             ui.speed.textContent = '';
                         } else {
-                            ui.label.textContent = '✗ Upload failed — try again';
+                            var errMsg = result.error && result.error.message ? result.error.message : 'Upload failed — try again';
+                            ui.label.textContent = '✗ ' + errMsg;
                             ui.bar.classList.replace('bg-gold-500', 'bg-red-400');
                             input.disabled = false;
                         }

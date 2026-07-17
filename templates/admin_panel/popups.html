@@ -56,7 +56,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Project Logo</label>
-                            {% if popup.project_logo %}<img src="{{ popup.project_logo.url }}" class="h-24 w-24 object-contain rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" alt="Current logo">{% else %}<div class="h-24"></div>{% endif %}
+                            {% if popup.project_logo %}<img src="{{ popup.project_logo.url }}" class="h-24 w-24 object-contain rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" alt="Current logo" onerror="this.style.display='none'">{% else %}<div class="h-24"></div>{% endif %}
                             <input type="file" name="project_logo" accept="image/*" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm text-brown-500 dark:text-cream-300/40">
                         </div>
                         <div>
@@ -64,9 +64,9 @@
                             {% if popup.image %}
                                 {% with popup.image.name|lower as fname %}
                                     {% if ".mp4" in fname or ".webm" in fname or ".mov" in fname %}
-                                        <video src="{{ popup.image.url }}" class="w-full h-24 object-cover rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" muted autoplay loop playsinline></video>
+                                        <video src="{{ popup.image.url }}" class="w-full h-24 object-cover rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" muted autoplay loop playsinline onerror="this.style.display='none'"></video>
                                     {% else %}
-                                        <img src="{{ popup.image.url }}" class="w-full h-24 object-cover rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" alt="">
+                                        <img src="{{ popup.image.url }}" class="w-full h-24 object-cover rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" alt="" onerror="this.style.display='none'">
                                     {% endif %}
                                 {% endwith %}
                             {% endif %}

@@ -270,14 +270,28 @@ function calcEndDate(startInput, durationInput, endInput) {
             if (!file) return;
             var folder = input.dataset.folder || 'popups';
 
-            input.disabled = true;
+            var isVideo = file.type.startsWith('video/');
+            var maxBytes = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
+            var maxLabel = isVideo ? '100 MB' : '10 MB';
+
             ui.wrap.classList.remove('hidden');
-            ui.bar.style.width = '0%';
             ui.bar.classList.remove('bg-green-500', 'bg-red-400');
             ui.bar.classList.add('bg-gold-500');
+            ui.speed.textContent = '';
+
+            if (file.size > maxBytes) {
+                ui.bar.style.width = '100%';
+                ui.bar.classList.replace('bg-gold-500', 'bg-red-400');
+                ui.pct.textContent = '';
+                ui.label.textContent = '✗ File too large — max ' + maxLabel + ' (your file: ' + fmtBytes(file.size) + ')';
+                input.value = '';
+                return;
+            }
+
+            input.disabled = true;
+            ui.bar.style.width = '0%';
             ui.pct.textContent = '0%';
             ui.label.textContent = 'Preparing ' + fmtBytes(file.size) + '…';
-            ui.speed.textContent = '';
 
             fetch(SIGN_URL + '?folder=' + encodeURIComponent(folder))
             .then(function(r) { return r.json(); })

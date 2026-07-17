@@ -156,7 +156,7 @@
                 <!-- Developer Card -->
                 <div class="glass-warm rounded-2xl p-8 glass-hover">
                     <div class="flex items-center gap-5 mb-4">
-                        <img src="{% static 'images/logo.png' %}" alt="" class="w-14 h-14 rounded-xl object-cover border border-brown-700/[0.05] dark:border-white/[0.06]" onerror="this.outerHTML='<div class=\'w-14 h-14 rounded-xl bg-brown-700/10 dark:bg-gold-500/10 flex items-center justify-center\'><i class=\'fas fa-building text-brown-400 dark:text-gold-500\'></i></div>'">
+                        <img src="{% static 'images/logo.png' %}" loading="lazy" alt="" class="w-14 h-14 rounded-xl object-cover border border-brown-700/[0.05] dark:border-white/[0.06]" onerror="this.outerHTML='<div class=\'w-14 h-14 rounded-xl bg-brown-700/10 dark:bg-gold-500/10 flex items-center justify-center\'><i class=\'fas fa-building text-brown-400 dark:text-gold-500\'></i></div>'">
                         <div>
                             <div class="font-display text-lg font-bold text-brown-800 dark:text-cream-100">{{ project.director_name }}</div>
                             <div class="text-[10px] tracking-[0.15em] uppercase text-brown-400 dark:text-gold-500/60">{{ project.director_title }}</div>
@@ -169,8 +169,8 @@
         <!-- About Image -->
         <div class="mt-10 md:mt-20 section-reveal">
             <div class="rounded-2xl overflow-hidden h-[35vh] md:h-[50vh] relative">
-                <img src="{% static 'images/gate_light.png' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-100'" alt="Silverwoods Gate">
-                <img src="{% static 'images/gate_night.png' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-100' : 'opacity-0'" alt="Silverwoods Gate Night">
+                <img src="{% static 'images/gate_light.png' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-100'" loading="lazy" alt="Silverwoods Gate">
+                <img src="{% static 'images/gate_night.png' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-100' : 'opacity-0'" loading="lazy" alt="Silverwoods Gate Night">
             </div>
         </div>
     </div>
@@ -228,8 +228,8 @@
             </div>
             <div class="section-reveal">
                 <div class="rounded-2xl overflow-hidden h-[280px] md:h-[400px] lg:h-[500px] relative">
-                    <img src="{% static 'images/clubhouse-light.png' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-100'" alt="Villa Interior">
-                    <img src="{% static 'images/clubhouse-dark.png' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-100' : 'opacity-0'" alt="Villa Interior">
+                    <img src="{% static 'images/clubhouse-light.png' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-100'" loading="lazy" alt="Villa Interior">
+                    <img src="{% static 'images/clubhouse-dark.png' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-100' : 'opacity-0'" loading="lazy" alt="Villa Interior">
                 </div>
             </div>
         </div>
@@ -347,23 +347,23 @@
                     <!-- Back -->
                     <div class="amenity-flip-back rounded-2xl overflow-hidden">
                         {% if amenity.icon == 'pool' %}
-                            <img src="https://picsum.photos/seed/pool/600/400" alt="{{ amenity.name }}" class="amenity-flip-img">
+                            <img src="https://picsum.photos/seed/pool/600/400" alt="{{ amenity.name }}" loading="lazy" class="amenity-flip-img">
                         {% elif amenity.icon == 'fitness' %}
-                            <img src="https://picsum.photos/seed/gym/600/400" alt="{{ amenity.name }}" class="amenity-flip-img">
+                            <img src="https://picsum.photos/seed/gym/600/400" alt="{{ amenity.name }}" loading="lazy" class="amenity-flip-img">
                         {% elif amenity.icon == 'child' %}
-                            <img src="https://picsum.photos/seed/kids/600/400" alt="{{ amenity.name }}" class="amenity-flip-img">
+                            <img src="https://picsum.photos/seed/kids/600/400" alt="{{ amenity.name }}" loading="lazy" class="amenity-flip-img">
                         {% elif amenity.icon == 'club' %}
-                            <img src="https://picsum.photos/seed/clubhouse/600/400" alt="{{ amenity.name }}" class="amenity-flip-img">
+                            <img src="https://picsum.photos/seed/clubhouse/600/400" alt="{{ amenity.name }}" loading="lazy" class="amenity-flip-img">
                         {% elif amenity.icon == 'garden' %}
-                            <img src="https://picsum.photos/seed/garden/600/400" alt="{{ amenity.name }}" class="amenity-flip-img">
+                            <img src="https://picsum.photos/seed/garden/600/400" alt="{{ amenity.name }}" loading="lazy" class="amenity-flip-img">
                         {% elif amenity.icon == 'security' %}
-                            <img src="https://picsum.photos/seed/security/600/400" alt="{{ amenity.name }}" class="amenity-flip-img">
+                            <img src="https://picsum.photos/seed/security/600/400" alt="{{ amenity.name }}" loading="lazy" class="amenity-flip-img">
                         {% elif amenity.icon == 'power' %}
-                            <img src="https://picsum.photos/seed/power/600/400" alt="{{ amenity.name }}" class="amenity-flip-img">
+                            <img src="https://picsum.photos/seed/power/600/400" alt="{{ amenity.name }}" loading="lazy" class="amenity-flip-img">
                         {% elif amenity.icon == 'parking' %}
-                            <img src="https://picsum.photos/seed/podium/600/400" alt="{{ amenity.name }}" class="amenity-flip-img">
+                            <img src="https://picsum.photos/seed/podium/600/400" alt="{{ amenity.name }}" loading="lazy" class="amenity-flip-img">
                         {% else %}
-                            <img src="https://picsum.photos/seed/villa/600/400" alt="{{ amenity.name }}" class="amenity-flip-img">
+                            <img src="https://picsum.photos/seed/villa/600/400" alt="{{ amenity.name }}" loading="lazy" class="amenity-flip-img">
                         {% endif %}
                         <div class="amenity-flip-overlay">
                             <h3 class="font-display text-sm font-bold text-white tracking-wide uppercase mb-1">{{ amenity.name }}</h3>
@@ -390,22 +390,22 @@
         </div>
         <div class="grid grid-cols-12 gap-3 md:gap-4">
             <div class="col-span-12 md:col-span-7 rounded-2xl overflow-hidden group section-reveal h-[220px] md:h-[400px]">
-                <img src="{% static 'images/gallery1.png' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" style="transition:transform 1s" alt="Silverwoods Gallery">
+                <img src="{% static 'images/gallery1.png' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
             </div>
             <div class="col-span-12 md:col-span-5 rounded-2xl overflow-hidden group section-reveal h-[220px] md:h-[400px]">
-                <img src="{% static 'images/gallery2.png' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" style="transition:transform 1s" alt="Silverwoods Gallery">
+                <img src="{% static 'images/gallery2.png' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
             </div>
             <div class="col-span-6 md:col-span-4 rounded-2xl overflow-hidden group section-reveal h-[160px] md:h-[300px]">
-                <img src="{% static 'images/gallery3.png' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" style="transition:transform 1s" alt="Silverwoods Gallery">
+                <img src="{% static 'images/gallery3.png' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
             </div>
             <div class="col-span-6 md:col-span-4 rounded-2xl overflow-hidden group section-reveal h-[160px] md:h-[300px]">
-                <img src="{% static 'images/gallery4.png' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" style="transition:transform 1s" alt="Silverwoods Gallery">
+                <img src="{% static 'images/gallery4.png' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
             </div>
             <div class="col-span-12 md:col-span-4 rounded-2xl overflow-hidden group section-reveal h-[160px] md:h-[300px]">
-                <img src="{% static 'images/gallery5.png' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" style="transition:transform 1s" alt="Silverwoods Gallery">
+                <img src="{% static 'images/gallery5.png' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
             </div>
             <div class="col-span-12 rounded-2xl overflow-hidden group section-reveal h-[35vh] md:h-[50vh]">
-                <img src="{% static 'images/gallery6.png' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" style="transition:transform 1s" alt="Silverwoods Gallery">
+                <img src="{% static 'images/gallery6.png' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
             </div>
         </div>
     </div>
@@ -434,7 +434,7 @@
             <div class="pricing-card glass-warm rounded-2xl overflow-hidden glass-hover group {% if flat.bhk == 3 %}border-gold-500/30{% endif %}">
                 <div class="p-3">
                     <div class="h-52 rounded-xl overflow-hidden relative bg-cream-200 dark:bg-dark-800">
-                        <img src="https://images.unsplash.com/photo-{% if flat.order == 1 %}1600596542815-ffad4c1539a9{% elif flat.order == 2 %}1600607687939-ce8a6c25118c{% elif flat.order == 3 %}1600566753190-17f0baa2a6c3{% elif flat.order == 4 %}1600585154340-be6161a56a0c{% elif flat.order == 5 %}1613490493576-7fde63acd811{% else %}1512917774080-9991f1c4c750{% endif %}?w=600&q=85" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" style="transition:transform 0.7s" alt="">
+                        <img src="https://images.unsplash.com/photo-{% if flat.order == 1 %}1600596542815-ffad4c1539a9{% elif flat.order == 2 %}1600607687939-ce8a6c25118c{% elif flat.order == 3 %}1600566753190-17f0baa2a6c3{% elif flat.order == 4 %}1600585154340-be6161a56a0c{% elif flat.order == 5 %}1613490493576-7fde63acd811{% else %}1512917774080-9991f1c4c750{% endif %}?w=600&q=85" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" style="transition:transform 0.7s" alt="">
                         <div class="absolute top-3 left-3 text-[10px] tracking-[0.15em] uppercase font-semibold text-brown-800 dark:text-cream-100 bg-cream-100/80 dark:bg-dark-900/80 backdrop-blur px-3 py-1.5 rounded-lg">{{ flat.bhk }} BHK</div>
                         {% if flat.bhk == 3 %}<div class="absolute top-3 right-3 text-[9px] tracking-[0.15em] uppercase font-bold text-brown-700 dark:text-gold-500 bg-cream-100/80 dark:bg-dark-900/80 backdrop-blur px-3 py-1.5 rounded-lg">Popular</div>{% endif %}
                     </div>
@@ -591,8 +591,8 @@
                 </a>
             </div>
             <div class="section-reveal rounded-2xl overflow-hidden h-[220px] md:h-[350px] relative">
-                <img src="{% static 'images/office-light.png' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-100'" alt="Contact">
-                <img src="{% static 'images/office-dark.png' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-100' : 'opacity-0'" alt="Contact">
+                <img src="{% static 'images/office-light.png' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-100'" loading="lazy" alt="Contact">
+                <img src="{% static 'images/office-dark.png' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-100' : 'opacity-0'" loading="lazy" alt="Contact">
             </div>
         </div>
 

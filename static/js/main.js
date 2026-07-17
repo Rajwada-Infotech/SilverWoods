@@ -1,19 +1,25 @@
 // Silverwoods Main JS - Animations & Interactions
 
-// Preloader — hide on DOMContentLoaded (don't wait for images/Cloudinary assets)
-function hidePreloader() {
+// Preloader — skip entirely on repeat visits (sessionStorage), otherwise hide on DOMContentLoaded
+(function() {
     const preloader = document.getElementById('preloader');
-    if (!preloader || preloader.dataset.hidden) return;
-    preloader.dataset.hidden = '1';
-    preloader.style.opacity = '0';
-    setTimeout(() => {
+    if (!preloader) return;
+    if (sessionStorage.getItem('sw_visited')) {
+        // Returning visitor this session — skip preloader instantly
         preloader.style.display = 'none';
-        animateHero();
-    }, 500);
-}
-document.addEventListener('DOMContentLoaded', hidePreloader);
-// Safety cap: force-hide after 2s even if DOMContentLoaded already fired
-setTimeout(hidePreloader, 2000);
+        document.addEventListener('DOMContentLoaded', animateHero);
+        return;
+    }
+    sessionStorage.setItem('sw_visited', '1');
+    function hidePreloader() {
+        if (preloader.dataset.hidden) return;
+        preloader.dataset.hidden = '1';
+        preloader.style.opacity = '0';
+        setTimeout(() => { preloader.style.display = 'none'; animateHero(); }, 500);
+    }
+    document.addEventListener('DOMContentLoaded', hidePreloader);
+    setTimeout(hidePreloader, 2000); // safety cap
+})();
 
 // Smooth Scroll
 function smoothScroll(e, id) {

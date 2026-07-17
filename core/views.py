@@ -30,7 +30,9 @@ def _cloudinary_url(file_field):
         if os.environ.get('CLOUDINARY_URL'):
             import cloudinary
             cloud_name = cloudinary.config().cloud_name
-            return f'https://res.cloudinary.com/{cloud_name}/image/upload/{name}'
+            ext = name.lower().rsplit('.', 1)[-1] if '.' in name else ''
+            resource_type = 'video' if ext in ('mp4', 'webm', 'mov', 'avi') else 'image'
+            return f'https://res.cloudinary.com/{cloud_name}/{resource_type}/upload/{name}'
         return file_field.url
     except Exception:
         return ''

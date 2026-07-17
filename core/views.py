@@ -668,6 +668,10 @@ def admin_profile(request):
 
         elif action == 'upload_photo':
             photo = request.FILES.get('photo')
+            if photo and photo.size > 5 * 1024 * 1024:
+                msg = 'Photo is too large. Please upload an image under 5 MB.'
+                msg_type = 'error'
+                photo = None
             if photo:
                 import os
                 public_id = f'admin_photos/{user.username}'

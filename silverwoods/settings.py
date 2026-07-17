@@ -9,6 +9,10 @@ SECRET_KEY = config('SECRET_KEY', default='build-phase-placeholder-not-used-in-p
 DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
 
+# Limit uploads to 10 MB to prevent gunicorn worker timeouts on large files
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+
 # ── Apps ──────────────────────────────────────────────────────────────
 INSTALLED_APPS = [
     "django.contrib.admin",

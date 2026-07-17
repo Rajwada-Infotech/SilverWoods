@@ -20,8 +20,13 @@ import os as _os
 from decouple import config as _decouple_config
 
 def _cloudinary_active():
-    """Return True if Cloudinary is configured — checks both os.environ and .env via decouple."""
+    """True if Cloudinary credentials are available (for URL building) — checks os.environ + .env."""
     return bool(_os.environ.get('CLOUDINARY_URL') or _decouple_config('CLOUDINARY_URL', default=None))
+
+def _direct_upload_active():
+    """True only when CLOUDINARY_URL is set via os.environ (Railway production), not just .env.
+    Keeps direct upload JS off on localhost so regular form upload is used instead."""
+    return bool(_os.environ.get('CLOUDINARY_URL'))
 
 
 def _cloudinary_url(file_field):
@@ -602,7 +607,7 @@ def cloudinary_sign_upload(request):
 
 def _admin_popups_inner(request):
     import os as _os
-    cloudinary_active = _cloudinary_active()
+    cloudinary_active = _direct_upload_active()
     popups = PopupAd.objects.all()
     popup_error = ''
     if request.method == 'POST':
@@ -823,7 +828,7 @@ def admin_profile(request):
     return render(request, 'admin_panel/profile.html', {
         'msg': msg, 'msg_type': msg_type,
         'photo_url': photo_url, 'has_photo': has_photo,
-        'cloudinary_active': _cloudinary_active(),
+        'cloudinary_active': _direct_upload_active(),
     })
 
 

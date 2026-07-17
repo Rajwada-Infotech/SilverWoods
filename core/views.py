@@ -30,15 +30,14 @@ def _direct_upload_active():
 
 
 def _cloudinary_url(file_field):
-    """Build the correct Cloudinary URL, using extension to pick video vs image resource type."""
-    import os
+    """Build the correct URL: Cloudinary in production, local /media/ on localhost."""
     if not file_field:
         return ''
     name = file_field.name if hasattr(file_field, 'name') else str(file_field)
     if not name:
         return ''
     try:
-        if _cloudinary_active():
+        if _direct_upload_active():
             import cloudinary
             cloud_name = cloudinary.config().cloud_name
             ext = name.lower().rsplit('.', 1)[-1] if '.' in name else ''

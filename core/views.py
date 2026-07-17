@@ -636,8 +636,11 @@ def _admin_popups_inner(request):
 
         if popup_id:
             popup = get_object_or_404(PopupAd, pk=popup_id)
+            old_image = popup.image.name if popup.image else None
+            old_logo = popup.project_logo.name if popup.project_logo else None
             form = PopupAdForm(request.POST, files, instance=popup)
         else:
+            old_image = old_logo = None
             form = PopupAdForm(request.POST, files)
         if form.is_valid():
             if not popup_id:
@@ -652,8 +655,12 @@ def _admin_popups_inner(request):
                     instance.order = max_order + 1
             # Apply direct-upload paths (bypass Django file storage for these)
             if image_public_id:
+                if old_image and old_image != image_public_id:
+                    _cloudinary_delete(type('F', (), {'name': old_image})())
                 instance.image = image_public_id
             if logo_public_id:
+                if old_logo and old_logo != logo_public_id:
+                    _cloudinary_delete(type('F', (), {'name': old_logo})())
                 instance.project_logo = logo_public_id
             instance.save()
             from django.core.cache import cache
@@ -696,9 +703,28 @@ def admin_toggle_popup(request, pk):
     return redirect('admin_popups')
 
 
+def _cloudinary_delete(file_field):
+    """Delete a file from Cloudinary by its stored name (public_id without extension)."""
+    if not _direct_upload_active() or not file_field:
+        return
+    name = file_field.name if hasattr(file_field, 'name') else str(file_field)
+    if not name:
+        return
+    try:
+        import cloudinary.uploader
+        public_id = name.rsplit('.', 1)[0]  # strip extension
+        ext = name.lower().rsplit('.', 1)[-1] if '.' in name else ''
+        resource_type = 'video' if ext in ('mp4', 'webm', 'mov', 'avi') else 'image'
+        cloudinary.uploader.destroy(public_id, resource_type=resource_type)
+    except Exception:
+        pass
+
+
 @login_required
 def admin_delete_popup(request, pk):
     popup = get_object_or_404(PopupAd, pk=pk)
+    _cloudinary_delete(popup.image)
+    _cloudinary_delete(popup.project_logo)
     popup.delete()
     from django.core.cache import cache
     cache.delete('api_popups')

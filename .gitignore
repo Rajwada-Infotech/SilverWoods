@@ -21,7 +21,6 @@ media/
 static/images/*.png
 static/images/*.jpg
 static/images/*.jpeg
-!static/images/chatbot-icon.png
 !static/images/favicon*.png
 
 # Node / Tailwind build

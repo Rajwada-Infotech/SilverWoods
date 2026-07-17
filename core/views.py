@@ -705,37 +705,43 @@ def admin_profile(request):
                 msg_type = 'success'
 
         elif action == 'upload_photo':
+            import os
+            photo_public_id = request.POST.get('photo_public_id', '').strip()
             photo = request.FILES.get('photo')
-            if photo and photo.size > 5 * 1024 * 1024:
-                msg = 'Photo is too large. Please upload an image under 5 MB.'
-                msg_type = 'error'
-                photo = None
-            if photo:
-                import os
-                public_id = f'admin_photos/{user.username}'
-                if os.environ.get('CLOUDINARY_URL'):
-                    import cloudinary.uploader
-                    result = cloudinary.uploader.upload(
-                        photo,
-                        public_id=public_id,
-                        overwrite=True,
-                        invalidate=True,
-                        resource_type='image',
-                    )
-                    # Store the returned secure_url so we can display it
-                    msg_detail = result.get('secure_url', '')
-                else:
-                    from django.core.files.storage import default_storage
-                    file_path = f'{public_id}.jpg'
-                    try:
-                        default_storage.delete(file_path)
-                    except Exception:
-                        pass
-                    default_storage.save(file_path, photo)
+            if photo_public_id and os.environ.get('CLOUDINARY_URL'):
+                # Direct upload already done — public_id stored by browser
+                import time as _t
                 msg = 'Photo uploaded successfully.'
                 msg_type = 'success'
-                import time as _t
                 request.session['photo_version'] = int(_t.time())
+            elif photo:
+                if photo.size > 10 * 1024 * 1024:
+                    msg = 'Photo is too large. Please upload an image under 10 MB.'
+                    msg_type = 'error'
+                    photo = None
+                if photo:
+                    public_id = f'admin_photos/{user.username}'
+                    if os.environ.get('CLOUDINARY_URL'):
+                        import cloudinary.uploader
+                        cloudinary.uploader.upload(
+                            photo,
+                            public_id=public_id,
+                            overwrite=True,
+                            invalidate=True,
+                            resource_type='image',
+                        )
+                    else:
+                        from django.core.files.storage import default_storage
+                        file_path = f'{public_id}.jpg'
+                        try:
+                            default_storage.delete(file_path)
+                        except Exception:
+                            pass
+                        default_storage.save(file_path, photo)
+                    msg = 'Photo uploaded successfully.'
+                    msg_type = 'success'
+                    import time as _t
+                    request.session['photo_version'] = int(_t.time())
 
     photo_url = ''
     has_photo = False
@@ -764,6 +770,7 @@ def admin_profile(request):
     return render(request, 'admin_panel/profile.html', {
         'msg': msg, 'msg_type': msg_type,
         'photo_url': photo_url, 'has_photo': has_photo,
+        'cloudinary_active': bool(os.environ.get('CLOUDINARY_URL')),
     })
 
 

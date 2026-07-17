@@ -26,15 +26,29 @@
                 <span class="text-4xl font-bold text-gold-600 dark:text-gold-400" style="font-family:'Playfair Display',serif">{{ request.user.username|first|upper }}</span>
             </div>
             {% endif %}
-            <form method="post" enctype="multipart/form-data" class="absolute -bottom-2 -right-2">
+            <form id="photo-upload-form" method="post" enctype="multipart/form-data" class="absolute -bottom-2 -right-2">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="upload_photo">
+                <input type="hidden" name="photo_public_id" id="photo-public-id">
                 <label class="w-9 h-9 rounded-full bg-brown-700 dark:bg-gold-500 flex items-center justify-center cursor-pointer shadow-lg hover:scale-110 transition-transform">
                     <i class="fas fa-camera text-cream-100 dark:text-brown-800 text-xs"></i>
-                    <input type="file" name="photo" accept="image/*" class="hidden" onchange="this.form.submit()">
+                    <input type="file" id="photo-file-input" name="photo" accept="image/*" class="hidden">
                 </label>
             </form>
         </div>
+        <!-- Photo upload progress -->
+        <div id="photo-progress-wrap" class="hidden mt-3 w-full max-w-[200px] mx-auto">
+            <span id="photo-prog-label" class="block text-[10px] text-brown-500 dark:text-cream-300/50 mb-0.5"></span>
+            <div class="flex items-center gap-1.5">
+                <div class="flex-1 h-2 bg-brown-100 dark:bg-white/[0.06] rounded-full overflow-hidden">
+                    <div id="photo-prog-bar" class="h-full bg-gold-500 rounded-full transition-all duration-150" style="width:0%"></div>
+                </div>
+                <span id="photo-prog-pct" class="text-[10px] text-brown-400 dark:text-cream-300/30 w-7 text-right shrink-0">0%</span>
+                <span id="photo-prog-speed" class="text-[10px] text-brown-300 dark:text-cream-300/25 shrink-0"></span>
+            </div>
+            <p class="text-[10px] text-brown-300 dark:text-cream-300/25 mt-0.5">Max size: 10 MB (image)</p>
+        </div>
+
         <h3 class="font-bold text-brown-800 dark:text-cream-100 text-lg" style="font-family:'Playfair Display',serif">
             {% if request.user.first_name %}{{ request.user.first_name }} {{ request.user.last_name }}{% else %}{{ request.user.username }}{% endif %}
         </h3>
@@ -124,4 +138,120 @@
         </div>
     </div>
 </div>
+
+{% if cloudinary_active %}
+<script>
+(function() {
+    var SIGN_URL = '{% url "cloudinary_sign_upload" %}';
+    var input = document.getElementById('photo-file-input');
+    var form = document.getElementById('photo-upload-form');
+    var hiddenPid = document.getElementById('photo-public-id');
+    var wrap = document.getElementById('photo-progress-wrap');
+    var bar = document.getElementById('photo-prog-bar');
+    var pct = document.getElementById('photo-prog-pct');
+    var label = document.getElementById('photo-prog-label');
+    var spd = document.getElementById('photo-prog-speed');
+
+    function fmtBytes(b) {
+        if (b < 1024) return b + ' B';
+        if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+        return (b/1048576).toFixed(1) + ' MB';
+    }
+
+    input.addEventListener('change', function() {
+        var file = input.files[0];
+        if (!file) return;
+
+        wrap.classList.remove('hidden');
+        bar.classList.remove('bg-green-500', 'bg-red-400');
+        bar.classList.add('bg-gold-500');
+        bar.style.width = '0%';
+        pct.textContent = '0%';
+        spd.textContent = '';
+
+        if (file.size > 10 * 1024 * 1024) {
+            bar.style.width = '100%';
+            bar.classList.replace('bg-gold-500', 'bg-red-400');
+            pct.textContent = '';
+            label.textContent = '✗ File too large — max 10 MB (your file: ' + fmtBytes(file.size) + ')';
+            input.value = '';
+            return;
+        }
+
+        label.textContent = 'Preparing ' + fmtBytes(file.size) + '…';
+        input.disabled = true;
+
+        fetch(SIGN_URL + '?folder=admin_photos')
+        .then(function(r) { return r.json(); })
+        .then(function(params) {
+            var fd = new FormData();
+            fd.append('file', file);
+            fd.append('api_key', params.api_key);
+            fd.append('timestamp', params.timestamp);
+            fd.append('signature', params.signature);
+            fd.append('folder', params.folder);
+
+            var lastLoaded = 0, lastTime = Date.now();
+            var xhr = new XMLHttpRequest();
+
+            xhr.upload.addEventListener('progress', function(e) {
+                if (!e.lengthComputable) return;
+                var p = Math.round(e.loaded / e.total * 100);
+                var now = Date.now();
+                var ct = (now - lastTime) / 1000;
+                var s = ct > 0 ? (e.loaded - lastLoaded) / ct : 0;
+                lastLoaded = e.loaded; lastTime = now;
+                bar.style.width = p + '%';
+                pct.textContent = p + '%';
+                label.textContent = 'Uploading ' + fmtBytes(e.loaded) + ' / ' + fmtBytes(e.total);
+                spd.textContent = s > 0 ? fmtBytes(s) + '/s' : '';
+            });
+
+            xhr.addEventListener('load', function() {
+                try {
+                    var result = JSON.parse(xhr.responseText);
+                    if (result.public_id) {
+                        hiddenPid.value = result.public_id;
+                        bar.style.width = '100%';
+                        bar.classList.replace('bg-gold-500', 'bg-green-500');
+                        pct.textContent = '100%';
+                        label.textContent = '✓ Upload complete — saving…';
+                        spd.textContent = '';
+                        form.submit();
+                    } else {
+                        var errMsg = result.error && result.error.message ? result.error.message : 'Upload failed — try again';
+                        label.textContent = '✗ ' + errMsg;
+                        bar.classList.replace('bg-gold-500', 'bg-red-400');
+                        input.disabled = false;
+                    }
+                } catch(err) {
+                    label.textContent = '✗ Error — try again';
+                    input.disabled = false;
+                }
+            });
+
+            xhr.addEventListener('error', function() {
+                label.textContent = '✗ Network error — try again';
+                bar.classList.replace('bg-gold-500', 'bg-red-400');
+                input.disabled = false;
+            });
+
+            xhr.open('POST', 'https://api.cloudinary.com/v1_1/' + params.cloud_name + '/image/upload');
+            xhr.send(fd);
+        })
+        .catch(function() {
+            label.textContent = '✗ Could not get upload key';
+            bar.classList.replace('bg-gold-500', 'bg-red-400');
+            input.disabled = false;
+        });
+    });
+})();
+</script>
+{% else %}
+<script>
+document.getElementById('photo-file-input').addEventListener('change', function() {
+    this.form.submit();
+});
+</script>
+{% endif %}
 {% endblock %}

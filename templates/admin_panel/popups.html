@@ -368,6 +368,83 @@ function calcEndDate(startInput, durationInput, endInput) {
 
     document.querySelectorAll('.sw-direct-upload').forEach(wireInput);
 })();
+{% else %}
+// Localhost: no direct upload — show instant local preview on file select
+(function() {
+    function fmtBytes(b) {
+        if (b < 1024) return b + ' B';
+        if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+        return (b/1048576).toFixed(1) + ' MB';
+    }
+
+    function showLocalPreview(previewEl, file, isLogo) {
+        var url = URL.createObjectURL(file);
+        var isVideo = file.type.startsWith('video/');
+        if (isLogo) {
+            previewEl.innerHTML = '<img src="' + url + '" class="h-24 w-24 object-contain rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" alt="">';
+        } else {
+            previewEl.innerHTML = isVideo
+                ? '<video src="' + url + '" class="w-full h-28 object-cover rounded-xl mt-1" muted autoplay loop playsinline></video>'
+                : '<img src="' + url + '" class="w-full h-28 object-cover rounded-xl mt-1" alt="">';
+        }
+    }
+
+    function makeProgressUI(container) {
+        var wrap = document.createElement('div');
+        wrap.className = 'mt-1 hidden';
+        wrap.style.maxWidth = '260px';
+        wrap.innerHTML = [
+            '<span class="prog-label block text-[10px] text-brown-500 dark:text-cream-300/50 mb-0.5"></span>',
+            '<div class="flex items-center gap-1.5">',
+            '  <div class="flex-1 h-2 bg-brown-100 dark:bg-white/[0.06] rounded-full overflow-hidden">',
+            '    <div class="prog-bar h-full bg-gold-500 rounded-full transition-all duration-150" style="width:0%"></div>',
+            '  </div>',
+            '  <span class="prog-pct text-[10px] text-brown-400 dark:text-cream-300/30 w-7 text-right shrink-0">0%</span>',
+            '</div>'
+        ].join('');
+        container.appendChild(wrap);
+        return {
+            wrap: wrap,
+            bar: wrap.querySelector('.prog-bar'),
+            pct: wrap.querySelector('.prog-pct'),
+            label: wrap.querySelector('.prog-label'),
+        };
+    }
+
+    document.querySelectorAll('.sw-direct-upload').forEach(function(input) {
+        var previewEl = document.getElementById(input.dataset.preview);
+        var folder = input.dataset.folder || 'popups';
+        var ui = makeProgressUI(input.parentElement);
+
+        input.addEventListener('change', function() {
+            var file = input.files[0];
+            if (!file) return;
+
+            var isVideo = file.type.startsWith('video/');
+            var maxBytes = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
+            var maxLabel = isVideo ? '100 MB' : '10 MB';
+
+            ui.wrap.classList.remove('hidden');
+            ui.bar.classList.remove('bg-green-500', 'bg-red-400');
+            ui.bar.classList.add('bg-gold-500');
+
+            if (file.size > maxBytes) {
+                ui.bar.style.width = '100%';
+                ui.bar.classList.replace('bg-gold-500', 'bg-red-400');
+                ui.pct.textContent = '';
+                ui.label.textContent = '✗ File too large — max ' + maxLabel + ' (your file: ' + fmtBytes(file.size) + ')';
+                input.value = '';
+                return;
+            }
+
+            if (previewEl) showLocalPreview(previewEl, file, folder.indexOf('logos') !== -1);
+            ui.bar.style.width = '100%';
+            ui.bar.classList.replace('bg-gold-500', 'bg-green-500');
+            ui.pct.textContent = '100%';
+            ui.label.textContent = '✓ ' + file.name;
+        });
+    });
+})();
 {% endif %}
 
 // Create form

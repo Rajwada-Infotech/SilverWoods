@@ -674,18 +674,17 @@
                 swCloseMenu();
                 var sy=window.scrollY||window.pageYOffset;
                 positionPanel();
-                var scrollLockEnd=Date.now()+3000;
-                (function holdScroll(){
-                    window.scrollTo(0,sy);
-                    if(Date.now()<scrollLockEnd) requestAnimationFrame(holdScroll);
-                })();
+                document.body.style.overflow='hidden';
                 if(body.children.length===0) greet();
+            } else {
+                document.body.style.overflow='';
             }
         }
 
         btn.addEventListener('click',togglePanel);
         closeBtn.addEventListener('click',function(){
             isOpen=false;
+            document.body.style.overflow='';
             panel.classList.remove('open');
             btn.classList.remove('open');
             if(!userDragged){

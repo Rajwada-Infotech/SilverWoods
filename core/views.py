@@ -602,18 +602,19 @@ def _admin_popups_inner(request):
     popup_error = ''
     if request.method == 'POST':
         popup_id = request.POST.get('popup_id')
-        # Reject files over 20 MB to prevent gunicorn timeout on large videos
-        for f in request.FILES.values():
-            if f.size > 20 * 1024 * 1024:
-                popup_error = f'"{f.name}" is too large ({f.size // (1024*1024)} MB). Maximum file size is 20 MB.'
-                _enriched = []
-                for p in popups:
-                    p.logo_url_cdn = _cloudinary_url(p.project_logo)
-                    p.image_url_cdn = _cloudinary_url(p.image)
-                    _enriched.append(p)
-                return render(request, 'admin_panel/popups.html', {
-                    'popups': _enriched, 'form': PopupAdForm(), 'popup_error': popup_error,
-                })
+        # Reject files over 100 MB only when direct upload is NOT active (file goes through Django)
+        if not cloudinary_active:
+            for f in request.FILES.values():
+                if f.size > 100 * 1024 * 1024:
+                    popup_error = f'"{f.name}" is too large ({f.size // (1024*1024)} MB). Maximum file size is 100 MB.'
+                    _enriched = []
+                    for p in popups:
+                        p.logo_url_cdn = _cloudinary_url(p.project_logo)
+                        p.image_url_cdn = _cloudinary_url(p.image)
+                        _enriched.append(p)
+                    return render(request, 'admin_panel/popups.html', {
+                        'popups': _enriched, 'form': PopupAdForm(), 'popup_error': popup_error,
+                    })
         # Check for direct-upload public_ids (browser uploaded straight to Cloudinary)
         image_public_id = request.POST.get('image_public_id', '').strip()
         logo_public_id = request.POST.get('logo_public_id', '').strip()

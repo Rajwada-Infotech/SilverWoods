@@ -326,6 +326,7 @@
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {% for amenity in amenities %}
+            {% if amenity.name == "Traffic-Free Podium" %}{% comment %}Hidden: Traffic-Free Podium commented out{% endcomment %}{% else %}
             <div class="amenity-card amenity-flip-card">
                 <div class="amenity-flip-inner">
                     <!-- Front -->
@@ -372,6 +373,7 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
             {% endfor %}
         </div>
     </div>
@@ -434,7 +436,7 @@
             <div class="pricing-card glass-warm rounded-2xl overflow-hidden glass-hover group {% if flat.bhk == 3 %}border-gold-500/30{% endif %}">
                 <div class="p-3">
                     <div class="h-52 rounded-xl overflow-hidden relative bg-cream-200 dark:bg-dark-800">
-                        <img src="https://images.unsplash.com/photo-{% if flat.order == 1 %}1600596542815-ffad4c1539a9{% elif flat.order == 2 %}1600607687939-ce8a6c25118c{% elif flat.order == 3 %}1600566753190-17f0baa2a6c3{% elif flat.order == 4 %}1600585154340-be6161a56a0c{% elif flat.order == 5 %}1613490493576-7fde63acd811{% else %}1512917774080-9991f1c4c750{% endif %}?w=600&q=85" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" style="transition:transform 0.7s" alt="">
+                        {% with order_s=flat.order|stringformat:"s" %}{% with img_path="images/Type"|add:order_s|add:".webp" %}<img src="{% static img_path %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" style="transition:transform 0.7s" alt="{{ flat.name }}">{% endwith %}{% endwith %}
                         <div class="absolute top-3 left-3 text-[10px] tracking-[0.15em] uppercase font-semibold text-brown-800 dark:text-cream-100 bg-cream-100/80 dark:bg-dark-900/80 backdrop-blur px-3 py-1.5 rounded-lg">{{ flat.bhk }} BHK</div>
                         {% if flat.bhk == 3 %}<div class="absolute top-3 right-3 text-[9px] tracking-[0.15em] uppercase font-bold text-brown-700 dark:text-gold-500 bg-cream-100/80 dark:bg-dark-900/80 backdrop-blur px-3 py-1.5 rounded-lg">Popular</div>{% endif %}
                     </div>

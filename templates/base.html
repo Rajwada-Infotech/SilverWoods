@@ -618,10 +618,10 @@
         document.addEventListener('mousemove',function(e){moveDrag(e.clientX,e.clientY);});
         document.addEventListener('mouseup',function(){dragging=false;});
 
-        btn.addEventListener('touchstart',function(e){var t=e.touches[0];startDrag(t.clientX,t.clientY);},{passive:true});
+        btn.addEventListener('touchstart',function(e){var t=e.touches[0];startDrag(t.clientX,t.clientY);e.preventDefault();},{passive:false});
         header.addEventListener('touchstart',function(e){if(e.target===closeBtn||closeBtn.contains(e.target)) return; var t=e.touches[0];startDrag(t.clientX,t.clientY);},{passive:true});
         panelInner.addEventListener('touchstart',function(e){if(!canDrag(e)) return; var t=e.touches[0];startDrag(t.clientX,t.clientY);},{passive:true});
-        document.addEventListener('touchmove',function(e){if(!dragging) return; var t=e.touches[0];moveDrag(t.clientX,t.clientY);},{passive:true});
+        document.addEventListener('touchmove',function(e){if(!dragging) return; e.preventDefault(); var t=e.touches[0];moveDrag(t.clientX,t.clientY);},{passive:false});
         document.addEventListener('touchend',function(){dragging=false;});
 
         function positionPanel(){

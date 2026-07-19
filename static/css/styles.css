@@ -173,7 +173,6 @@
 
 /* ── Amenity Flip Cards ── */
 .amenity-flip-card {
-    perspective: 1000px;
     height: 220px;
     cursor: pointer;
     border-radius: 1rem;
@@ -191,7 +190,7 @@
     transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .amenity-flip-card:hover .amenity-flip-inner {
-    transform: rotateY(180deg);
+    transform: perspective(1000px) rotateY(180deg);
 }
 .amenity-flip-front,
 .amenity-flip-back {

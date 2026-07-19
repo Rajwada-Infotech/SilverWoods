@@ -674,11 +674,11 @@
                 swCloseMenu();
                 var sy=window.scrollY||window.pageYOffset;
                 positionPanel();
-                window.scrollTo(0,sy);
-                requestAnimationFrame(function(){
+                var scrollLockEnd=Date.now()+1200;
+                (function holdScroll(){
                     window.scrollTo(0,sy);
-                    requestAnimationFrame(function(){ window.scrollTo(0,sy); });
-                });
+                    if(Date.now()<scrollLockEnd) requestAnimationFrame(holdScroll);
+                })();
                 if(body.children.length===0) greet();
             }
         }

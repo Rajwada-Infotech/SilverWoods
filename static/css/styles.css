@@ -176,10 +176,6 @@
     perspective: 1000px;
     height: 220px;
     cursor: pointer;
-    transition: box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.amenity-flip-card:hover {
-    box-shadow: 0 20px 56px rgba(0,0,0,0.28);
 }
 .amenity-flip-inner {
     position: relative;

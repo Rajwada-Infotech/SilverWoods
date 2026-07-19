@@ -40,8 +40,8 @@
             <!-- Frame -->
             <div class="relative bg-white p-3 rounded-2xl shadow-2xl shadow-brown-800/20 dark:shadow-black/40 border border-cream-300">
                 <div class="w-60 h-80 rounded-xl overflow-hidden relative">
-                    <img src="{% static 'images/hero1-day1.webp' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-100'" alt="">
-                    <img src="{% static 'images/hero1-night1.webp' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-100' : 'opacity-0'" alt="">
+                    <img src="{% static 'images/hero1-day.webp' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-100'" alt="">
+                    <img src="{% static 'images/hero1-night.webp' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-100' : 'opacity-0'" alt="">
                 </div>
             </div>
             <!-- Small accent frame offset -->
@@ -436,11 +436,7 @@
             <div class="pricing-card glass-warm rounded-2xl overflow-hidden glass-hover group {% if flat.bhk == 3 %}border-gold-500/30{% endif %}">
                 <div class="p-3">
                     <div class="h-52 rounded-xl overflow-hidden relative bg-cream-200 dark:bg-dark-800">
-                        {% if flat.order == 2 %}
-                        <img src="{% static 'images/Typee2.webp' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" style="transition:transform 0.7s" alt="{{ flat.name }}">
-                        {% else %}
                         {% with order_s=flat.order|stringformat:"s" %}{% with img_path="images/Type"|add:order_s|add:".webp" %}<img src="{% static img_path %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" style="transition:transform 0.7s" alt="{{ flat.name }}">{% endwith %}{% endwith %}
-                        {% endif %}
                         <div class="absolute top-3 left-3 text-[10px] tracking-[0.15em] uppercase font-semibold text-brown-800 dark:text-cream-100 bg-cream-100/80 dark:bg-dark-900/80 backdrop-blur px-3 py-1.5 rounded-lg">{{ flat.bhk }} BHK</div>
                         {% if flat.bhk == 3 %}<div class="absolute top-3 right-3 text-[9px] tracking-[0.15em] uppercase font-bold text-brown-700 dark:text-gold-500 bg-cream-100/80 dark:bg-dark-900/80 backdrop-blur px-3 py-1.5 rounded-lg">Popular</div>{% endif %}
                     </div>

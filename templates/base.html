@@ -674,7 +674,7 @@
                 swCloseMenu();
                 var sy=window.scrollY||window.pageYOffset;
                 positionPanel();
-                var scrollLockEnd=Date.now()+1200;
+                var scrollLockEnd=Date.now()+3000;
                 (function holdScroll(){
                     window.scrollTo(0,sy);
                     if(Date.now()<scrollLockEnd) requestAnimationFrame(holdScroll);

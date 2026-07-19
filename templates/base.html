@@ -594,6 +594,10 @@
         function moveDrag(cx,cy){
             if(!dragging) return;
             var x=cx-ox, y=cy-oy;
+            var maxX=window.innerWidth-wrap.offsetWidth;
+            var maxY=window.innerHeight-wrap.offsetHeight;
+            x=Math.max(0,Math.min(x,maxX));
+            y=Math.max(0,Math.min(y,maxY));
             wrap.style.left=x+'px'; wrap.style.top=y+'px';
             wrap.style.right='auto'; wrap.style.bottom='auto';
             didDrag=true; userDragged=true;
@@ -621,7 +625,7 @@
         btn.addEventListener('touchstart',function(e){var t=e.touches[0];startDrag(t.clientX,t.clientY);},{passive:true});
         header.addEventListener('touchstart',function(e){if(e.target===closeBtn||closeBtn.contains(e.target)) return; var t=e.touches[0];startDrag(t.clientX,t.clientY);},{passive:true});
         panelInner.addEventListener('touchstart',function(e){if(!canDrag(e)) return; var t=e.touches[0];startDrag(t.clientX,t.clientY);},{passive:true});
-        document.addEventListener('touchmove',function(e){if(!dragging) return; var t=e.touches[0];moveDrag(t.clientX,t.clientY);},{passive:true});
+        document.addEventListener('touchmove',function(e){if(!dragging) return; e.preventDefault(); var t=e.touches[0];moveDrag(t.clientX,t.clientY);},{passive:false});
         document.addEventListener('touchend',function(){dragging=false;});
 
         function positionPanel(){

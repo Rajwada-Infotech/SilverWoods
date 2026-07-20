@@ -719,6 +719,12 @@ def _cloudinary_promote_temp(stored_name):
             overwrite=True, invalidate=True,
         )
         new_public_id = result.get('public_id', to_public_id)
+        # Explicitly delete the source temp asset in case rename left a copy
+        try:
+            if new_public_id and new_public_id != from_public_id:
+                cloudinary.uploader.destroy(from_public_id, resource_type=resource_type, invalidate=True)
+        except Exception:
+            pass
         return new_public_id + '.' + ext if ext else new_public_id
     except Exception:
         return stored_name  # fallback: keep temp path if rename fails

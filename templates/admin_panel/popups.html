@@ -59,7 +59,7 @@
                             <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Project Logo</label>
                             <div id="edit-logo-preview-{{ popup.pk }}">{% if popup.logo_url_cdn %}<img src="{{ popup.logo_url_cdn }}" class="h-24 w-24 object-contain rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" alt="Current logo" onerror="this.style.display='none'">{% else %}<div class="h-24"></div>{% endif %}</div>
                             <input type="file" name="project_logo" accept="image/*" class="sw-direct-upload w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm text-brown-500 dark:text-cream-300/40" data-folder="popups/logos" data-hidden="edit-logo-pid-{{ popup.pk }}" data-preview="edit-logo-preview-{{ popup.pk }}">
-                            <p class="text-[10px] text-brown-300 dark:text-cream-300/25 mt-0.5">Max size: 10 MB (image)</p>
+                            <p class="text-[10px] text-brown-300 dark:text-cream-300/25 mt-0.5">Max size: 10 MB (image) · Frame: 56×56 px</p>
                             <input type="hidden" name="logo_public_id" id="edit-logo-pid-{{ popup.pk }}">
                             <div class="text-xs text-gold-600 edit-logo-prog-{{ popup.pk }} hidden">Uploading...</div>
                         </div>
@@ -67,7 +67,7 @@
                             <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Image / Video</label>
                             <div id="edit-img-preview-{{ popup.pk }}">{% if popup.image_url_cdn %}{% with popup.image.name|lower as fname %}{% if ".mp4" in fname or ".webm" in fname or ".mov" in fname %}<video src="{{ popup.image_url_cdn }}" class="w-full h-24 object-cover rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" muted autoplay loop playsinline onerror="this.style.display='none'"></video>{% else %}<img src="{{ popup.image_url_cdn }}" class="w-full h-24 object-cover rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" alt="" onerror="this.style.display='none'">{% endif %}{% endwith %}{% endif %}</div>
                             <input type="file" name="image" accept="image/*,video/mp4,video/webm,video/quicktime" class="sw-direct-upload w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm text-brown-500 dark:text-cream-300/40" data-folder="popups" data-hidden="edit-img-pid-{{ popup.pk }}" data-preview="edit-img-preview-{{ popup.pk }}">
-                            <p class="text-[10px] text-brown-300 dark:text-cream-300/25 mt-0.5">Max size: 10 MB (image) · 100 MB (video)</p>
+                            <p class="text-[10px] text-brown-300 dark:text-cream-300/25 mt-0.5">Max size: 10 MB (image) · Frame: 56×56 px · 100 MB (video) · Frame: 576×256 px</p>
                             <input type="hidden" name="image_public_id" id="edit-img-pid-{{ popup.pk }}">
                             <div class="text-xs text-gold-600 edit-img-prog-{{ popup.pk }} hidden">Uploading...</div>
                         </div>
@@ -139,7 +139,7 @@
                     <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Project Logo</label>
                     <div id="create-logo-preview" class="mb-1"></div>
                     <input type="file" name="project_logo" id="create-logo-file" accept="image/*" class="sw-direct-upload w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm text-brown-500 dark:text-cream-300/40" data-folder="popups/logos" data-hidden="create-logo-public-id" data-preview="create-logo-preview">
-                    <p class="text-[10px] text-brown-300 dark:text-cream-300/25 mt-0.5">Max size: 10 MB (image)</p>
+                    <p class="text-[10px] text-brown-300 dark:text-cream-300/25 mt-0.5">Max size: 10 MB (image) · Frame: 56×56 px</p>
                     <input type="hidden" name="logo_public_id" id="create-logo-public-id">
                     <div id="create-logo-progress" class="mt-1 text-xs text-gold-600 hidden">Uploading...</div>
                 </div>
@@ -147,7 +147,7 @@
                     <label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Image / Video</label>
                     <div id="create-image-preview" class="mb-1"></div>
                     <input type="file" name="image" id="create-image-file" accept="image/*,video/mp4,video/webm,video/quicktime" class="sw-direct-upload w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm text-brown-500 dark:text-cream-300/40" data-folder="popups" data-hidden="create-image-public-id" data-preview="create-image-preview">
-                    <p class="text-[10px] text-brown-300 dark:text-cream-300/25 mt-0.5">Max size: 10 MB (image) · 100 MB (video)</p>
+                    <p class="text-[10px] text-brown-300 dark:text-cream-300/25 mt-0.5">Max size: 10 MB (image) · Frame: 56×56 px · 100 MB (video) · Frame: 576×256 px</p>
                     <input type="hidden" name="image_public_id" id="create-image-public-id">
                     <div id="create-image-progress" class="mt-1 text-xs text-gold-600 hidden">Uploading...</div>
                 </div>

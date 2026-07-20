@@ -115,43 +115,43 @@
              class="lg:hidden fixed inset-0 top-[60px] bg-cream-100 dark:bg-dark-900 z-40 overflow-y-auto">
             <div class="flex flex-col items-center justify-center gap-6 px-6 py-10 w-full max-w-sm mx-auto" style="min-height:calc(100vh - 60px)">
                 {% if request.resolver_match.url_name == 'home' %}
-                <a href="#home" @click="mobileOpen=false" onclick="smoothScroll(event,'home')" class="font-display text-3xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Home</a>
-                <a href="#about" @click="mobileOpen=false" onclick="smoothScroll(event,'about')" class="font-display text-3xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">About</a>
-                <a href="#amenities" @click="mobileOpen=false" onclick="smoothScroll(event,'amenities')" class="font-display text-3xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Amenities</a>
-                <a href="#gallery" @click="mobileOpen=false" onclick="smoothScroll(event,'gallery')" class="font-display text-3xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Gallery</a>
-                <a href="#pricing" @click="mobileOpen=false" onclick="smoothScroll(event,'pricing')" class="font-display text-3xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Pricing</a>
-                <a href="#contact" @click="mobileOpen=false" onclick="smoothScroll(event,'contact')" class="font-display text-3xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Contact</a>
+                <a href="#home" @click="mobileOpen=false" onclick="smoothScroll(event,'home')" class="font-display text-xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Home</a>
+                <a href="#about" @click="mobileOpen=false" onclick="smoothScroll(event,'about')" class="font-display text-xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">About</a>
+                <a href="#amenities" @click="mobileOpen=false" onclick="smoothScroll(event,'amenities')" class="font-display text-xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Amenities</a>
+                <a href="#gallery" @click="mobileOpen=false" onclick="smoothScroll(event,'gallery')" class="font-display text-xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Gallery</a>
+                <a href="#pricing" @click="mobileOpen=false" onclick="smoothScroll(event,'pricing')" class="font-display text-xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Pricing</a>
+                <a href="#contact" @click="mobileOpen=false" onclick="smoothScroll(event,'contact')" class="font-display text-xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Contact</a>
                 {% else %}
-                <a href="{% url 'home' %}#home" class="font-display text-3xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Home</a>
-                <a href="{% url 'home' %}#about" class="font-display text-3xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">About</a>
-                <a href="{% url 'home' %}#amenities" class="font-display text-3xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Amenities</a>
-                <a href="{% url 'home' %}#gallery" class="font-display text-3xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Gallery</a>
-                <a href="{% url 'home' %}#pricing" class="font-display text-3xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Pricing</a>
-                <a href="{% url 'home' %}#contact" class="font-display text-3xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Contact</a>
+                <a href="{% url 'home' %}#home" class="font-display text-xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Home</a>
+                <a href="{% url 'home' %}#about" class="font-display text-xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">About</a>
+                <a href="{% url 'home' %}#amenities" class="font-display text-xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Amenities</a>
+                <a href="{% url 'home' %}#gallery" class="font-display text-xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Gallery</a>
+                <a href="{% url 'home' %}#pricing" class="font-display text-xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Pricing</a>
+                <a href="{% url 'home' %}#contact" class="font-display text-xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Contact</a>
                 {% endif %}
                 <div class="w-full mt-4">
                     <p class="text-[9px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/50 text-center mb-4">Explore More</p>
                     <div class="grid grid-cols-4 gap-4">
                         <a href="{% url 'brochure' %}" class="mobile-module-link flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
-                            <div class="w-14 h-14 rounded-full bg-brown-800/8 dark:bg-white/[0.07] border border-brown-700/15 dark:border-white/10 flex items-center justify-center">
+                            <div class="w-10 h-10 rounded-full bg-brown-800/8 dark:bg-white/[0.07] border border-brown-700/15 dark:border-white/10 flex items-center justify-center">
                                 <i class="fas fa-book-open text-brown-700 dark:text-gold-500 text-lg"></i>
                             </div>
                             <span class="text-[10px] font-semibold text-brown-600 dark:text-cream-100/70 tracking-wider uppercase">Brochure</span>
                         </a>
                         <a href="{% url 'blueprint' %}" class="mobile-module-link flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
-                            <div class="w-14 h-14 rounded-full bg-brown-800/8 dark:bg-white/[0.07] border border-brown-700/15 dark:border-white/10 flex items-center justify-center">
+                            <div class="w-10 h-10 rounded-full bg-brown-800/8 dark:bg-white/[0.07] border border-brown-700/15 dark:border-white/10 flex items-center justify-center">
                                 <i class="fas fa-drafting-compass text-brown-700 dark:text-gold-500 text-lg"></i>
                             </div>
                             <span class="text-[10px] font-semibold text-brown-600 dark:text-cream-100/70 tracking-wider uppercase">Blueprint</span>
                         </a>
                         <a href="{% url 'plots' %}" class="mobile-module-link flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
-                            <div class="w-14 h-14 rounded-full bg-brown-800/8 dark:bg-white/[0.07] border border-brown-700/15 dark:border-white/10 flex items-center justify-center">
+                            <div class="w-10 h-10 rounded-full bg-brown-800/8 dark:bg-white/[0.07] border border-brown-700/15 dark:border-white/10 flex items-center justify-center">
                                 <i class="fas fa-vector-square text-brown-700 dark:text-gold-500 text-lg"></i>
                             </div>
                             <span class="text-[10px] font-semibold text-brown-600 dark:text-cream-100/70 tracking-wider uppercase">Plots</span>
                         </a>
                         <a href="{% url 'admin_login' %}" class="mobile-module-link flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
-                            <div class="w-14 h-14 rounded-full bg-brown-800/8 dark:bg-white/[0.07] border border-brown-700/15 dark:border-white/10 flex items-center justify-center">
+                            <div class="w-10 h-10 rounded-full bg-brown-800/8 dark:bg-white/[0.07] border border-brown-700/15 dark:border-white/10 flex items-center justify-center">
                                 <i class="fas fa-lock text-brown-700 dark:text-gold-500 text-lg"></i>
                             </div>
                             <span class="text-[10px] font-semibold text-brown-600 dark:text-cream-100/70 tracking-wider uppercase">Admin</span>

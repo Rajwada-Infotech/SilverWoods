@@ -756,10 +756,8 @@
             var t=typing();
             setTimeout(function(){
                 t.remove();
-                lockScroll=true;
                 addMsg('Hi! I\'m <strong style="color:#c9a84c">MARICHA</strong>, your SILVERWOODS virtual concierge. 🏡<br>Ask me anything about the project, or pick a topic below.','sw-bot-msg');
                 showDefaultSuggestions();
-                setTimeout(function(){ body.scrollTop=0; lockScroll=false; },200);
             },600);
         }
 

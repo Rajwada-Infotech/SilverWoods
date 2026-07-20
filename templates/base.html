@@ -129,11 +129,23 @@
                 <a href="{% url 'home' %}#pricing" class="font-display text-3xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Pricing</a>
                 <a href="{% url 'home' %}#contact" class="font-display text-3xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Contact</a>
                 {% endif %}
-                <div class="flex flex-wrap justify-center gap-x-6 gap-y-2">
-                    <a href="{% url 'brochure' %}" class="mobile-module-link text-xs tracking-[0.15em] uppercase text-brown-400 dark:text-cream-400">Brochure</a>
-                    <a href="{% url 'blueprint' %}" class="mobile-module-link text-xs tracking-[0.15em] uppercase text-brown-400 dark:text-cream-400">Blueprint</a>
-                    <a href="{% url 'plots' %}" class="mobile-module-link text-xs tracking-[0.15em] uppercase text-brown-400 dark:text-cream-400"><span class="sm:hidden">Plots</span><span class="hidden sm:inline">Plot Metrics</span></a>
-                    <a href="{% url 'admin_login' %}" class="mobile-module-link text-xs tracking-[0.15em] uppercase text-brown-400 dark:text-cream-400">Login</a>
+                <div class="w-full pt-4 border-t border-brown-700/10 dark:border-cream-100/10 grid grid-cols-2 gap-3">
+                    <a href="{% url 'brochure' %}" class="mobile-module-link flex flex-col items-center gap-2 py-4 rounded-2xl bg-brown-800/5 dark:bg-cream-100/5 border border-brown-700/10 dark:border-cream-100/10 hover:bg-gold-500/10 hover:border-gold-500/30 transition-all">
+                        <i class="fas fa-book-open text-gold-500 text-lg"></i>
+                        <span class="text-xs font-semibold tracking-[0.18em] uppercase text-brown-700 dark:text-cream-100">Brochure</span>
+                    </a>
+                    <a href="{% url 'blueprint' %}" class="mobile-module-link flex flex-col items-center gap-2 py-4 rounded-2xl bg-brown-800/5 dark:bg-cream-100/5 border border-brown-700/10 dark:border-cream-100/10 hover:bg-gold-500/10 hover:border-gold-500/30 transition-all">
+                        <i class="fas fa-drafting-compass text-gold-500 text-lg"></i>
+                        <span class="text-xs font-semibold tracking-[0.18em] uppercase text-brown-700 dark:text-cream-100">Blueprint</span>
+                    </a>
+                    <a href="{% url 'plots' %}" class="mobile-module-link flex flex-col items-center gap-2 py-4 rounded-2xl bg-brown-800/5 dark:bg-cream-100/5 border border-brown-700/10 dark:border-cream-100/10 hover:bg-gold-500/10 hover:border-gold-500/30 transition-all">
+                        <i class="fas fa-vector-square text-gold-500 text-lg"></i>
+                        <span class="text-xs font-semibold tracking-[0.18em] uppercase text-brown-700 dark:text-cream-100">Plot Metrics</span>
+                    </a>
+                    <a href="{% url 'admin_login' %}" class="mobile-module-link flex flex-col items-center gap-2 py-4 rounded-2xl bg-brown-800/5 dark:bg-cream-100/5 border border-brown-700/10 dark:border-cream-100/10 hover:bg-gold-500/10 hover:border-gold-500/30 transition-all">
+                        <i class="fas fa-lock text-gold-500 text-lg"></i>
+                        <span class="text-xs font-semibold tracking-[0.18em] uppercase text-brown-700 dark:text-cream-100">Login</span>
+                    </a>
                 </div>
             </div>
         </div>

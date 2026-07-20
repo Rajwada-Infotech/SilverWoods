@@ -1,24 +1,23 @@
 // Silverwoods Main JS - Animations & Interactions
 
-// Preloader — skip entirely on repeat visits (sessionStorage), otherwise hide on DOMContentLoaded
+// Preloader — always show on every page load, hide after 600ms (300ms first visit)
 (function() {
     const preloader = document.getElementById('preloader');
     if (!preloader) return;
-    if (sessionStorage.getItem('sw_visited')) {
-        // Returning visitor this session — skip preloader instantly
-        preloader.style.display = 'none';
-        document.addEventListener('DOMContentLoaded', animateHero);
-        return;
-    }
-    sessionStorage.setItem('sw_visited', '1');
+    const isFirst = !sessionStorage.getItem('sw_visited');
+    if (isFirst) sessionStorage.setItem('sw_visited', '1');
+    const delay = isFirst ? 2000 : 600; // first visit: full preloader; module switch: quick
     function hidePreloader() {
         if (preloader.dataset.hidden) return;
         preloader.dataset.hidden = '1';
+        preloader.style.transition = 'opacity 250ms ease';
         preloader.style.opacity = '0';
-        setTimeout(() => { preloader.style.display = 'none'; animateHero(); }, 500);
+        setTimeout(() => { preloader.style.display = 'none'; animateHero(); }, 260);
     }
-    document.addEventListener('DOMContentLoaded', hidePreloader);
-    setTimeout(hidePreloader, 2000); // safety cap
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(hidePreloader, delay);
+    });
+    setTimeout(hidePreloader, Math.max(delay, 3000)); // safety cap
 })();
 
 // Smooth Scroll

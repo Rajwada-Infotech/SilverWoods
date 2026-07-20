@@ -403,42 +403,6 @@
     <script src="{% static 'js/main.js' %}?v=12"></script>
     {% block extra_js %}{% endblock %}
 
-    <script>
-    /* Module link fade-out transition — fade page out in 150ms then navigate */
-    (function(){
-        var overlay=document.createElement('div');
-        overlay.style.cssText='position:fixed;inset:0;z-index:99999;pointer-events:none;opacity:0;transition:opacity 150ms ease;';
-        var dark=document.documentElement.classList.contains('dark');
-        overlay.style.background=dark?'#0a0703':'#f5f0e8';
-        document.addEventListener('DOMContentLoaded',function(){
-            document.body.appendChild(overlay);
-            /* Fade in (page reveal) */
-            requestAnimationFrame(function(){
-                requestAnimationFrame(function(){ overlay.style.opacity='0'; });
-            });
-            /* Intercept module links */
-            document.querySelectorAll('a.cloud-link,.mobile-module-link').forEach(function(a){
-                a.addEventListener('click',function(e){
-                    e.preventDefault();
-                    var href=a.href;
-                    overlay.style.opacity='1';
-                    setTimeout(function(){ window.location.href=href; },150);
-                });
-            });
-        });
-        /* Fade in on new page load */
-        window.addEventListener('pageshow',function(){
-            overlay.style.transition='none';
-            overlay.style.opacity='1';
-            requestAnimationFrame(function(){
-                requestAnimationFrame(function(){
-                    overlay.style.transition='opacity 200ms ease';
-                    overlay.style.opacity='0';
-                });
-            });
-        });
-    })();
-    </script>
 
     <!-- ═══ SILVERWOODS CONCIERGE CHATBOT ═══ -->
     <style>

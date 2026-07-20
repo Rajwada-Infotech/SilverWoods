@@ -25,6 +25,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=13">
     {% block extra_css %}{% endblock %}
+    <!-- Prefetch module pages so navigation is instant -->
+    <link rel="prefetch" href="{% url 'brochure' %}">
+    <link rel="prefetch" href="{% url 'blueprint' %}">
+    <link rel="prefetch" href="{% url 'plots' %}">
 </head>
 <body x-data="{ darkMode: localStorage.getItem('theme')==='dark' }"
       x-init="$watch('darkMode', v => { document.documentElement.classList.toggle('dark', v); localStorage.setItem('theme', v?'dark':'light'); window.dispatchEvent(new CustomEvent('theme-changed', {detail:{dark:v}})); }); if(darkMode) document.documentElement.classList.add('dark')"

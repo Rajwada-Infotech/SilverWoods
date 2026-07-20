@@ -1,23 +1,38 @@
 // Silverwoods Main JS - Animations & Interactions
 
-// Preloader — always show on every page load, hide after 600ms (300ms first visit)
+// Preloader — hide instantly when content is ready; only keep visible if load is slow (>400ms)
 (function() {
+    const t0 = performance.now();
     const preloader = document.getElementById('preloader');
     if (!preloader) return;
     const isFirst = !sessionStorage.getItem('sw_visited');
     if (isFirst) sessionStorage.setItem('sw_visited', '1');
-    const delay = isFirst ? 2000 : 600; // first visit: full preloader; module switch: quick
+
     function hidePreloader() {
         if (preloader.dataset.hidden) return;
         preloader.dataset.hidden = '1';
-        preloader.style.transition = 'opacity 250ms ease';
-        preloader.style.opacity = '0';
-        setTimeout(() => { preloader.style.display = 'none'; animateHero(); }, 260);
+        const elapsed = performance.now() - t0;
+        if (elapsed < 400) {
+            // Fast load — hide instantly, no visible preloader
+            preloader.style.transition = 'none';
+            preloader.style.opacity = '0';
+            preloader.style.display = 'none';
+            animateHero();
+        } else {
+            // Slow load — fade out gracefully
+            preloader.style.transition = 'opacity 300ms ease';
+            preloader.style.opacity = '0';
+            setTimeout(() => { preloader.style.display = 'none'; animateHero(); }, 310);
+        }
     }
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(hidePreloader, delay);
-    });
-    setTimeout(hidePreloader, Math.max(delay, 3000)); // safety cap
+
+    if (isFirst) {
+        // First ever visit — show full branded preloader for 1.8s
+        document.addEventListener('DOMContentLoaded', () => setTimeout(hidePreloader, 1800));
+    } else {
+        document.addEventListener('DOMContentLoaded', hidePreloader);
+    }
+    setTimeout(hidePreloader, 3000); // safety cap
 })();
 
 // Smooth Scroll

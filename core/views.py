@@ -704,8 +704,10 @@ def _cloudinary_promote_temp(stored_name):
     Returns the permanent stored_name, or the original if it's not in temp.
     """
     if not _cloudinary_active() or not stored_name:
+        print(f'[promote_temp] skipped — active={_cloudinary_active()} stored_name={stored_name!r}')
         return stored_name
     if '/temp/' not in stored_name:
+        print(f'[promote_temp] no /temp/ in {stored_name!r}, skipping')
         return stored_name  # already permanent, nothing to do
     try:
         import cloudinary.uploader
@@ -713,18 +715,20 @@ def _cloudinary_promote_temp(stored_name):
         from_public_id = stored_name.rsplit('.', 1)[0]  # strip extension
         to_public_id = from_public_id.replace('/temp/', '/', 1)
         resource_type = 'video' if ext in ('mp4', 'webm', 'mov', 'avi') else 'image'
+        print(f'[promote_temp] renaming {from_public_id!r} → {to_public_id!r} ({resource_type})')
         cloudinary.uploader.rename(
             from_public_id, to_public_id,
             resource_type=resource_type,
             overwrite=True, invalidate=True,
         )
-        # Always destroy the temp source — rename() sometimes leaves a copy
+        print(f'[promote_temp] rename OK, destroying temp {from_public_id!r}')
         try:
             cloudinary.uploader.destroy(from_public_id, resource_type=resource_type, invalidate=True)
-        except Exception:
-            pass
+        except Exception as e:
+            print(f'[promote_temp] destroy failed: {e}')
         return to_public_id + '.' + ext if ext else to_public_id
-    except Exception:
+    except Exception as e:
+        print(f'[promote_temp] ERROR: {e}')
         return stored_name  # fallback: keep temp path if rename fails
 
 

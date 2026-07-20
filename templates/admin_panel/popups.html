@@ -116,7 +116,7 @@
                     </div>
 
                     <div class="flex gap-3 pt-1">
-                        <button type="submit" class="px-5 py-2 bg-brown-700 dark:bg-gold-500/20 text-cream-100 dark:text-gold-400 rounded-xl text-xs font-semibold tracking-wider uppercase">Save</button>
+                        <button type="submit" data-label="Save" class="px-5 py-2 bg-brown-700 dark:bg-gold-500/20 text-cream-100 dark:text-gold-400 rounded-xl text-xs font-semibold tracking-wider uppercase">Save</button>
                         <button type="button" @click="openId = null" class="px-5 py-2 bg-cream-200 dark:bg-white/[0.04] text-brown-600 dark:text-cream-300/50 rounded-xl text-xs font-semibold tracking-wider uppercase">Cancel</button>
                     </div>
                 </form>
@@ -195,7 +195,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="w-full py-3 bg-brown-700 dark:bg-gold-500/20 text-cream-100 dark:text-gold-400 rounded-xl text-xs font-semibold hover:bg-brown-800 dark:hover:bg-gold-500/30 transition-colors tracking-wider uppercase">
+            <button type="submit" data-label="+ Create Popup" class="w-full py-3 bg-brown-700 dark:bg-gold-500/20 text-cream-100 dark:text-gold-400 rounded-xl text-xs font-semibold hover:bg-brown-800 dark:hover:bg-gold-500/30 transition-colors tracking-wider uppercase">
                 <i class="fas fa-plus mr-2"></i> Create Popup
             </button>
         </form>
@@ -217,7 +217,7 @@ function calcEndDate(startInput, durationInput, endInput) {
     durationInput.addEventListener('input', update);
 }
 
-// Direct-to-Cloudinary upload with progress bar
+// Direct-to-Cloudinary upload — deferred to form submit (no upload until Save is clicked)
 {% if cloudinary_active %}
 (function() {
     var SIGN_URL = '{% url "cloudinary_sign_upload" %}';
@@ -228,14 +228,15 @@ function calcEndDate(startInput, durationInput, endInput) {
         return (b/1048576).toFixed(1) + ' MB';
     }
 
-    function showPreview(previewEl, file, secureUrl, isLogo) {
+    function showLocalPreview(previewEl, file, isLogo) {
+        var url = URL.createObjectURL(file);
         var isVideo = file.type.startsWith('video/');
         if (isLogo) {
-            previewEl.innerHTML = '<img src="' + secureUrl + '" class="h-24 w-24 object-contain rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" alt="">';
+            previewEl.innerHTML = '<img src="' + url + '" class="h-24 w-24 object-contain rounded-lg mb-1 border border-brown-700/10 dark:border-white/[0.06]" alt="">';
         } else {
             previewEl.innerHTML = isVideo
-                ? '<video src="' + secureUrl + '" class="w-full h-28 object-cover rounded-xl mt-1" muted autoplay loop playsinline></video>'
-                : '<img src="' + secureUrl + '" class="w-full h-28 object-cover rounded-xl mt-1" alt="">';
+                ? '<video src="' + url + '" class="w-full h-28 object-cover rounded-xl mt-1" muted autoplay loop playsinline></video>'
+                : '<img src="' + url + '" class="w-full h-28 object-cover rounded-xl mt-1" alt="">';
         }
     }
 
@@ -263,38 +264,16 @@ function calcEndDate(startInput, durationInput, endInput) {
         };
     }
 
-    function wireInput(input) {
-        var hiddenEl = document.getElementById(input.dataset.hidden);
-        var previewEl = document.getElementById(input.dataset.preview);
-        var ui = makeProgressUI(input.parentElement);
-
-        input.addEventListener('change', function() {
-            var file = input.files[0];
-            if (!file) return;
-            var folder = input.dataset.folder || 'popups';
-
-            var isVideo = file.type.startsWith('video/');
-            var maxBytes = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
-            var maxLabel = isVideo ? '100 MB' : '10 MB';
-
+    // Upload a single file to Cloudinary, return a Promise that resolves to public_id string
+    function uploadToCloudinary(file, folder, ui) {
+        return new Promise(function(resolve, reject) {
             ui.wrap.classList.remove('hidden');
-            ui.bar.classList.remove('bg-green-500', 'bg-red-400');
-            ui.bar.classList.add('bg-gold-500');
-            ui.speed.textContent = '';
-
-            if (file.size > maxBytes) {
-                ui.bar.style.width = '100%';
-                ui.bar.classList.replace('bg-gold-500', 'bg-red-400');
-                ui.pct.textContent = '';
-                ui.label.textContent = '✗ File too large — max ' + maxLabel + ' (your file: ' + fmtBytes(file.size) + ')';
-                input.value = '';
-                return;
-            }
-
-            input.disabled = true;
             ui.bar.style.width = '0%';
             ui.pct.textContent = '0%';
-            ui.label.textContent = 'Preparing ' + fmtBytes(file.size) + '…';
+            ui.label.textContent = 'Uploading ' + fmtBytes(file.size) + '…';
+            ui.speed.textContent = '';
+            ui.bar.classList.remove('bg-green-500', 'bg-red-400');
+            ui.bar.classList.add('bg-gold-500');
 
             fetch(SIGN_URL + '?folder=' + encodeURIComponent(folder))
             .then(function(r) { return r.json(); })
@@ -306,7 +285,6 @@ function calcEndDate(startInput, durationInput, endInput) {
                 fd.append('signature', params.signature);
                 fd.append('folder', params.folder);
 
-                var startTime = Date.now();
                 var lastLoaded = 0;
                 var lastTime = Date.now();
                 var xhr = new XMLHttpRequest();
@@ -317,8 +295,7 @@ function calcEndDate(startInput, durationInput, endInput) {
                     var now = Date.now();
                     var chunkTime = (now - lastTime) / 1000;
                     var speed = chunkTime > 0 ? (e.loaded - lastLoaded) / chunkTime : 0;
-                    lastLoaded = e.loaded;
-                    lastTime = now;
+                    lastLoaded = e.loaded; lastTime = now;
                     ui.bar.style.width = pct + '%';
                     ui.pct.textContent = pct + '%';
                     ui.label.textContent = 'Uploading ' + fmtBytes(e.loaded) + ' / ' + fmtBytes(e.total);
@@ -329,44 +306,126 @@ function calcEndDate(startInput, durationInput, endInput) {
                     try {
                         var result = JSON.parse(xhr.responseText);
                         if (result.public_id) {
-                            var ext = file.name.split('.').pop().toLowerCase();
-                            hiddenEl.value = result.public_id + '.' + ext;
-                            if (previewEl) showPreview(previewEl, file, result.secure_url, folder.indexOf('logos') !== -1);
                             ui.bar.style.width = '100%';
                             ui.bar.classList.replace('bg-gold-500', 'bg-green-500');
                             ui.pct.textContent = '100%';
                             ui.label.textContent = '✓ Upload complete';
                             ui.speed.textContent = '';
-                            input.disabled = false;
+                            var ext = file.name.split('.').pop().toLowerCase();
+                            resolve(result.public_id + '.' + ext);
                         } else {
-                            var errMsg = result.error && result.error.message ? result.error.message : 'Upload failed — try again';
-                            ui.label.textContent = '✗ ' + errMsg;
+                            var msg = result.error && result.error.message ? result.error.message : 'Upload failed';
+                            ui.label.textContent = '✗ ' + msg;
                             ui.bar.classList.replace('bg-gold-500', 'bg-red-400');
-                            input.disabled = false;
+                            reject(new Error(msg));
                         }
                     } catch(e) {
                         ui.label.textContent = '✗ Error — try again';
-                        input.disabled = false;
+                        ui.bar.classList.replace('bg-gold-500', 'bg-red-400');
+                        reject(e);
                     }
                 });
 
                 xhr.addEventListener('error', function() {
                     ui.label.textContent = '✗ Network error — try again';
                     ui.bar.classList.replace('bg-gold-500', 'bg-red-400');
-                    input.disabled = false;
+                    reject(new Error('network error'));
                 });
 
                 xhr.open('POST', 'https://api.cloudinary.com/v1_1/' + params.cloud_name + '/auto/upload');
                 xhr.send(fd);
             })
-            .catch(function() {
+            .catch(function(e) {
                 ui.label.textContent = '✗ Could not get upload key';
-                input.disabled = false;
+                ui.bar.classList.replace('bg-gold-500', 'bg-red-400');
+                reject(e);
             });
         });
     }
 
-    document.querySelectorAll('.sw-direct-upload').forEach(wireInput);
+    function wireForm(form) {
+        // Track pending files per input: { input, hiddenEl, previewEl, ui, file, folder }
+        var pendingInputs = [];
+
+        form.querySelectorAll('.sw-direct-upload').forEach(function(input) {
+            var hiddenEl = document.getElementById(input.dataset.hidden);
+            var previewEl = document.getElementById(input.dataset.preview);
+            var ui = makeProgressUI(input.parentElement);
+            var folder = input.dataset.folder || 'popups';
+            var isLogo = folder.indexOf('logos') !== -1;
+
+            var entry = { input: input, hiddenEl: hiddenEl, previewEl: previewEl, ui: ui, folder: folder, isLogo: isLogo, file: null };
+            pendingInputs.push(entry);
+
+            input.addEventListener('change', function() {
+                var file = input.files[0];
+                entry.file = null;
+                hiddenEl.value = '';
+                ui.wrap.classList.add('hidden');
+
+                if (!file) return;
+
+                var isVideo = file.type.startsWith('video/');
+                var maxBytes = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
+                var maxLabel = isVideo ? '100 MB' : '10 MB';
+
+                if (file.size > maxBytes) {
+                    ui.wrap.classList.remove('hidden');
+                    ui.bar.style.width = '100%';
+                    ui.bar.classList.remove('bg-gold-500', 'bg-green-500');
+                    ui.bar.classList.add('bg-red-400');
+                    ui.pct.textContent = '';
+                    ui.label.textContent = '✗ File too large — max ' + maxLabel + ' (your file: ' + fmtBytes(file.size) + ')';
+                    input.value = '';
+                    return;
+                }
+
+                // Store file for upload on submit, show local preview immediately
+                entry.file = file;
+                ui.wrap.classList.remove('hidden');
+                ui.bar.style.width = '0%';
+                ui.bar.classList.remove('bg-green-500', 'bg-red-400');
+                ui.bar.classList.add('bg-gold-500');
+                ui.pct.textContent = '';
+                ui.label.textContent = '📎 ' + file.name + ' (' + fmtBytes(file.size) + ') — will upload on save';
+                ui.speed.textContent = '';
+                if (previewEl) showLocalPreview(previewEl, file, isLogo);
+            });
+        });
+
+        form.addEventListener('submit', function(e) {
+            var toUpload = pendingInputs.filter(function(entry) { return entry.file; });
+            if (toUpload.length === 0) return; // nothing to upload, let form submit normally
+
+            e.preventDefault();
+
+            var submitBtn = form.querySelector('[type="submit"]');
+            if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Uploading…'; }
+
+            var uploads = toUpload.map(function(entry) {
+                return uploadToCloudinary(entry.file, entry.folder, entry.ui)
+                .then(function(publicIdWithExt) {
+                    entry.hiddenEl.value = publicIdWithExt;
+                    entry.file = null;
+                });
+            });
+
+            Promise.all(uploads)
+            .then(function() {
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = submitBtn.dataset.label || 'Save'; }
+                form.submit();
+            })
+            .catch(function() {
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = submitBtn.dataset.label || 'Save'; }
+                // Errors shown inline — don't submit
+            });
+        });
+    }
+
+    // Wire every popup form (create form + each edit form)
+    document.querySelectorAll('form').forEach(function(form) {
+        if (form.querySelector('.sw-direct-upload')) wireForm(form);
+    });
 })();
 {% else %}
 // Localhost: no direct upload — show instant local preview on file select

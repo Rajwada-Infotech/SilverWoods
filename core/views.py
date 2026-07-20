@@ -713,19 +713,17 @@ def _cloudinary_promote_temp(stored_name):
         from_public_id = stored_name.rsplit('.', 1)[0]  # strip extension
         to_public_id = from_public_id.replace('/temp/', '/', 1)
         resource_type = 'video' if ext in ('mp4', 'webm', 'mov', 'avi') else 'image'
-        result = cloudinary.uploader.rename(
+        cloudinary.uploader.rename(
             from_public_id, to_public_id,
             resource_type=resource_type,
             overwrite=True, invalidate=True,
         )
-        new_public_id = result.get('public_id', to_public_id)
-        # Explicitly delete the source temp asset in case rename left a copy
+        # Always destroy the temp source — rename() sometimes leaves a copy
         try:
-            if new_public_id and new_public_id != from_public_id:
-                cloudinary.uploader.destroy(from_public_id, resource_type=resource_type, invalidate=True)
+            cloudinary.uploader.destroy(from_public_id, resource_type=resource_type, invalidate=True)
         except Exception:
             pass
-        return new_public_id + '.' + ext if ext else new_public_id
+        return to_public_id + '.' + ext if ext else to_public_id
     except Exception:
         return stored_name  # fallback: keep temp path if rename fails
 

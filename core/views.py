@@ -645,14 +645,16 @@ def _admin_popups_inner(request):
                 if was_active and not instance.is_active:
                     max_order = PopupAd.objects.aggregate(m=Max('order'))['m'] or 0
                     instance.order = max_order + 1
-            # Apply direct-upload paths (bypass Django file storage for these)
+            # Apply direct-upload paths — move from temp folder to permanent on save
             if image_public_id:
                 if old_image and old_image != image_public_id:
                     _cloudinary_delete(type('F', (), {'name': old_image})())
+                image_public_id = _cloudinary_promote_temp(image_public_id)
                 instance.image = image_public_id
             if logo_public_id:
                 if old_logo and old_logo != logo_public_id:
                     _cloudinary_delete(type('F', (), {'name': old_logo})())
+                logo_public_id = _cloudinary_promote_temp(logo_public_id)
                 instance.project_logo = logo_public_id
             instance.save()
             from django.core.cache import cache
@@ -693,6 +695,33 @@ def admin_toggle_popup(request, pk):
     cache.delete('api_popups')
     cache.delete('index_popups')
     return redirect('admin_popups')
+
+
+def _cloudinary_promote_temp(stored_name):
+    """Move a temp-folder asset to its permanent location on Save.
+
+    stored_name is like 'popups/temp/abc.jpg' or 'popups/temp/logos/abc.jpg'.
+    Returns the permanent stored_name, or the original if it's not in temp.
+    """
+    if not _direct_upload_active() or not stored_name:
+        return stored_name
+    if '/temp/' not in stored_name:
+        return stored_name  # already permanent, nothing to do
+    try:
+        import cloudinary.uploader
+        ext = stored_name.rsplit('.', 1)[-1].lower() if '.' in stored_name else ''
+        from_public_id = stored_name.rsplit('.', 1)[0]  # strip extension
+        to_public_id = from_public_id.replace('/temp/', '/', 1)
+        resource_type = 'video' if ext in ('mp4', 'webm', 'mov', 'avi') else 'image'
+        result = cloudinary.uploader.rename(
+            from_public_id, to_public_id,
+            resource_type=resource_type,
+            overwrite=True, invalidate=True,
+        )
+        new_public_id = result.get('public_id', to_public_id)
+        return new_public_id + '.' + ext if ext else new_public_id
+    except Exception:
+        return stored_name  # fallback: keep temp path if rename fails
 
 
 def _cloudinary_delete(file_field):

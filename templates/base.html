@@ -5,6 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Silverwoods - Live the Villa Life{% endblock %}</title>
+    <!-- Prevent white flash: set bg instantly from stored theme before any CSS loads -->
+    <script>
+    (function(){
+        var t=localStorage.getItem('theme');
+        var dark=t==='dark'||(t===null&&window.matchMedia('(prefers-color-scheme:dark)').matches);
+        if(dark){document.documentElement.classList.add('dark');}
+        document.documentElement.style.background=dark?'#0a0703':'#f5f0e8';
+    })();
+    </script>
     <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
@@ -395,25 +404,37 @@
     {% block extra_js %}{% endblock %}
 
     <script>
-    /* Fast page transitions for module links (Brochure / Blueprint / Plots / Login) */
+    /* Module link fade-out transition — fade page out in 150ms then navigate */
     (function(){
-        var style = document.createElement('style');
-        style.textContent = '@keyframes _sw_fade_out{to{opacity:0}}@keyframes _sw_fade_in{from{opacity:0}to{opacity:1}}::view-transition-old(root){animation:_sw_fade_out 120ms ease both}::view-transition-new(root){animation:_sw_fade_in 120ms ease both}';
-        document.head.appendChild(style);
-
-        function intercept(e){
-            var a = e.currentTarget;
-            if(!document.startViewTransition){return;}
-            e.preventDefault();
-            var href = a.href;
-            document.startViewTransition(function(){
-                window.location.href = href;
+        var overlay=document.createElement('div');
+        overlay.style.cssText='position:fixed;inset:0;z-index:99999;pointer-events:none;opacity:0;transition:opacity 150ms ease;';
+        var dark=document.documentElement.classList.contains('dark');
+        overlay.style.background=dark?'#0a0703':'#f5f0e8';
+        document.addEventListener('DOMContentLoaded',function(){
+            document.body.appendChild(overlay);
+            /* Fade in (page reveal) */
+            requestAnimationFrame(function(){
+                requestAnimationFrame(function(){ overlay.style.opacity='0'; });
             });
-        }
-
-        document.addEventListener('DOMContentLoaded', function(){
-            document.querySelectorAll('a.cloud-link, .mobile-module-link').forEach(function(a){
-                a.addEventListener('click', intercept);
+            /* Intercept module links */
+            document.querySelectorAll('a.cloud-link,.mobile-module-link').forEach(function(a){
+                a.addEventListener('click',function(e){
+                    e.preventDefault();
+                    var href=a.href;
+                    overlay.style.opacity='1';
+                    setTimeout(function(){ window.location.href=href; },150);
+                });
+            });
+        });
+        /* Fade in on new page load */
+        window.addEventListener('pageshow',function(){
+            overlay.style.transition='none';
+            overlay.style.opacity='1';
+            requestAnimationFrame(function(){
+                requestAnimationFrame(function(){
+                    overlay.style.transition='opacity 200ms ease';
+                    overlay.style.opacity='0';
+                });
             });
         });
     })();

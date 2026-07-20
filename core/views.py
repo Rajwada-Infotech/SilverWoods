@@ -703,7 +703,7 @@ def _cloudinary_promote_temp(stored_name):
     stored_name is like 'popups/temp/abc.jpg' or 'popups/temp/logos/abc.jpg'.
     Returns the permanent stored_name, or the original if it's not in temp.
     """
-    if not _direct_upload_active() or not stored_name:
+    if not _cloudinary_active() or not stored_name:
         return stored_name
     if '/temp/' not in stored_name:
         return stored_name  # already permanent, nothing to do

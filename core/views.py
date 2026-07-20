@@ -724,7 +724,19 @@ def _cloudinary_promote_temp(stored_name):
         )
         print(f'[promote_temp] rename OK, destroying temp {from_public_id!r}')
         try:
-            cloudinary.uploader.destroy(from_public_id, resource_type=resource_type, invalidate=True)
+            dr = cloudinary.uploader.destroy(from_public_id, resource_type=resource_type, invalidate=True)
+            print(f'[promote_temp] destroy result: {dr}')
+            # If destroy says "not found", rename didn't actually move it — try deleting by to_public_id
+            if dr.get('result') == 'not found':
+                print(f'[promote_temp] temp still exists, trying destroy on renamed id {to_public_id!r}')
+                # File might still be in temp under original id but rename returned wrong result
+                # Try force-deleting via admin API
+                import cloudinary.api
+                try:
+                    cloudinary.api.delete_resources([from_public_id], resource_type=resource_type, invalidate=True)
+                    print(f'[promote_temp] admin delete done')
+                except Exception as e2:
+                    print(f'[promote_temp] admin delete failed: {e2}')
         except Exception as e:
             print(f'[promote_temp] destroy failed: {e}')
         return to_public_id + '.' + ext if ext else to_public_id

@@ -618,7 +618,7 @@ def _admin_popups_inner(request):
         # Check for direct-upload public_ids (browser uploaded straight to Cloudinary)
         image_public_id = request.POST.get('image_public_id', '').strip()
         logo_public_id = request.POST.get('logo_public_id', '').strip()
-        print(f'[popup_save] POST image_public_id={image_public_id!r} logo_public_id={logo_public_id!r}')
+
 
         # Remove files from FILES if we have a direct-upload public_id (avoid double upload)
         files = request.FILES.copy()
@@ -731,7 +731,7 @@ def _cloudinary_promote_temp(stored_name):
         cloudinary.uploader.destroy(from_public_id, resource_type=resource_type, invalidate=True)
         return to_public_id + '.' + ext if ext else to_public_id
     except Exception as e:
-        print(f'[promote_temp] ERROR: {e}')
+
         return stored_name
         return stored_name  # fallback: keep temp path if rename fails
 

@@ -80,8 +80,8 @@
                     <div class="flex items-center gap-3 lg:hidden">
                         <button @click="$dispatch('toggle-dark')"
                                 class="w-8 h-8 rounded-full border flex items-center justify-center transition-all border-brown-200 bg-cream-200 text-brown-600 dark:border-gold-500/20 dark:bg-dark-800 dark:text-gold-500">
-                            <i class="fas fa-sun text-xs" x-show="!darkMode"></i>
-                            <i class="fas fa-moon text-xs" x-show="darkMode"></i>
+                            <i class="fas fa-sun text-xs" x-show="!darkMode" x-cloak></i>
+                            <i class="fas fa-moon text-xs" x-show="darkMode" x-cloak></i>
                         </button>
                         <button @click="mobileOpen = !mobileOpen" class="w-8 h-8 rounded-full border flex items-center justify-center transition-all border-brown-200 bg-cream-200 text-brown-600 dark:border-gold-500/20 dark:bg-dark-800 dark:text-gold-500">
                             <svg x-show="mobileOpen" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
@@ -117,10 +117,10 @@
                 <a href="{% url 'home' %}#contact" class="font-display text-3xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Contact</a>
                 {% endif %}
                 <div class="flex flex-wrap justify-center gap-x-6 gap-y-2">
-                    <a href="{% url 'brochure' %}" class="text-xs tracking-[0.15em] uppercase text-brown-400 dark:text-cream-400">Brochure</a>
-                    <a href="{% url 'blueprint' %}" class="text-xs tracking-[0.15em] uppercase text-brown-400 dark:text-cream-400">Blueprint</a>
-                    <a href="{% url 'plots' %}" class="text-xs tracking-[0.15em] uppercase text-brown-400 dark:text-cream-400"><span class="sm:hidden">Plots</span><span class="hidden sm:inline">Plot Metrics</span></a>
-                    <a href="{% url 'admin_login' %}" class="text-xs tracking-[0.15em] uppercase text-brown-400 dark:text-cream-400">Login</a>
+                    <a href="{% url 'brochure' %}" class="mobile-module-link text-xs tracking-[0.15em] uppercase text-brown-400 dark:text-cream-400">Brochure</a>
+                    <a href="{% url 'blueprint' %}" class="mobile-module-link text-xs tracking-[0.15em] uppercase text-brown-400 dark:text-cream-400">Blueprint</a>
+                    <a href="{% url 'plots' %}" class="mobile-module-link text-xs tracking-[0.15em] uppercase text-brown-400 dark:text-cream-400"><span class="sm:hidden">Plots</span><span class="hidden sm:inline">Plot Metrics</span></a>
+                    <a href="{% url 'admin_login' %}" class="mobile-module-link text-xs tracking-[0.15em] uppercase text-brown-400 dark:text-cream-400">Login</a>
                 </div>
             </div>
         </div>
@@ -393,6 +393,31 @@
 
     <script src="{% static 'js/main.js' %}?v=12"></script>
     {% block extra_js %}{% endblock %}
+
+    <script>
+    /* Fast page transitions for module links (Brochure / Blueprint / Plots / Login) */
+    (function(){
+        var style = document.createElement('style');
+        style.textContent = '@keyframes _sw_fade_out{to{opacity:0}}@keyframes _sw_fade_in{from{opacity:0}to{opacity:1}}::view-transition-old(root){animation:_sw_fade_out 120ms ease both}::view-transition-new(root){animation:_sw_fade_in 120ms ease both}';
+        document.head.appendChild(style);
+
+        function intercept(e){
+            var a = e.currentTarget;
+            if(!document.startViewTransition){return;}
+            e.preventDefault();
+            var href = a.href;
+            document.startViewTransition(function(){
+                window.location.href = href;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function(){
+            document.querySelectorAll('a.cloud-link, .mobile-module-link').forEach(function(a){
+                a.addEventListener('click', intercept);
+            });
+        });
+    })();
+    </script>
 
     <!-- ═══ SILVERWOODS CONCIERGE CHATBOT ═══ -->
     <style>

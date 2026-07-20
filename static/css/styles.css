@@ -1,6 +1,8 @@
 /* Silverwoods - Warm Luxury Glass Theme */
 /* Inspired by Sol Haus: cream, warm brown, earthy tones */
 
+[x-cloak] { display: none !important; }
+
 :root {
     /* Light mode (cream/warm) */
     --bg-primary: #f5f0e8;

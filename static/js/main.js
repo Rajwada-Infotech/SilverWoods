@@ -332,12 +332,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Knob icon (rope/knob colors handled by CSS)
         knobIcon.textContent = isDark ? ICON_MOON : ICON_SUN;
         knobIcon.style.fill  = isDark ? '#ffe8a0' : '#e8d0a0';
-        const ring = document.getElementById('drop-border-ring');
-        if (ring) {
-            ring.setAttribute('stroke', isDark ? '#c9a84c' : 'none');
-            ring.setAttribute('stroke-width', isDark ? '3' : '0');
-            ring.style.opacity = isDark ? '1' : '0';
-        }
+        // Removed drop-border-ring logic
+
         if (dropBody) dropBody.setAttribute('fill', isDark ? 'url(#dropGradDark)' : 'url(#dropGradLight)');
         if (dropGlow) {
             dropGlow.style.transition = 'opacity 0.6s ease';

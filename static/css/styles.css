@@ -581,7 +581,6 @@ a, button { transition: all 0.3s ease; }
 
 /* Water drop border ring */
 #drop-border-ring               { stroke: none; stroke-width: 0; }
-.dark #drop-border-ring         { stroke: #c9a84c; stroke-width: 2; opacity: 0.5; }
 /* drop-outer-glow opacity controlled exclusively by JS setVisuals() to avoid flash on load */
 
 /* ── Thought cloud menu ── */

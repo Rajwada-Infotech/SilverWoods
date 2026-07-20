@@ -130,23 +130,31 @@
                 <a href="{% url 'home' %}#contact" class="font-display text-3xl text-brown-800 dark:text-cream-100 hover:text-brown-400 dark:hover:text-gold-500 transition-colors">Contact</a>
                 {% endif %}
                 <div class="w-full mt-4">
-                    <p class="text-[9px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/50 text-center mb-3">Explore More</p>
-                    <div class="grid grid-cols-2 gap-3">
-                        <a href="{% url 'brochure' %}" class="mobile-module-link bg-brown-800/5 dark:bg-cream-100/5 border border-brown-700/10 dark:border-cream-100/10 flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform duration-150" style="border-radius:1.75rem;height:82px;">
-                            <i class="fas fa-book-open text-brown-700 dark:text-gold-500 text-xl"></i>
-                            <span class="text-[11px] font-semibold text-brown-700 dark:text-cream-100 tracking-wider uppercase">Brochure</span>
+                    <p class="text-[9px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/50 text-center mb-4">Explore More</p>
+                    <div class="grid grid-cols-4 gap-4">
+                        <a href="{% url 'brochure' %}" class="mobile-module-link flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
+                            <div class="w-14 h-14 rounded-full bg-brown-800/8 dark:bg-white/[0.07] border border-brown-700/15 dark:border-white/10 flex items-center justify-center">
+                                <i class="fas fa-book-open text-brown-700 dark:text-gold-500 text-lg"></i>
+                            </div>
+                            <span class="text-[10px] font-semibold text-brown-600 dark:text-cream-100/70 tracking-wider uppercase">Brochure</span>
                         </a>
-                        <a href="{% url 'blueprint' %}" class="mobile-module-link bg-brown-800/5 dark:bg-cream-100/5 border border-brown-700/10 dark:border-cream-100/10 flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform duration-150" style="border-radius:1.75rem;height:82px;">
-                            <i class="fas fa-drafting-compass text-brown-700 dark:text-gold-500 text-xl"></i>
-                            <span class="text-[11px] font-semibold text-brown-700 dark:text-cream-100 tracking-wider uppercase">Blueprint</span>
+                        <a href="{% url 'blueprint' %}" class="mobile-module-link flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
+                            <div class="w-14 h-14 rounded-full bg-brown-800/8 dark:bg-white/[0.07] border border-brown-700/15 dark:border-white/10 flex items-center justify-center">
+                                <i class="fas fa-drafting-compass text-brown-700 dark:text-gold-500 text-lg"></i>
+                            </div>
+                            <span class="text-[10px] font-semibold text-brown-600 dark:text-cream-100/70 tracking-wider uppercase">Blueprint</span>
                         </a>
-                        <a href="{% url 'plots' %}" class="mobile-module-link bg-brown-800/5 dark:bg-cream-100/5 border border-brown-700/10 dark:border-cream-100/10 flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform duration-150" style="border-radius:1.75rem;height:82px;">
-                            <i class="fas fa-vector-square text-brown-700 dark:text-gold-500 text-xl"></i>
-                            <span class="text-[11px] font-semibold text-brown-700 dark:text-cream-100 tracking-wider uppercase">Plot Metrics</span>
+                        <a href="{% url 'plots' %}" class="mobile-module-link flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
+                            <div class="w-14 h-14 rounded-full bg-brown-800/8 dark:bg-white/[0.07] border border-brown-700/15 dark:border-white/10 flex items-center justify-center">
+                                <i class="fas fa-vector-square text-brown-700 dark:text-gold-500 text-lg"></i>
+                            </div>
+                            <span class="text-[10px] font-semibold text-brown-600 dark:text-cream-100/70 tracking-wider uppercase">Plots</span>
                         </a>
-                        <a href="{% url 'admin_login' %}" class="mobile-module-link bg-brown-800/5 dark:bg-cream-100/5 border border-brown-700/10 dark:border-cream-100/10 flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform duration-150" style="border-radius:1.75rem;height:82px;">
-                            <i class="fas fa-lock text-brown-700 dark:text-gold-500 text-xl"></i>
-                            <span class="text-[11px] font-semibold text-brown-700 dark:text-cream-100 tracking-wider uppercase">Admin</span>
+                        <a href="{% url 'admin_login' %}" class="mobile-module-link flex flex-col items-center gap-2 active:scale-95 transition-transform duration-150">
+                            <div class="w-14 h-14 rounded-full bg-brown-800/8 dark:bg-white/[0.07] border border-brown-700/15 dark:border-white/10 flex items-center justify-center">
+                                <i class="fas fa-lock text-brown-700 dark:text-gold-500 text-lg"></i>
+                            </div>
+                            <span class="text-[10px] font-semibold text-brown-600 dark:text-cream-100/70 tracking-wider uppercase">Admin</span>
                         </a>
                     </div>
                 </div>

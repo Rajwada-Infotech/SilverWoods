@@ -699,49 +699,40 @@ def admin_toggle_popup(request, pk):
 
 
 def _cloudinary_promote_temp(stored_name):
-    """Move a temp-folder asset to its permanent location on Save.
+    """Move a temp-folder asset to permanent location on Save.
 
-    stored_name is like 'popups/temp/abc.jpg' or 'popups/temp/logos/abc.jpg'.
-    Returns the permanent stored_name, or the original if it's not in temp.
+    Uses upload-from-URL + destroy (not rename) so it works in both
+    Dynamic and Fixed folder modes.
     """
     if not _cloudinary_active() or not stored_name:
-        print(f'[promote_temp] skipped — active={_cloudinary_active()} stored_name={stored_name!r}')
         return stored_name
     if '/temp/' not in stored_name:
-        print(f'[promote_temp] no /temp/ in {stored_name!r}, skipping')
-        return stored_name  # already permanent, nothing to do
+        return stored_name
     try:
-        import cloudinary.uploader
+        import cloudinary, cloudinary.uploader
         ext = stored_name.rsplit('.', 1)[-1].lower() if '.' in stored_name else ''
-        from_public_id = stored_name.rsplit('.', 1)[0]  # strip extension
+        from_public_id = stored_name.rsplit('.', 1)[0]
         to_public_id = from_public_id.replace('/temp/', '/', 1)
         resource_type = 'video' if ext in ('mp4', 'webm', 'mov', 'avi') else 'image'
-        print(f'[promote_temp] renaming {from_public_id!r} → {to_public_id!r} ({resource_type})')
-        cloudinary.uploader.rename(
-            from_public_id, to_public_id,
+        cloud_name = cloudinary.config().cloud_name
+        temp_url = f'https://res.cloudinary.com/{cloud_name}/{resource_type}/upload/{from_public_id}'
+        # Split to_public_id into folder + filename for Fixed Folder mode compatibility
+        parts = to_public_id.rsplit('/', 1)
+        perm_folder = parts[0] if len(parts) == 2 else ''
+        perm_filename = parts[-1]
+        cloudinary.uploader.upload(
+            temp_url,
+            public_id=perm_filename,
+            folder=perm_folder,
             resource_type=resource_type,
-            overwrite=True, invalidate=True,
+            overwrite=True,
+            invalidate=True,
         )
-        print(f'[promote_temp] rename OK, destroying temp {from_public_id!r}')
-        try:
-            dr = cloudinary.uploader.destroy(from_public_id, resource_type=resource_type, invalidate=True)
-            print(f'[promote_temp] destroy result: {dr}')
-            # If destroy says "not found", rename didn't actually move it — try deleting by to_public_id
-            if dr.get('result') == 'not found':
-                print(f'[promote_temp] temp still exists, trying destroy on renamed id {to_public_id!r}')
-                # File might still be in temp under original id but rename returned wrong result
-                # Try force-deleting via admin API
-                import cloudinary.api
-                try:
-                    cloudinary.api.delete_resources([from_public_id], resource_type=resource_type, invalidate=True)
-                    print(f'[promote_temp] admin delete done')
-                except Exception as e2:
-                    print(f'[promote_temp] admin delete failed: {e2}')
-        except Exception as e:
-            print(f'[promote_temp] destroy failed: {e}')
+        cloudinary.uploader.destroy(from_public_id, resource_type=resource_type, invalidate=True)
         return to_public_id + '.' + ext if ext else to_public_id
     except Exception as e:
         print(f'[promote_temp] ERROR: {e}')
+        return stored_name
         return stored_name  # fallback: keep temp path if rename fails
 
 

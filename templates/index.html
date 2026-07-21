@@ -413,37 +413,6 @@
             </div>
         </div>
 
-        <!-- Lightbox Modal -->
-        <div id="gallery-lightbox" class="fixed inset-0 z-[9999] hidden flex-col" style="background:rgba(0,0,0,0.96);backdrop-filter:blur(12px);opacity:0;transition:opacity 0.3s ease;">
-            <!-- Close button — top right, large & elegant -->
-            <button onclick="closeLightbox()" title="Close (Esc)"
-                    class="absolute top-4 right-4 z-20 group flex items-center gap-2 text-white/60 hover:text-white transition-all duration-200">
-                <span class="text-xs tracking-widest uppercase font-light opacity-0 group-hover:opacity-100 transition-opacity duration-200">Close</span>
-                <div class="w-10 h-10 rounded-full border border-white/20 group-hover:border-white/50 bg-white/5 group-hover:bg-white/15 flex items-center justify-center transition-all duration-200">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </div>
-            </button>
-            <!-- Gallery label -->
-            <div class="absolute top-5 left-5 z-20 text-white/30 text-xs tracking-[0.25em] uppercase font-light">Silverwoods Gallery</div>
-            <!-- Prev -->
-            <button onclick="lightboxPrev()" class="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full border border-white/20 hover:border-white/50 bg-white/5 hover:bg-white/15 flex items-center justify-center text-white transition-all duration-200">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-            </button>
-            <!-- Next -->
-            <button onclick="lightboxNext()" class="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full border border-white/20 hover:border-white/50 bg-white/5 hover:bg-white/15 flex items-center justify-center text-white transition-all duration-200">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-            </button>
-            <!-- Main image -->
-            <div class="flex-1 flex items-center justify-center px-16 pt-16 pb-4">
-                <img id="lightbox-img" src="" alt="" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl" style="transition: opacity 0.4s, transform 0.4s;">
-            </div>
-            <!-- Thumbnails -->
-            <div class="flex items-center justify-center gap-3 pb-5 px-4 mt-3">
-                <div id="lightbox-thumbs" class="flex gap-2 overflow-x-auto pb-1" style="scrollbar-width:none;-ms-overflow-style:none;"></div>
-            </div>
-            <!-- Counter -->
-            <div id="lightbox-counter" class="absolute bottom-[4.5rem] left-1/2 -translate-x-1/2 text-white/30 text-[11px] tracking-[0.3em]"></div>
-        </div>
     </div>
 </section>
 
@@ -995,7 +964,7 @@ var _lbAutoTimer = null;
 var _lbHiddenEls = [];
 function _lbHideUI() {
     _lbHiddenEls = [];
-    var ids = ['navbar','liquid-drop-menu','liquid-lamp-wrap','cloud-dot1','cloud-dot2','cloud-dot3','cloud-dot4','sw-chat-wrap','ldi-overlay'];
+    var ids = ['navbar','liquid-drop-menu','liquid-lamp-wrap','cloud-dot1','cloud-dot2','cloud-dot3','cloud-dot4','sw-chat-wrap','ldi-overlay','popup-overlay','interest-overlay'];
     ids.forEach(function(id) {
         var el = document.getElementById(id);
         if (el) { el.style.transition = 'opacity 0.25s ease'; el.style.opacity = '0'; el.style.pointerEvents = 'none'; _lbHiddenEls.push(el); }
@@ -1014,75 +983,98 @@ function _lbShowUI() {
 function openLightbox(index) {
     _lbIndex = index;
     var lb = document.getElementById('gallery-lightbox');
-    lb.style.display = 'flex';
-    lb.classList.remove('hidden');
-    lb.style.opacity = '0';
+    if (window.gsap) { gsap.killTweensOf(lb); gsap.set(lb, {clearProps: 'opacity,visibility'}); }
+    lb.style.transition = 'none';
+    lb.style.opacity = '1';
+    lb.style.display = 'block';
     document.body.style.overflow = 'hidden';
     _lbHideUI();
-    _buildThumbs();
-    _showSlide(_lbIndex, 'none');
+    _lbRender('none');
+    _lbBuildDots();
     _startAuto();
-    requestAnimationFrame(function() { lb.style.opacity = '1'; });
+    var w = window.innerWidth;
+    document.getElementById('lb-arrow-prev').style.display = w < 640 ? 'flex' : 'none';
+    document.getElementById('lb-arrow-next').style.display = w < 640 ? 'flex' : 'none';
 }
 
 function closeLightbox() {
     var lb = document.getElementById('gallery-lightbox');
-    lb.style.opacity = '0';
+    lb.style.display = 'none';
+    lb.style.opacity = '1';
     clearInterval(_lbAutoTimer);
-    setTimeout(function() {
-        lb.style.display = 'none';
-        lb.classList.add('hidden');
-        document.body.style.overflow = '';
-        _lbShowUI();
-    }, 300);
+    document.body.style.overflow = '';
+    _lbShowUI();
 }
 
 function lightboxNext() {
     _lbIndex = (_lbIndex + 1) % _lbImages.length;
-    _showSlide(_lbIndex, 'next');
+    _lbRender('next');
     _resetAuto();
 }
 
 function lightboxPrev() {
     _lbIndex = (_lbIndex - 1 + _lbImages.length) % _lbImages.length;
-    _showSlide(_lbIndex, 'prev');
+    _lbRender('prev');
     _resetAuto();
 }
 
-function _showSlide(index, dir) {
-    var img = document.getElementById('lightbox-img');
-    var fromX = dir === 'next' ? '60px' : dir === 'prev' ? '-60px' : '0';
-    img.style.opacity = '0';
-    img.style.transform = 'translateX(' + fromX + ')';
-    setTimeout(function() {
-        img.src = _lbImages[index];
-        img.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-        img.style.opacity = '1';
-        img.style.transform = 'translateX(0)';
-    }, dir === 'none' ? 0 : 80);
-    document.getElementById('lightbox-counter').textContent = (index + 1) + ' / ' + _lbImages.length;
-    _updateThumbs(index);
-}
+function _lbRender(dir) {
+    var n = _lbImages.length;
+    var pi = (_lbIndex - 1 + n) % n;
+    var ni = (_lbIndex + 1) % n;
 
-function _buildThumbs() {
-    var container = document.getElementById('lightbox-thumbs');
-    container.innerHTML = '';
-    _lbImages.forEach(function(src, i) {
-        var el = document.createElement('img');
-        el.src = src;
-        el.className = 'h-12 w-16 object-cover rounded-lg cursor-pointer transition-all duration-300 opacity-50 hover:opacity-100';
-        el.onclick = function() { _lbIndex = i; _showSlide(i, 'next'); _resetAuto(); };
-        el.id = 'lb-thumb-' + i;
-        container.appendChild(el);
+    var imgActive = document.getElementById('lb-img-active');
+    var imgPrev   = document.getElementById('lb-img-prev');
+    var imgNext   = document.getElementById('lb-img-next');
+    var cardActive = document.getElementById('lb-card-active');
+    var cardPrev   = document.getElementById('lb-card-prev');
+    var cardNext   = document.getElementById('lb-card-next');
+
+    if (dir !== 'none') {
+        /* flash the active card off-screen in direction of travel, then snap */
+        var exitX = dir === 'next' ? '-30%' : '30%';
+        cardActive.style.transition = 'none';
+        cardActive.style.transform = 'translateX('+exitX+') rotateY('+(dir==='next'?'20':'-20')+'deg) scale(0.8)';
+        cardActive.style.opacity = '0';
+        void cardActive.offsetWidth; /* reflow */
+        cardActive.style.transition = 'all 0.55s cubic-bezier(.22,.68,0,1.2)';
+    }
+
+    imgActive.src = _lbImages[_lbIndex];
+    imgPrev.src   = _lbImages[pi];
+    imgNext.src   = _lbImages[ni];
+
+    /* settle active */
+    requestAnimationFrame(function() {
+        cardActive.style.transform = 'translateX(0) rotateY(0deg) scale(1)';
+        cardActive.style.opacity = '1';
     });
+
+    /* counter + dots */
+    document.getElementById('lb-counter').textContent = (_lbIndex + 1) + ' / ' + n;
+    _lbUpdateDots(_lbIndex);
 }
 
-function _updateThumbs(index) {
+function _lbBuildDots() {
+    var wrap = document.getElementById('lb-dots');
+    wrap.innerHTML = '';
     _lbImages.forEach(function(_, i) {
-        var t = document.getElementById('lb-thumb-' + i);
-        if (!t) return;
-        t.style.opacity = i === index ? '1' : '0.4';
-        t.style.outline = i === index ? '2px solid #c9a84c' : 'none';
+        var d = document.createElement('button');
+        d.id = 'lb-dot-' + i;
+        d.onclick = function() { _lbIndex = i; _lbRender('next'); _resetAuto(); };
+        d.style.cssText = 'width:6px;height:6px;border-radius:50%;border:none;cursor:pointer;transition:all 0.3s ease;background:rgba(255,255,255,0.25);padding:0;';
+        wrap.appendChild(d);
+    });
+    _lbUpdateDots(_lbIndex);
+}
+
+function _lbUpdateDots(index) {
+    _lbImages.forEach(function(_, i) {
+        var d = document.getElementById('lb-dot-' + i);
+        if (!d) return;
+        d.style.background = i === index ? '#c9a84c' : 'rgba(255,255,255,0.25)';
+        d.style.width  = i === index ? '20px' : '6px';
+        d.style.borderRadius = i === index ? '3px' : '50%';
     });
 }
 
@@ -1103,4 +1095,50 @@ document.getElementById('gallery-lightbox').addEventListener('click', function(e
     if (e.target === this) closeLightbox();
 });
 </script>
+
+<!-- Gallery Lightbox — 3D card stack — lives outside all sections to avoid scroll-opacity interference -->
+<div id="gallery-lightbox" style="position:fixed;inset:0;z-index:99999;background:#08060a;display:none;">
+    <!-- Close -->
+    <button onclick="closeLightbox()" title="Close (Esc)"
+            style="position:absolute;top:20px;right:20px;z-index:10;display:flex;align-items:center;gap:8px;background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.5);"
+            onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">
+        <span style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;font-weight:300;" id="lb-close-label"></span>
+        <div style="width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;transition:all 0.2s;">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </div>
+    </button>
+
+    <!-- Counter -->
+    <div id="lb-counter" style="position:absolute;top:24px;left:50%;transform:translateX(-50%);z-index:10;color:rgba(255,255,255,0.3);font-size:11px;letter-spacing:0.3em;user-select:none;"></div>
+
+    <!-- 3D Card Stage -->
+    <div id="lb-stage" style="position:absolute;inset:0;perspective:1400px;overflow:hidden;">
+        <!-- Prev card -->
+        <div id="lb-card-prev" onclick="lightboxPrev()" style="position:absolute;top:50%;left:50%;width:min(52vw,500px);aspect-ratio:16/10;margin-top:calc(min(52vw,500px)*-5/16);margin-left:calc(min(52vw,500px)*-1/2);transform:translateX(calc(-1 * min(44vw,430px))) rotateY(28deg) scale(0.75);opacity:0.5;cursor:pointer;transition:all 0.55s cubic-bezier(.22,.68,0,1.2);border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.8);z-index:1;">
+            <img id="lb-img-prev" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;">
+            <div style="position:absolute;inset:0;background:rgba(0,0,0,0.4);pointer-events:none;"></div>
+        </div>
+        <!-- Active card -->
+        <div id="lb-card-active" style="position:absolute;top:50%;left:50%;width:min(58vw,600px);aspect-ratio:16/10;margin-top:calc(min(58vw,600px)*-5/16);margin-left:calc(min(58vw,600px)*-1/2);transform:translateX(0) rotateY(0deg) scale(1);opacity:1;transition:all 0.55s cubic-bezier(.22,.68,0,1.2);border-radius:16px;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,0.9),0 0 0 1px rgba(255,255,255,0.07);z-index:2;">
+            <img id="lb-img-active" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
+        </div>
+        <!-- Next card -->
+        <div id="lb-card-next" onclick="lightboxNext()" style="position:absolute;top:50%;left:50%;width:min(52vw,500px);aspect-ratio:16/10;margin-top:calc(min(52vw,500px)*-5/16);margin-left:calc(min(52vw,500px)*-1/2);transform:translateX(min(44vw,430px)) rotateY(-28deg) scale(0.75);opacity:0.5;cursor:pointer;transition:all 0.55s cubic-bezier(.22,.68,0,1.2);border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.8);z-index:1;">
+            <img id="lb-img-next" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;">
+            <div style="position:absolute;inset:0;background:rgba(0,0,0,0.4);pointer-events:none;"></div>
+        </div>
+    </div>
+
+    <!-- Dot indicators -->
+    <div id="lb-dots" style="position:absolute;bottom:32px;left:50%;transform:translateX(-50%);z-index:10;display:flex;gap:8px;align-items:center;"></div>
+
+    <!-- Mobile arrows -->
+    <button onclick="lightboxPrev()" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);z-index:10;width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);background:rgba(0,0,0,0.4);color:rgba(255,255,255,0.6);display:none;align-items:center;justify-content:center;cursor:pointer;" id="lb-arrow-prev">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+    </button>
+    <button onclick="lightboxNext()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);z-index:10;width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);background:rgba(0,0,0,0.4);color:rgba(255,255,255,0.6);display:none;align-items:center;justify-content:center;cursor:pointer;" id="lb-arrow-next">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    </button>
+</div>
+
 {% endblock %}

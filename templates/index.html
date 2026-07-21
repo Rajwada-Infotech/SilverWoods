@@ -489,7 +489,7 @@
         </div>
         <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-10">
             {% for review in reviews %}
-            <div class="section-reveal glass-warm rounded-2xl p-5 md:p-8 glass-hover flex flex-col h-48 md:h-56 {% if forloop.counter == 4 %}lg:hidden{% endif %}">
+            <div class="section-reveal glass-warm rounded-2xl p-5 md:p-8 glass-hover flex flex-col h-48 lg:h-56 {% if forloop.counter == 4 %}lg:hidden{% endif %}">
                 <div class="flex gap-0.5 mb-3">
                     {% for i in "12345" %}
                     <i class="fas fa-star {% if forloop.counter <= review.rating %}text-gold-500{% else %}text-brown-200 dark:text-cream-300/10{% endif %} text-[10px]"></i>

@@ -1094,7 +1094,7 @@ function _lbUpdateDots(index) {
 function _startAuto() {
     _lbAutoTimer = setInterval(function() {
         _lbIndex = (_lbIndex + 1) % _lbImages.length;
-        _showSlide(_lbIndex, 'next');
+        _lbRender('next');
     }, 3000);
 }
 

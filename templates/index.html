@@ -393,57 +393,26 @@
             </h2>
         </div>
         <div class="grid grid-cols-12 gap-3 md:gap-4">
-            <div class="col-span-12 md:col-span-7 rounded-2xl overflow-hidden group section-reveal h-[220px] md:h-[400px] cursor-pointer" onclick="openLightbox(0)">
+            <div class="col-span-12 md:col-span-7 rounded-2xl overflow-hidden group section-reveal h-[220px] md:h-[400px] cursor-pointer" onclick="openLightbox(event,0)">
                 <img src="{% static 'images/gallery1.webp' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
             </div>
-            <div class="col-span-12 md:col-span-5 rounded-2xl overflow-hidden group section-reveal h-[220px] md:h-[400px] cursor-pointer" onclick="openLightbox(1)">
+            <div class="col-span-12 md:col-span-5 rounded-2xl overflow-hidden group section-reveal h-[220px] md:h-[400px] cursor-pointer" onclick="openLightbox(event,1)">
                 <img src="{% static 'images/gallery2.webp' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
             </div>
-            <div class="col-span-6 md:col-span-4 rounded-2xl overflow-hidden group section-reveal h-[160px] md:h-[300px] cursor-pointer" onclick="openLightbox(2)">
+            <div class="col-span-6 md:col-span-4 rounded-2xl overflow-hidden group section-reveal h-[160px] md:h-[300px] cursor-pointer" onclick="openLightbox(event,2)">
                 <img src="{% static 'images/gallery3.webp' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
             </div>
-            <div class="col-span-6 md:col-span-4 rounded-2xl overflow-hidden group section-reveal h-[160px] md:h-[300px] cursor-pointer" onclick="openLightbox(3)">
+            <div class="col-span-6 md:col-span-4 rounded-2xl overflow-hidden group section-reveal h-[160px] md:h-[300px] cursor-pointer" onclick="openLightbox(event,3)">
                 <img src="{% static 'images/gallery4.webp' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
             </div>
-            <div class="col-span-12 md:col-span-4 rounded-2xl overflow-hidden group section-reveal h-[160px] md:h-[300px] cursor-pointer" onclick="openLightbox(4)">
+            <div class="col-span-12 md:col-span-4 rounded-2xl overflow-hidden group section-reveal h-[160px] md:h-[300px] cursor-pointer" onclick="openLightbox(event,4)">
                 <img src="{% static 'images/gallery5.webp' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
             </div>
-            <div class="col-span-12 rounded-2xl overflow-hidden group section-reveal h-[35vh] md:h-[50vh] cursor-pointer" onclick="openLightbox(5)">
+            <div class="col-span-12 rounded-2xl overflow-hidden group section-reveal h-[35vh] md:h-[50vh] cursor-pointer" onclick="openLightbox(event,5)">
                 <img src="{% static 'images/gallery6.webp' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
             </div>
         </div>
 
-        <!-- Lightbox Modal -->
-        <div id="gallery-lightbox" class="fixed inset-0 z-[9999] hidden flex-col" style="background:rgba(0,0,0,0.96);backdrop-filter:blur(12px);opacity:0;transition:opacity 0.3s ease;">
-            <!-- Close button — top right, large & elegant -->
-            <button onclick="closeLightbox()" title="Close (Esc)"
-                    class="absolute top-4 right-4 z-20 group flex items-center gap-2 text-white/60 hover:text-white transition-all duration-200">
-                <span class="text-xs tracking-widest uppercase font-light opacity-0 group-hover:opacity-100 transition-opacity duration-200">Close</span>
-                <div class="w-10 h-10 rounded-full border border-white/20 group-hover:border-white/50 bg-white/5 group-hover:bg-white/15 flex items-center justify-center transition-all duration-200">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </div>
-            </button>
-            <!-- Gallery label -->
-            <div class="absolute top-5 left-5 z-20 text-white/30 text-xs tracking-[0.25em] uppercase font-light">Silverwoods Gallery</div>
-            <!-- Prev -->
-            <button onclick="lightboxPrev()" class="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full border border-white/20 hover:border-white/50 bg-white/5 hover:bg-white/15 flex items-center justify-center text-white transition-all duration-200">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-            </button>
-            <!-- Next -->
-            <button onclick="lightboxNext()" class="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full border border-white/20 hover:border-white/50 bg-white/5 hover:bg-white/15 flex items-center justify-center text-white transition-all duration-200">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-            </button>
-            <!-- Main image -->
-            <div class="flex-1 flex items-center justify-center px-16 pt-16 pb-4">
-                <img id="lightbox-img" src="" alt="" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl" style="transition: opacity 0.4s, transform 0.4s;">
-            </div>
-            <!-- Thumbnails -->
-            <div class="flex items-center justify-center gap-3 pb-5 px-4 mt-3">
-                <div id="lightbox-thumbs" class="flex gap-2 overflow-x-auto pb-1" style="scrollbar-width:none;-ms-overflow-style:none;"></div>
-            </div>
-            <!-- Counter -->
-            <div id="lightbox-counter" class="absolute bottom-[4.5rem] left-1/2 -translate-x-1/2 text-white/30 text-[11px] tracking-[0.3em]"></div>
-        </div>
     </div>
 </section>
 
@@ -980,7 +949,7 @@ document.addEventListener('keydown', function(e) {
     if(e.key === 'ArrowLeft') lightboxPrev();
 });
 
-// Gallery Lightbox
+// ── Gallery Lightbox — La Soufflerie clip-path scale ──────────────────────
 var _lbImages = [
     "{% static 'images/gallery1.webp' %}",
     "{% static 'images/gallery2.webp' %}",
@@ -991,116 +960,165 @@ var _lbImages = [
 ];
 var _lbIndex = 0;
 var _lbAutoTimer = null;
+var _lbOriginRect = null; // rect of clicked grid cell
 
 var _lbHiddenEls = [];
 function _lbHideUI() {
     _lbHiddenEls = [];
-    var ids = ['navbar','liquid-drop-menu','liquid-lamp-wrap','cloud-dot1','cloud-dot2','cloud-dot3','cloud-dot4','sw-chat-wrap','ldi-overlay'];
-    ids.forEach(function(id) {
+    ['navbar','liquid-drop-menu','liquid-lamp-wrap','cloud-dot1','cloud-dot2','cloud-dot3','cloud-dot4','sw-chat-wrap','ldi-overlay','popup-overlay','interest-overlay'].forEach(function(id) {
         var el = document.getElementById(id);
-        if (el) { el.style.transition = 'opacity 0.25s ease'; el.style.opacity = '0'; el.style.pointerEvents = 'none'; _lbHiddenEls.push(el); }
+        if (el) { el.style.transition = 'opacity 0.3s'; el.style.opacity = '0'; el.style.pointerEvents = 'none'; _lbHiddenEls.push(el); }
     });
 }
 function _lbShowUI() {
     _lbHiddenEls.forEach(function(el) {
-        el.style.transition = 'opacity 0.25s ease';
+        el.style.transition = 'opacity 0.3s';
         el.style.opacity = '';
         el.style.pointerEvents = '';
-        setTimeout(function() { el.style.transition = ''; }, 300);
+        setTimeout(function() { el.style.transition = ''; }, 350);
     });
     _lbHiddenEls = [];
 }
 
-function openLightbox(index) {
+/* Build clip-path inset string from a DOMRect */
+function _rectToClip(rect) {
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var t = rect.top,
+        r = vw - rect.right,
+        b = vh - rect.bottom,
+        l = rect.left;
+    var br = 14; // border-radius px to match grid cells
+    return 'inset(' + t + 'px ' + r + 'px ' + b + 'px ' + l + 'px round ' + br + 'px)';
+}
+
+function openLightbox(evt, index) {
     _lbIndex = index;
+    _lbOriginRect = evt.currentTarget.getBoundingClientRect();
+
     var lb = document.getElementById('gallery-lightbox');
-    lb.style.display = 'flex';
-    lb.classList.remove('hidden');
-    lb.style.opacity = '0';
-    document.body.style.overflow = 'hidden';
+    var img = document.getElementById('lb-img');
+
+    // Kill GSAP if present
+    if (window.gsap) { gsap.killTweensOf(lb); }
+
+    // Set image immediately (no transition yet)
+    img.style.transition = 'none';
+    img.style.opacity = '1';
+    img.style.transform = '';
+    img.src = _lbImages[index];
+
+    // Start clipped to the grid cell position — instant, no transition
+    lb.style.transition = 'none';
+    lb.style.clipPath = _rectToClip(_lbOriginRect);
+    lb.style.display = 'block';
+
     _lbHideUI();
-    _buildThumbs();
-    _showSlide(_lbIndex, 'none');
+    document.body.style.overflow = 'hidden';
+    _lbUpdateCounter();
+    _lbBuildDots();
+
+    // Force paint of initial clipped state, then animate to fullscreen
+    lb.getBoundingClientRect(); // trigger reflow
+    setTimeout(function() {
+        lb.style.transition = 'clip-path 0.72s cubic-bezier(0.76, 0, 0.24, 1)';
+        lb.style.clipPath = 'inset(0px 0px 0px 0px round 0px)';
+    }, 20);
+
     _startAuto();
-    requestAnimationFrame(function() { lb.style.opacity = '1'; });
 }
 
 function closeLightbox() {
     var lb = document.getElementById('gallery-lightbox');
-    lb.style.opacity = '0';
     clearInterval(_lbAutoTimer);
-    setTimeout(function() {
+
+    // Collapse back to origin rect if we have it, else just hide
+    if (_lbOriginRect) {
+        lb.style.transition = 'clip-path 0.6s cubic-bezier(0.76, 0, 0.24, 1)';
+        lb.style.clipPath = _rectToClip(_lbOriginRect);
+        setTimeout(function() {
+            lb.style.display = 'none';
+            lb.style.clipPath = '';
+            lb.style.transition = '';
+            document.body.style.overflow = '';
+            _lbShowUI();
+        }, 620);
+    } else {
         lb.style.display = 'none';
-        lb.classList.add('hidden');
         document.body.style.overflow = '';
         _lbShowUI();
-    }, 300);
+    }
 }
 
 function lightboxNext() {
     _lbIndex = (_lbIndex + 1) % _lbImages.length;
-    _showSlide(_lbIndex, 'next');
+    _lbSwapImage('next');
     _resetAuto();
 }
 
 function lightboxPrev() {
     _lbIndex = (_lbIndex - 1 + _lbImages.length) % _lbImages.length;
-    _showSlide(_lbIndex, 'prev');
+    _lbSwapImage('prev');
     _resetAuto();
 }
 
-function _showSlide(index, dir) {
-    var img = document.getElementById('lightbox-img');
-    var fromX = dir === 'next' ? '60px' : dir === 'prev' ? '-60px' : '0';
-    img.style.opacity = '0';
-    img.style.transform = 'translateX(' + fromX + ')';
-    setTimeout(function() {
-        img.src = _lbImages[index];
-        img.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-        img.style.opacity = '1';
-        img.style.transform = 'translateX(0)';
-    }, dir === 'none' ? 0 : 80);
-    document.getElementById('lightbox-counter').textContent = (index + 1) + ' / ' + _lbImages.length;
-    _updateThumbs(index);
+function _lbSwapImage(dir) {
+    var img = document.getElementById('lb-img');
+    // Cancel any lingering animations before swapping
+    img.getAnimations().forEach(function(a) { a.cancel(); });
+    img.style.transition = 'none';
+    img.style.opacity = '1';
+    img.style.transform = '';
+    img.src = _lbImages[_lbIndex];
+    _lbUpdateCounter();
+    _lbBuildDots();
 }
 
-function _buildThumbs() {
-    var container = document.getElementById('lightbox-thumbs');
-    container.innerHTML = '';
-    _lbImages.forEach(function(src, i) {
-        var el = document.createElement('img');
-        el.src = src;
-        el.className = 'h-12 w-16 object-cover rounded-lg cursor-pointer transition-all duration-300 opacity-50 hover:opacity-100';
-        el.onclick = function() { _lbIndex = i; _showSlide(i, 'next'); _resetAuto(); };
-        el.id = 'lb-thumb-' + i;
-        container.appendChild(el);
-    });
+function _lbUpdateCounter() {
+    var el = document.getElementById('lb-counter');
+    if (el) el.textContent = (_lbIndex + 1) + ' / ' + _lbImages.length;
 }
 
-function _updateThumbs(index) {
+function _lbBuildDots() {
+    var wrap = document.getElementById('lb-dots');
+    if (!wrap) return;
+    wrap.innerHTML = '';
     _lbImages.forEach(function(_, i) {
-        var t = document.getElementById('lb-thumb-' + i);
-        if (!t) return;
-        t.style.opacity = i === index ? '1' : '0.4';
-        t.style.outline = i === index ? '2px solid #c9a84c' : 'none';
+        var d = document.createElement('button');
+        d.onclick = function(e) { e.stopPropagation(); _lbIndex = i; _lbSwapImage('next'); _resetAuto(); };
+        d.style.cssText = 'width:' + (i===_lbIndex?'20px':'6px') + ';height:6px;border-radius:' + (i===_lbIndex?'3px':'50%') + ';border:none;padding:0;cursor:pointer;transition:all 0.3s ease;background:' + (i===_lbIndex?'#c9a84c':'rgba(255,255,255,0.3)') + ';';
+        wrap.appendChild(d);
     });
 }
 
 function _startAuto() {
+    clearInterval(_lbAutoTimer);
     _lbAutoTimer = setInterval(function() {
         _lbIndex = (_lbIndex + 1) % _lbImages.length;
-        _showSlide(_lbIndex, 'next');
-    }, 3000);
+        _lbSwapImage('next');
+    }, 4000);
 }
 
 function _resetAuto() {
     clearInterval(_lbAutoTimer);
     _startAuto();
 }
-
-// Close lightbox on backdrop click
-document.getElementById('gallery-lightbox').addEventListener('click', function(e) {
-    if (e.target === this) closeLightbox();
-});
 </script>
+
+<!-- Gallery Lightbox — La Soufflerie clip-path scale — outside all sections/GSAP stacking contexts -->
+<div id="gallery-lightbox" style="position:fixed;inset:0;z-index:99999;background:#0a0a0a;display:none;overflow:hidden;">
+    <img id="lb-img" src="" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 40%,transparent 60%,rgba(0,0,0,0.3) 100%);pointer-events:none;"></div>
+    <button onclick="closeLightbox()" style="position:absolute;top:20px;right:20px;z-index:10;width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,0.25);background:rgba(0,0,0,0.3);color:white;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px);" onmouseover="this.style.background='rgba(0,0,0,0.6)'" onmouseout="this.style.background='rgba(0,0,0,0.3)'">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+    <div id="lb-counter" style="position:absolute;top:26px;left:24px;z-index:10;color:rgba(255,255,255,0.5);font-size:11px;letter-spacing:0.25em;font-weight:300;"></div>
+    <button onclick="lightboxPrev()" style="position:absolute;left:20px;top:50%;transform:translateY(-50%);z-index:10;width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,0.2);background:rgba(0,0,0,0.3);color:white;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px);" onmouseover="this.style.background='rgba(0,0,0,0.6)'" onmouseout="this.style.background='rgba(0,0,0,0.3)'">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+    </button>
+    <button onclick="lightboxNext()" style="position:absolute;right:20px;top:50%;transform:translateY(-50%);z-index:10;width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,0.2);background:rgba(0,0,0,0.3);color:white;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px);" onmouseover="this.style.background='rgba(0,0,0,0.6)'" onmouseout="this.style.background='rgba(0,0,0,0.3)'">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    </button>
+    <div id="lb-dots" style="position:absolute;bottom:28px;left:50%;transform:translateX(-50%);z-index:10;display:flex;gap:6px;align-items:center;"></div>
+</div>
+
 {% endblock %}

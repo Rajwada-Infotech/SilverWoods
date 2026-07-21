@@ -30,7 +30,7 @@ class Command(BaseCommand):
         project.pincode = "700151"
         project.phone = "+91 7411781881"
         project.email = "info@silverwoods.co.in"
-        project.website = "https://silverwoods.deltarealtech.in/"
+        project.website = "https://deltarealtech.in/"
         project.director_name = "Delta Realtech"
         project.director_title = "Developer & Promoter"
         project.director_bio = (

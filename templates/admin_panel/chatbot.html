@@ -5,32 +5,38 @@
 {% block admin_content %}
 <div class="grid lg:grid-cols-5 gap-6">
 
-    <!-- Add New Q&A -->
+    <!-- Add / Edit Q&A -->
     <div class="lg:col-span-2">
         <div class="bg-white dark:bg-white/[0.03] rounded-2xl border border-brown-700/[0.05] dark:border-white/[0.06] p-6">
-            <h2 class="text-lg font-bold text-brown-800 dark:text-cream-100 mb-5" style="font-family:'Playfair Display',serif">Add New Q&A</h2>
-            <form method="post" class="space-y-4">
+            <h2 id="form-title" class="text-lg font-bold text-brown-800 dark:text-cream-100 mb-5" style="font-family:'Playfair Display',serif">Add New Q&A</h2>
+            <form method="post" class="space-y-4" id="qa-form">
                 {% csrf_token %}
-                <input type="hidden" name="action" value="add">
+                <input type="hidden" name="action" id="form-action" value="add">
+                <input type="hidden" name="pk" id="form-pk" value="">
                 <div>
                     <label class="block text-xs font-semibold text-brown-400 dark:text-cream-300/40 uppercase tracking-wider mb-1.5">Question</label>
-                    <input type="text" name="question" required placeholder="e.g. What is the price of 2BHK villa?"
+                    <input type="text" name="question" id="form-question" required placeholder="e.g. What is the price of 2BHK villa?"
                            class="w-full px-4 py-2.5 rounded-xl border border-brown-200 dark:border-white/10 bg-cream-50 dark:bg-white/5 text-brown-800 dark:text-cream-100 text-sm focus:outline-none focus:border-gold-500 transition-colors">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-brown-400 dark:text-cream-300/40 uppercase tracking-wider mb-1.5">Answer</label>
-                    <textarea name="answer" required rows="4" placeholder="The full answer the bot will display..."
+                    <textarea name="answer" id="form-answer" required rows="4" placeholder="The full answer the bot will display..."
                               class="w-full px-4 py-2.5 rounded-xl border border-brown-200 dark:border-white/10 bg-cream-50 dark:bg-white/5 text-brown-800 dark:text-cream-100 text-sm focus:outline-none focus:border-gold-500 transition-colors resize-none"></textarea>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-brown-400 dark:text-cream-300/40 uppercase tracking-wider mb-1.5">Keywords <span class="normal-case font-normal">(comma-separated)</span></label>
-                    <input type="text" name="keywords" required placeholder="price,cost,rate,2bhk,villa"
+                    <input type="text" name="keywords" id="form-keywords" required placeholder="price,cost,rate,2bhk,villa"
                            class="w-full px-4 py-2.5 rounded-xl border border-brown-200 dark:border-white/10 bg-cream-50 dark:bg-white/5 text-brown-800 dark:text-cream-100 text-sm focus:outline-none focus:border-gold-500 transition-colors">
                     <p class="text-[11px] text-brown-300 dark:text-cream-400/30 mt-1.5">User's message is matched against these keywords to suggest this question.</p>
                 </div>
-                <button type="submit" class="w-full py-2.5 bg-gold-500 hover:bg-gold-600 text-brown-900 font-semibold rounded-xl text-sm transition-colors">
-                    <i class="fas fa-plus mr-2"></i>Add Q&A
-                </button>
+                <div class="flex gap-2">
+                    <button type="submit" id="form-submit-btn" class="flex-1 py-2.5 bg-brown-800 hover:bg-brown-700 dark:bg-gold-500 dark:hover:bg-gold-600 text-cream-100 dark:text-brown-900 font-semibold rounded-xl text-sm transition-colors">
+                        <i class="fas fa-plus mr-2" id="form-submit-icon"></i><span id="form-submit-label">Add Q&A</span>
+                    </button>
+                    <button type="button" id="form-cancel-btn" onclick="resetForm()" class="hidden py-2.5 px-4 bg-brown-100 dark:bg-white/5 hover:bg-brown-200 dark:hover:bg-white/10 text-brown-600 dark:text-cream-300/60 font-semibold rounded-xl text-sm transition-colors">
+                        Cancel
+                    </button>
+                </div>
             </form>
         </div>
 
@@ -68,7 +74,8 @@
                                 {% endfor %}
                             </div>
                         </div>
-                        <div class="flex items-center gap-2 flex-shrink-0">
+                        <div class="flex flex-col sm:flex-row items-center gap-2 flex-shrink-0">
+                            <!-- Toggle -->
                             <form method="post">
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="toggle">
@@ -78,6 +85,13 @@
                                     <i class="fas {% if qa.is_active %}fa-toggle-on{% else %}fa-toggle-off{% endif %}"></i>
                                 </button>
                             </form>
+                            <!-- Edit -->
+                            <button type="button" title="Edit"
+                                    onclick="editQA('{{ qa.pk }}', '{{ qa.question|escapejs }}', '{{ qa.answer|escapejs }}', '{{ qa.keywords|escapejs }}')"
+                                    class="w-8 h-8 rounded-lg flex items-center justify-center text-xs bg-blue-50 dark:bg-blue-500/10 text-blue-500 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <!-- Delete -->
                             <form method="post" onsubmit="return confirm('Delete this Q&A?')">
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="delete">
@@ -102,4 +116,29 @@
         </div>
     </div>
 </div>
+
+<script>
+function editQA(pk, question, answer, keywords) {
+    document.getElementById('form-title').textContent = 'Edit Q&A';
+    document.getElementById('form-action').value = 'edit';
+    document.getElementById('form-pk').value = pk;
+    document.getElementById('form-question').value = question;
+    document.getElementById('form-answer').value = answer;
+    document.getElementById('form-keywords').value = keywords;
+    document.getElementById('form-submit-icon').className = 'fas fa-save mr-2';
+    document.getElementById('form-submit-label').textContent = 'Save Changes';
+    document.getElementById('form-cancel-btn').classList.remove('hidden');
+    document.getElementById('qa-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function resetForm() {
+    document.getElementById('form-title').textContent = 'Add New Q&A';
+    document.getElementById('form-action').value = 'add';
+    document.getElementById('form-pk').value = '';
+    document.getElementById('qa-form').reset();
+    document.getElementById('form-submit-icon').className = 'fas fa-plus mr-2';
+    document.getElementById('form-submit-label').textContent = 'Add Q&A';
+    document.getElementById('form-cancel-btn').classList.add('hidden');
+}
+</script>
 {% endblock %}

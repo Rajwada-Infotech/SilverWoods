@@ -84,7 +84,7 @@ def index(request):
 
     reviews = cache.get('index_reviews')
     if reviews is None:
-        reviews = list(Review.objects.filter(is_approved=True, rating=5).order_by('-created_at')[:4])
+        reviews = list(Review.objects.filter(is_approved=True).order_by('-created_at')[:4])
         cache.set('index_reviews', reviews, 300)
 
     popups = cache.get('index_popups')
@@ -161,9 +161,8 @@ def track_visit(request):
 
 
 def all_reviews(request):
-    """Return all approved reviews with rating 3-5, optionally filtered by rating."""
     rating = request.GET.get('rating')
-    qs = Review.objects.filter(is_approved=True, rating__gte=3).order_by('-created_at')
+    qs = Review.objects.filter(is_approved=True).order_by('-created_at')
     if rating:
         qs = qs.filter(rating=int(rating))
     data = [
@@ -1034,6 +1033,15 @@ def admin_chatbot(request):
                     question=question, answer=answer,
                     keywords=keywords, order=max_order + 1
                 )
+        elif action == 'edit':
+            pk = request.POST.get('pk')
+            question = request.POST.get('question', '').strip()
+            answer = request.POST.get('answer', '').strip()
+            keywords = request.POST.get('keywords', '').strip()
+            if pk and question and answer and keywords:
+                ChatbotQA.objects.filter(pk=pk).update(
+                    question=question, answer=answer, keywords=keywords
+                )
         elif action == 'delete':
             pk = request.POST.get('pk')
             ChatbotQA.objects.filter(pk=pk).delete()
@@ -1044,3 +1052,14 @@ def admin_chatbot(request):
             qa.save()
         return redirect('admin_chatbot')
     return render(request, 'admin_panel/chatbot.html', {'qas': qas})
+
+
+@login_required
+def admin_reviews(request):
+    if request.method == 'POST':
+        pk = request.POST.get('delete_id')
+        if pk:
+            Review.objects.filter(pk=pk).delete()
+        return redirect('admin_reviews')
+    reviews = Review.objects.all().order_by('-created_at')
+    return render(request, 'admin_panel/reviews.html', {'reviews': reviews})

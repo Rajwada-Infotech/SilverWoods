@@ -1,0 +1,52 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% block title %}Reviews{% endblock %}
+{% block page_title %}Reviews Manager{% endblock %}
+
+{% block admin_content %}
+<div class="bg-white dark:bg-white/[0.03] rounded-2xl border border-brown-700/[0.05] dark:border-white/[0.06] overflow-hidden">
+    <div class="px-6 py-4 border-b border-brown-700/[0.05] dark:border-white/[0.06] flex items-center justify-between">
+        <h2 class="text-lg font-bold text-brown-800 dark:text-cream-100" style="font-family:'Playfair Display',serif">All Reviews</h2>
+        <span class="text-sm text-brown-400 dark:text-cream-300/40">{{ reviews.count }} total</span>
+    </div>
+
+    {% if reviews %}
+    <div class="divide-y divide-brown-700/[0.05] dark:divide-white/[0.04]">
+        {% for review in reviews %}
+        <div class="px-6 py-4 flex items-start gap-4">
+            <!-- Avatar -->
+            <div class="w-10 h-10 rounded-full bg-gold-500/20 flex items-center justify-center flex-shrink-0 text-sm font-bold text-gold-600 dark:text-gold-400">
+                {{ review.name|first|upper }}
+            </div>
+            <!-- Content -->
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="font-semibold text-sm text-brown-800 dark:text-cream-100">{{ review.name }}</span>
+                    {% if review.designation %}
+                    <span class="text-xs text-brown-400 dark:text-cream-300/40">· {{ review.designation }}</span>
+                    {% endif %}
+                    <span class="text-xs text-brown-300 dark:text-cream-300/30 ml-auto">{{ review.created_at|date:"d M Y" }}</span>
+                </div>
+                <!-- Stars -->
+                <div class="flex gap-0.5 mt-1">
+                    {% for i in "12345" %}
+                    <svg class="w-3.5 h-3.5 {% if forloop.counter <= review.rating %}text-gold-500{% else %}text-brown-200 dark:text-white/10{% endif %}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    {% endfor %}
+                </div>
+                <p class="text-sm text-brown-600 dark:text-cream-300/60 mt-1 leading-relaxed">"{{ review.comment }}"</p>
+            </div>
+            <!-- Delete -->
+            <form method="post" onsubmit="return confirm('Delete this review?')">
+                {% csrf_token %}
+                <input type="hidden" name="delete_id" value="{{ review.pk }}">
+                <button type="submit" class="flex-shrink-0 p-2 rounded-xl text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors" title="Delete">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="px-6 py-16 text-center text-brown-400 dark:text-cream-300/30 text-sm">No reviews yet.</div>
+    {% endif %}
+</div>
+{% endblock %}

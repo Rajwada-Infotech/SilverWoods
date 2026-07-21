@@ -85,7 +85,7 @@ def index(request):
     reviews = cache.get('index_reviews')
     if reviews is None:
         reviews = list(Review.objects.filter(is_approved=True, rating=5).order_by('-created_at')[:4])
-        cache.set('index_reviews', reviews, 300)
+        cache.set('index_reviews', reviews, 30)
 
     popups = cache.get('index_popups')
     if popups is None:
@@ -1057,9 +1057,11 @@ def admin_chatbot(request):
 @login_required
 def admin_reviews(request):
     if request.method == 'POST':
+        from django.core.cache import cache
         pk = request.POST.get('delete_id')
         if pk:
             Review.objects.filter(pk=pk).delete()
+            cache.delete('index_reviews')
         return redirect('admin_reviews')
     reviews = Review.objects.all().order_by('-created_at')
     return render(request, 'admin_panel/reviews.html', {'reviews': reviews})

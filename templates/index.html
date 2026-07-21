@@ -1045,49 +1045,49 @@ function _lbRender(dir) {
     }
 
     _lbBusy = true;
-    var isNext  = dir === 'next';
-    var exitX   = isNext ? '-55%' : '55%';
-    var enterX  = isNext ? '55%'  : '-55%';
-    var exitRot = isNext ? '18deg' : '-18deg';
+    var isNext = dir === 'next';
+    var exitX  = isNext ? '-28%' : '28%';
+    var enterX = isNext ? '28%'  : '-28%';
 
-    /* Phase 1 — active card slides out */
-    cardActive.style.transition = 'all 0.42s cubic-bezier(.55,0,1,.45)';
-    cardActive.style.transform  = 'translateX('+exitX+') rotateY('+exitRot+') scale(0.78)';
+    /* Phase 1 — center card gently drifts out and fades */
+    cardActive.style.transition = 'transform 0.55s cubic-bezier(.4,0,.6,1), opacity 0.45s ease-in';
+    cardActive.style.transform  = 'translateX('+exitX+') scale(0.93)';
     cardActive.style.opacity    = '0';
 
-    /* side cards quietly fade their images halfway through */
-    setTimeout(function() {
-        imgPrev.style.transition = 'opacity 0.25s';
-        imgNext.style.transition = 'opacity 0.25s';
-        imgPrev.style.opacity = '0';
-        imgNext.style.opacity = '0';
-    }, 200);
+    /* Side cards softly fade out at the same time */
+    imgPrev.style.transition = 'opacity 0.35s ease';
+    imgNext.style.transition = 'opacity 0.35s ease';
+    imgPrev.style.opacity = '0';
+    imgNext.style.opacity = '0';
 
     setTimeout(function() {
-        /* swap all images while everything is hidden/exited */
+        /* Swap images while all are invisible */
         imgActive.src = _lbImages[_lbIndex];
         imgPrev.src   = _lbImages[pi];
         imgNext.src   = _lbImages[ni];
 
-        /* side cards fade back in */
-        imgPrev.style.opacity = '1';
-        imgNext.style.opacity = '1';
-
-        /* Phase 2 — snap active card to enter side, then slide to center */
+        /* Snap center card to enter position (instant, invisible) */
         cardActive.style.transition = 'none';
-        cardActive.style.transform  = 'translateX('+enterX+') rotateY('+(isNext?'-18deg':'18deg')+') scale(0.78)';
+        cardActive.style.transform  = 'translateX('+enterX+') scale(0.93)';
         cardActive.style.opacity    = '0';
         void cardActive.offsetWidth;
 
-        cardActive.style.transition = 'all 0.52s cubic-bezier(.22,.68,0,1.2)';
-        cardActive.style.transform  = 'translateX(0) rotateY(0deg) scale(1)';
+        /* Phase 2 — center card floats in calmly */
+        cardActive.style.transition = 'transform 0.7s cubic-bezier(.25,.46,.45,.94), opacity 0.6s ease-out';
+        cardActive.style.transform  = 'translateX(0) scale(1)';
         cardActive.style.opacity    = '1';
+
+        /* Side cards fade back in gently */
+        imgPrev.style.transition = 'opacity 0.5s ease';
+        imgNext.style.transition = 'opacity 0.5s ease';
+        imgPrev.style.opacity = '1';
+        imgNext.style.opacity = '1';
 
         document.getElementById('lb-counter').textContent = (_lbIndex + 1) + ' / ' + n;
         _lbUpdateDots(_lbIndex);
 
-        setTimeout(function() { _lbBusy = false; }, 540);
-    }, 440);
+        setTimeout(function() { _lbBusy = false; }, 720);
+    }, 500);
 }
 
 function _lbBuildDots() {

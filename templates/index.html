@@ -989,6 +989,7 @@ function openLightbox(index) {
     lb.style.display = 'block';
     document.body.style.overflow = 'hidden';
     _lbHideUI();
+    _lbInitCards();
     _lbRender('none');
     _lbBuildDots();
     _startAuto();
@@ -1006,53 +1007,133 @@ function closeLightbox() {
     _lbShowUI();
 }
 
+/* card reference pool — rotated on each transition so all 3 cards slide together */
+var _lbC = { prev: null, active: null, next: null };
+var _lbBusy = false;
+
+function _lbInitCards() {
+    _lbC.prev   = document.getElementById('lb-card-prev');
+    _lbC.active = document.getElementById('lb-card-active');
+    _lbC.next   = document.getElementById('lb-card-next');
+    _lbC.prev.onclick   = function(){ lightboxPrev(); };
+    _lbC.next.onclick   = function(){ lightboxNext(); };
+    _lbC.active.onclick = null;
+}
+
+function _lbAssignOnclicks() {
+    _lbC.prev.onclick   = function(){ lightboxPrev(); };
+    _lbC.active.onclick = null;
+    _lbC.next.onclick   = function(){ lightboxNext(); };
+    _lbC.prev.style.cursor   = 'pointer';
+    _lbC.active.style.cursor = 'default';
+    _lbC.next.style.cursor   = 'pointer';
+}
+
 function lightboxNext() {
+    if (_lbBusy) return;
     _lbIndex = (_lbIndex + 1) % _lbImages.length;
     _lbRender('next');
     _resetAuto();
 }
 
 function lightboxPrev() {
+    if (_lbBusy) return;
     _lbIndex = (_lbIndex - 1 + _lbImages.length) % _lbImages.length;
     _lbRender('prev');
     _resetAuto();
 }
 
 function _lbRender(dir) {
-    var n = _lbImages.length;
+    var n  = _lbImages.length;
     var pi = (_lbIndex - 1 + n) % n;
     var ni = (_lbIndex + 1) % n;
+    var so = 'min(44vw,430px)';
+    var DUR = '0.65s', EASE = 'cubic-bezier(.77,0,.18,1)';
 
-    var imgActive = document.getElementById('lb-img-active');
-    var imgPrev   = document.getElementById('lb-img-prev');
-    var imgNext   = document.getElementById('lb-img-next');
-    var cardActive = document.getElementById('lb-card-active');
-    var cardPrev   = document.getElementById('lb-card-prev');
-    var cardNext   = document.getElementById('lb-card-next');
-
-    if (dir !== 'none') {
-        /* flash the active card off-screen in direction of travel, then snap */
-        var exitX = dir === 'next' ? '-30%' : '30%';
-        cardActive.style.transition = 'none';
-        cardActive.style.transform = 'translateX('+exitX+') rotateY('+(dir==='next'?'20':'-20')+'deg) scale(0.8)';
-        cardActive.style.opacity = '0';
-        void cardActive.offsetWidth; /* reflow */
-        cardActive.style.transition = 'all 0.55s cubic-bezier(.22,.68,0,1.2)';
+    if (dir === 'none') {
+        _lbC.active.querySelector('img').src = _lbImages[_lbIndex];
+        _lbC.prev.querySelector('img').src   = _lbImages[pi];
+        _lbC.next.querySelector('img').src   = _lbImages[ni];
+        /* reset to canonical positions without transition */
+        _lbC.active.style.transition = 'none';
+        _lbC.active.style.transform  = 'translateX(0) rotateY(0deg) scale(1)';
+        _lbC.active.style.opacity    = '1';
+        _lbC.prev.style.transition   = 'none';
+        _lbC.prev.style.transform    = 'translateX(calc(-1 * '+so+')) rotateY(28deg) scale(0.75)';
+        _lbC.prev.style.opacity      = '0.5';
+        _lbC.next.style.transition   = 'none';
+        _lbC.next.style.transform    = 'translateX('+so+') rotateY(-28deg) scale(0.75)';
+        _lbC.next.style.opacity      = '0.5';
+        document.getElementById('lb-counter').textContent = (_lbIndex + 1) + ' / ' + n;
+        _lbUpdateDots(_lbIndex);
+        return;
     }
 
-    imgActive.src = _lbImages[_lbIndex];
-    imgPrev.src   = _lbImages[pi];
-    imgNext.src   = _lbImages[ni];
+    _lbBusy = true;
 
-    /* settle active */
-    requestAnimationFrame(function() {
-        cardActive.style.transform = 'translateX(0) rotateY(0deg) scale(1)';
-        cardActive.style.opacity = '1';
-    });
+    if (dir === 'next') {
+        /* all 3 cards slide left simultaneously */
+        _lbC.prev.style.transition   = 'all '+DUR+' '+EASE;
+        _lbC.prev.style.transform    = 'translateX(calc(-2 * '+so+')) scale(0.45)';
+        _lbC.prev.style.opacity      = '0';
 
-    /* counter + dots */
-    document.getElementById('lb-counter').textContent = (_lbIndex + 1) + ' / ' + n;
-    _lbUpdateDots(_lbIndex);
+        _lbC.active.style.transition = 'all '+DUR+' '+EASE;
+        _lbC.active.style.transform  = 'translateX(calc(-1 * '+so+')) rotateY(28deg) scale(0.75)';
+        _lbC.active.style.opacity    = '0.5';
+
+        _lbC.next.style.transition   = 'all '+DUR+' '+EASE;
+        _lbC.next.style.transform    = 'translateX(0) rotateY(0deg) scale(1)';
+        _lbC.next.style.opacity      = '1';
+
+        /* rotate logical references: outgoing prev → becomes new next */
+        var recycled = _lbC.prev;
+        _lbC.prev    = _lbC.active;
+        _lbC.active  = _lbC.next;
+        _lbC.next    = recycled;
+
+        setTimeout(function() {
+            /* snap recycled card to right with new next image (invisible during snap) */
+            _lbC.next.style.transition = 'none';
+            _lbC.next.querySelector('img').src = _lbImages[ni];
+            _lbC.next.style.transform  = 'translateX('+so+') rotateY(-28deg) scale(0.75)';
+            _lbC.next.style.opacity    = '0.5';
+            document.getElementById('lb-counter').textContent = (_lbIndex + 1) + ' / ' + n;
+            _lbUpdateDots(_lbIndex);
+            _lbAssignOnclicks();
+            _lbBusy = false;
+        }, 680);
+    }
+
+    if (dir === 'prev') {
+        /* all 3 cards slide right simultaneously */
+        _lbC.next.style.transition   = 'all '+DUR+' '+EASE;
+        _lbC.next.style.transform    = 'translateX(calc(2 * '+so+')) scale(0.45)';
+        _lbC.next.style.opacity      = '0';
+
+        _lbC.active.style.transition = 'all '+DUR+' '+EASE;
+        _lbC.active.style.transform  = 'translateX('+so+') rotateY(-28deg) scale(0.75)';
+        _lbC.active.style.opacity    = '0.5';
+
+        _lbC.prev.style.transition   = 'all '+DUR+' '+EASE;
+        _lbC.prev.style.transform    = 'translateX(0) rotateY(0deg) scale(1)';
+        _lbC.prev.style.opacity      = '1';
+
+        var recycled = _lbC.next;
+        _lbC.next    = _lbC.active;
+        _lbC.active  = _lbC.prev;
+        _lbC.prev    = recycled;
+
+        setTimeout(function() {
+            _lbC.prev.style.transition = 'none';
+            _lbC.prev.querySelector('img').src = _lbImages[pi];
+            _lbC.prev.style.transform  = 'translateX(calc(-1 * '+so+')) rotateY(28deg) scale(0.75)';
+            _lbC.prev.style.opacity    = '0.5';
+            document.getElementById('lb-counter').textContent = (_lbIndex + 1) + ' / ' + n;
+            _lbUpdateDots(_lbIndex);
+            _lbAssignOnclicks();
+            _lbBusy = false;
+        }, 680);
+    }
 }
 
 function _lbBuildDots() {
@@ -1093,9 +1174,10 @@ function _lbUpdateDots(index) {
 
 function _startAuto() {
     _lbAutoTimer = setInterval(function() {
+        if (_lbBusy) return;
         _lbIndex = (_lbIndex + 1) % _lbImages.length;
         _lbRender('next');
-    }, 3000);
+    }, 4000);
 }
 
 function _resetAuto() {
@@ -1127,7 +1209,7 @@ document.getElementById('gallery-lightbox').addEventListener('click', function(e
     <!-- 3D Card Stage -->
     <div id="lb-stage" style="position:absolute;inset:0;perspective:1400px;overflow:hidden;">
         <!-- Prev card -->
-        <div id="lb-card-prev" onclick="lightboxPrev()" style="position:absolute;top:50%;left:50%;width:min(62vw,600px);aspect-ratio:16/10;margin-top:calc(min(62vw,600px)*-5/16);margin-left:calc(min(62vw,600px)*-1/2);transform:translateX(calc(-1 * min(44vw,430px))) rotateY(28deg) scale(0.75);opacity:0.5;cursor:pointer;transition:all 0.55s cubic-bezier(.22,.68,0,1.2);border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.8);z-index:1;">
+        <div id="lb-card-prev" style="position:absolute;top:50%;left:50%;width:min(62vw,600px);aspect-ratio:16/10;margin-top:calc(min(62vw,600px)*-5/16);margin-left:calc(min(62vw,600px)*-1/2);transform:translateX(calc(-1 * min(44vw,430px))) rotateY(28deg) scale(0.75);opacity:0.5;cursor:pointer;transition:all 0.55s cubic-bezier(.22,.68,0,1.2);border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.8);z-index:1;">
             <img id="lb-img-prev" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;">
             <div style="position:absolute;inset:0;background:rgba(0,0,0,0.4);pointer-events:none;"></div>
         </div>
@@ -1136,7 +1218,7 @@ document.getElementById('gallery-lightbox').addEventListener('click', function(e
             <img id="lb-img-active" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
         </div>
         <!-- Next card -->
-        <div id="lb-card-next" onclick="lightboxNext()" style="position:absolute;top:50%;left:50%;width:min(62vw,600px);aspect-ratio:16/10;margin-top:calc(min(62vw,600px)*-5/16);margin-left:calc(min(62vw,600px)*-1/2);transform:translateX(min(44vw,430px)) rotateY(-28deg) scale(0.75);opacity:0.5;cursor:pointer;transition:all 0.55s cubic-bezier(.22,.68,0,1.2);border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.8);z-index:1;">
+        <div id="lb-card-next" style="position:absolute;top:50%;left:50%;width:min(62vw,600px);aspect-ratio:16/10;margin-top:calc(min(62vw,600px)*-5/16);margin-left:calc(min(62vw,600px)*-1/2);transform:translateX(min(44vw,430px)) rotateY(-28deg) scale(0.75);opacity:0.5;cursor:pointer;transition:all 0.55s cubic-bezier(.22,.68,0,1.2);border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.8);z-index:1;">
             <img id="lb-img-next" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;">
             <div style="position:absolute;inset:0;background:rgba(0,0,0,0.4);pointer-events:none;"></div>
         </div>

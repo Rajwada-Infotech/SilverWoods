@@ -731,9 +731,7 @@ def _cloudinary_promote_temp(stored_name):
         cloudinary.uploader.destroy(from_public_id, resource_type=resource_type, invalidate=True)
         return to_public_id + '.' + ext if ext else to_public_id
     except Exception as e:
-
         return stored_name
-        return stored_name  # fallback: keep temp path if rename fails
 
 
 def _cloudinary_delete(file_field):

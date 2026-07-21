@@ -84,7 +84,7 @@ def index(request):
 
     reviews = cache.get('index_reviews')
     if reviews is None:
-        reviews = list(Review.objects.filter(is_approved=True).order_by('-created_at')[:4])
+        reviews = list(Review.objects.filter(is_approved=True, rating=5).order_by('-created_at')[:4])
         cache.set('index_reviews', reviews, 300)
 
     popups = cache.get('index_popups')

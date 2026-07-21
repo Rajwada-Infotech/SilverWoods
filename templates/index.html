@@ -489,14 +489,14 @@
         </div>
         <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-10">
             {% for review in reviews %}
-            <div class="section-reveal glass-warm rounded-2xl p-5 md:p-8 glass-hover flex flex-col h-56 {% if forloop.counter == 4 %}lg:hidden{% endif %}">
-                <div class="flex gap-0.5 mb-3">
+            <div class="section-reveal glass-warm rounded-2xl p-5 md:p-8 glass-hover flex flex-col overflow-hidden h-56 {% if forloop.counter == 4 %}lg:hidden{% endif %}">
+                <div class="flex gap-0.5 mb-3 flex-shrink-0">
                     {% for i in "12345" %}
                     <i class="fas fa-star {% if forloop.counter <= review.rating %}text-gold-500{% else %}text-brown-200 dark:text-cream-300/10{% endif %} text-[10px]"></i>
                     {% endfor %}
                 </div>
                 <p class="text-brown-600 dark:text-cream-300/60 text-xs md:text-sm leading-[1.7] italic font-display flex-1 overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">"{{ review.comment }}"</p>
-                <div class="flex items-center gap-2 mt-3 pt-3 border-t border-brown-700/[0.07] dark:border-white/[0.05]">
+                <div class="flex items-center gap-2 mt-auto pt-3 flex-shrink-0">
                     <div class="w-8 h-8 rounded-full bg-brown-700/10 dark:bg-gold-500/10 flex items-center justify-center text-brown-600 dark:text-gold-500 font-display font-bold text-xs flex-shrink-0">{{ review.name|first }}</div>
                     <div class="min-w-0">
                         <div class="font-semibold text-brown-800 dark:text-cream-100 text-[11px] tracking-wide truncate">{{ review.name }}</div>

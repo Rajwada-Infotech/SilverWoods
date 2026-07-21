@@ -38,14 +38,14 @@
             <!-- Shadow layer -->
             <div class="absolute -inset-2 bg-brown-800/5 dark:bg-transparent rounded-3xl blur-2xl"></div>
             <!-- Frame -->
-            <div class="relative bg-white p-3 rounded-2xl shadow-2xl shadow-brown-800/20 dark:shadow-black/40 border border-cream-300">
+            <div class="relative bg-white p-3 rounded-2xl shadow-2xl shadow-brown-800/20 dark:shadow-black/40 border border-cream-300 hero-slide-frame-1">
                 <div class="w-60 h-80 rounded-xl overflow-hidden relative">
                     <img src="{% static 'images/hero1-day.webp' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-100'" alt="">
                     <img src="{% static 'images/hero1-night.webp' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-100' : 'opacity-0'" alt="">
                 </div>
             </div>
             <!-- Small accent frame offset -->
-            <div class="absolute -bottom-12 -left-20 bg-white p-2.5 rounded-xl shadow-2xl shadow-brown-800/20 dark:shadow-black/40 border border-cream-300 z-10">
+            <div class="absolute -bottom-12 -left-20 bg-white p-2.5 rounded-xl shadow-2xl shadow-brown-800/20 dark:shadow-black/40 border border-cream-300 z-10 hero-slide-frame-2">
                 <div class="w-36 h-44 rounded-lg overflow-hidden relative">
                     <img src="{% static 'images/hero2-day.webp' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-100'" alt="">
                     <img src="{% static 'images/hero2-night.webp' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-100' : 'opacity-0'" alt="">
@@ -226,8 +226,8 @@
                     </div>
                 </div>
             </div>
-            <div class="section-reveal">
-                <div class="rounded-2xl overflow-hidden h-[280px] md:h-[400px] lg:h-[500px] relative">
+            <div class="about-img-slide about-img-slide-2">
+                <div class="rounded-2xl overflow-hidden h-[280px] md:h-[400px] lg:h-[500px] relative about-img-inner">
                     <img src="{% static 'images/clubhouse-light.webp' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-100'" loading="lazy" alt="Villa Interior">
                     <img src="{% static 'images/clubhouse-dark.webp' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-100' : 'opacity-0'" loading="lazy" alt="Villa Interior">
                 </div>
@@ -594,9 +594,11 @@
                     Escape the urban hustle and embrace a life of serene luxury at Silverwoods, an exclusive residential villa project meticulously designed for those who seek comfort, privacy, and sophisticated living. Nestled amidst lush greenery on a generous 8.1 Acre expanse, Silverwoods offers an unparalleled lifestyle just a short drive from the city's Southern Bypass.
                 </p>
             </div>
-            <div class="section-reveal rounded-2xl overflow-hidden h-[220px] md:h-[350px] relative">
+            <div class="about-img-slide">
+                <div class="rounded-2xl overflow-hidden h-[220px] md:h-[350px] relative about-img-inner">
                 <img src="{% static 'images/office-light.webp' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-0' : 'opacity-100'" loading="lazy" alt="Contact">
                 <img src="{% static 'images/office-dark.webp' %}" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000" :class="darkMode ? 'opacity-100' : 'opacity-0'" loading="lazy" alt="Contact">
+                </div>
             </div>
         </div>
 

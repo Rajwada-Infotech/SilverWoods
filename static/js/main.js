@@ -101,10 +101,22 @@ const revealObserver = new IntersectionObserver((entries) => {
     });
 }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
+// About image slide-in: fires early so animation plays as element scrolls into view
+const aboutSlideObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('slide-in');
+            aboutSlideObserver.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0, rootMargin: '0px 0px -80px 0px' });
+
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.section-reveal, .amenity-card, .pricing-card').forEach(el => {
         revealObserver.observe(el);
     });
+
+    document.querySelectorAll('.about-img-slide').forEach(el => aboutSlideObserver.observe(el));
 
     // Popup Ads
     if (!window.location.pathname.startsWith('/admin-panel')) loadPopups();

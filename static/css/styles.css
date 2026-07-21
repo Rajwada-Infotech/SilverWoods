@@ -143,6 +143,43 @@
     transform: translateY(0);
 }
 
+/* Hero side frames slide-in from right on page load */
+@keyframes heroSlideInRight {
+    from { opacity: 0; transform: translateX(140px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+.hero-slide-frame-1 {
+    animation: heroSlideInRight 1.8s 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.hero-slide-frame-2 {
+    animation: heroSlideInRight 1.8s 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* About image slide-in from right (desktop only) */
+.about-img-slide {
+    overflow: hidden;
+}
+@media (min-width: 1024px) {
+    .about-img-slide .about-img-inner {
+        transform: translateX(110%);
+        transition: transform 1.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .about-img-slide.slide-in .about-img-inner {
+        transform: translateX(0);
+    }
+}
+@media (max-width: 1023px) {
+    .about-img-slide {
+        opacity: 0;
+        transform: translateY(60px);
+        transition: all 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .about-img-slide.slide-in {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* ── Hero Animations ── */
 .hero-badge { opacity: 0; transform: translateY(30px); }
 .hero-title { opacity: 0; transform: translateY(50px); }

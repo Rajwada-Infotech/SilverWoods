@@ -1162,7 +1162,7 @@ document.getElementById('gallery-lightbox').addEventListener('click', function(e
     <!-- 3D Card Stage -->
     <div id="lb-stage" style="position:absolute;inset:0;perspective:1400px;overflow:hidden;">
         <!-- Prev card -->
-        <div id="lb-card-prev" onclick="lightboxPrev()" style="position:absolute;top:50%;left:50%;width:min(62vw,600px);aspect-ratio:16/10;margin-top:calc(min(62vw,600px)*-5/16);margin-left:calc(min(62vw,600px)*-1/2);transform:translateX(calc(-1 * min(44vw,430px))) rotateY(28deg) scale(0.75);opacity:0.28;cursor:pointer;transition:all 0.55s cubic-bezier(.22,.68,0,1.2);border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.8);z-index:1;">
+        <div id="lb-card-prev" onclick="lightboxPrev()" style="position:absolute;top:50%;left:50%;width:min(62vw,600px);aspect-ratio:16/10;margin-top:calc(min(62vw,600px)*-5/16);margin-left:calc(min(62vw,600px)*-1/2);transform:translateX(calc(-1 * min(44vw,430px))) rotateY(28deg) scale(0.75);opacity:0.35;cursor:pointer;transition:all 0.55s cubic-bezier(.22,.68,0,1.2);border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.8);z-index:1;">
             <img id="lb-img-prev" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;">
             <div style="position:absolute;inset:0;background:rgba(0,0,0,0.4);pointer-events:none;"></div>
         </div>
@@ -1171,7 +1171,7 @@ document.getElementById('gallery-lightbox').addEventListener('click', function(e
             <img id="lb-img-active" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
         </div>
         <!-- Next card -->
-        <div id="lb-card-next" onclick="lightboxNext()" style="position:absolute;top:50%;left:50%;width:min(62vw,600px);aspect-ratio:16/10;margin-top:calc(min(62vw,600px)*-5/16);margin-left:calc(min(62vw,600px)*-1/2);transform:translateX(min(44vw,430px)) rotateY(-28deg) scale(0.75);opacity:0.28;cursor:pointer;transition:all 0.55s cubic-bezier(.22,.68,0,1.2);border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.8);z-index:1;">
+        <div id="lb-card-next" onclick="lightboxNext()" style="position:absolute;top:50%;left:50%;width:min(62vw,600px);aspect-ratio:16/10;margin-top:calc(min(62vw,600px)*-5/16);margin-left:calc(min(62vw,600px)*-1/2);transform:translateX(min(44vw,430px)) rotateY(-28deg) scale(0.75);opacity:0.35;cursor:pointer;transition:all 0.55s cubic-bezier(.22,.68,0,1.2);border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.8);z-index:1;">
             <img id="lb-img-next" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;">
             <div style="position:absolute;inset:0;background:rgba(0,0,0,0.4);pointer-events:none;"></div>
         </div>

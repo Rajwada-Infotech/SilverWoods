@@ -324,14 +324,14 @@
                 <span class="italic">Our</span> Approach
             </h2>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {% for amenity in amenities %}
             {% if amenity.name == "Traffic-Free Podium" %}{% comment %}Hidden: Traffic-Free Podium commented out{% endcomment %}{% else %}
             <div class="amenity-card amenity-flip-card">
                 <div class="amenity-flip-inner">
                     <!-- Front -->
-                    <div class="amenity-flip-front glass-warm rounded-2xl p-6">
-                        <div class="w-10 h-10 rounded-xl bg-brown-700/5 dark:bg-gold-500/10 flex items-center justify-center mb-5">
+                    <div class="amenity-flip-front glass-warm rounded-2xl p-4">
+                        <div class="w-10 h-10 rounded-xl bg-brown-700/5 dark:bg-gold-500/10 flex items-center justify-center mb-3">
                             {% if amenity.icon == 'pool' %}<i class="fas fa-swimming-pool text-brown-500 dark:text-gold-500 text-sm"></i>
                             {% elif amenity.icon == 'fitness' %}<i class="fas fa-dumbbell text-brown-500 dark:text-gold-500 text-sm"></i>
                             {% elif amenity.icon == 'child' %}<i class="fas fa-child text-brown-500 dark:text-gold-500 text-sm"></i>
@@ -370,7 +370,7 @@
                         {% endif %}
                         <div class="amenity-flip-overlay">
                             <h3 class="font-display text-sm font-bold text-white tracking-wide uppercase mb-1">{{ amenity.name }}</h3>
-                            <p class="text-white/70 text-[10px] leading-relaxed">{{ amenity.description }}</p>
+                            <p class="hidden sm:block text-white/70 text-[10px] leading-relaxed">{{ amenity.description }}</p>
                         </div>
                     </div>
                 </div>

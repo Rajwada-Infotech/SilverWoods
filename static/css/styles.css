@@ -176,7 +176,7 @@
 /* ── Amenity Flip Cards ── */
 .amenity-flip-card {
     perspective: 1000px;
-    height: 220px;
+    height: 200px;
     cursor: pointer;
 }
 .amenity-flip-inner {

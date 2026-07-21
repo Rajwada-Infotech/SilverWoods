@@ -1006,20 +1006,24 @@ function closeLightbox() {
     _lbShowUI();
 }
 
+var _lbBusy = false;
+
 function lightboxNext() {
+    if (_lbBusy) return;
     _lbIndex = (_lbIndex + 1) % _lbImages.length;
     _lbRender('next');
     _resetAuto();
 }
 
 function lightboxPrev() {
+    if (_lbBusy) return;
     _lbIndex = (_lbIndex - 1 + _lbImages.length) % _lbImages.length;
     _lbRender('prev');
     _resetAuto();
 }
 
 function _lbRender(dir) {
-    var n = _lbImages.length;
+    var n  = _lbImages.length;
     var pi = (_lbIndex - 1 + n) % n;
     var ni = (_lbIndex + 1) % n;
 
@@ -1027,32 +1031,63 @@ function _lbRender(dir) {
     var imgPrev   = document.getElementById('lb-img-prev');
     var imgNext   = document.getElementById('lb-img-next');
     var cardActive = document.getElementById('lb-card-active');
-    var cardPrev   = document.getElementById('lb-card-prev');
-    var cardNext   = document.getElementById('lb-card-next');
 
-    if (dir !== 'none') {
-        /* flash the active card off-screen in direction of travel, then snap */
-        var exitX = dir === 'next' ? '-30%' : '30%';
+    if (dir === 'none') {
+        imgActive.src = _lbImages[_lbIndex];
+        imgPrev.src   = _lbImages[pi];
+        imgNext.src   = _lbImages[ni];
         cardActive.style.transition = 'none';
-        cardActive.style.transform = 'translateX('+exitX+') rotateY('+(dir==='next'?'20':'-20')+'deg) scale(0.8)';
-        cardActive.style.opacity = '0';
-        void cardActive.offsetWidth; /* reflow */
-        cardActive.style.transition = 'all 0.55s cubic-bezier(.22,.68,0,1.2)';
+        cardActive.style.transform  = 'translateX(0) rotateY(0deg) scale(1)';
+        cardActive.style.opacity    = '1';
+        document.getElementById('lb-counter').textContent = (_lbIndex + 1) + ' / ' + n;
+        _lbUpdateDots(_lbIndex);
+        return;
     }
 
-    imgActive.src = _lbImages[_lbIndex];
-    imgPrev.src   = _lbImages[pi];
-    imgNext.src   = _lbImages[ni];
+    _lbBusy = true;
+    var isNext  = dir === 'next';
+    var exitX   = isNext ? '-55%' : '55%';
+    var enterX  = isNext ? '55%'  : '-55%';
+    var exitRot = isNext ? '18deg' : '-18deg';
 
-    /* settle active */
-    requestAnimationFrame(function() {
-        cardActive.style.transform = 'translateX(0) rotateY(0deg) scale(1)';
-        cardActive.style.opacity = '1';
-    });
+    /* Phase 1 — active card slides out */
+    cardActive.style.transition = 'all 0.42s cubic-bezier(.55,0,1,.45)';
+    cardActive.style.transform  = 'translateX('+exitX+') rotateY('+exitRot+') scale(0.78)';
+    cardActive.style.opacity    = '0';
 
-    /* counter + dots */
-    document.getElementById('lb-counter').textContent = (_lbIndex + 1) + ' / ' + n;
-    _lbUpdateDots(_lbIndex);
+    /* side cards quietly fade their images halfway through */
+    setTimeout(function() {
+        imgPrev.style.transition = 'opacity 0.25s';
+        imgNext.style.transition = 'opacity 0.25s';
+        imgPrev.style.opacity = '0';
+        imgNext.style.opacity = '0';
+    }, 200);
+
+    setTimeout(function() {
+        /* swap all images while everything is hidden/exited */
+        imgActive.src = _lbImages[_lbIndex];
+        imgPrev.src   = _lbImages[pi];
+        imgNext.src   = _lbImages[ni];
+
+        /* side cards fade back in */
+        imgPrev.style.opacity = '1';
+        imgNext.style.opacity = '1';
+
+        /* Phase 2 — snap active card to enter side, then slide to center */
+        cardActive.style.transition = 'none';
+        cardActive.style.transform  = 'translateX('+enterX+') rotateY('+(isNext?'-18deg':'18deg')+') scale(0.78)';
+        cardActive.style.opacity    = '0';
+        void cardActive.offsetWidth;
+
+        cardActive.style.transition = 'all 0.52s cubic-bezier(.22,.68,0,1.2)';
+        cardActive.style.transform  = 'translateX(0) rotateY(0deg) scale(1)';
+        cardActive.style.opacity    = '1';
+
+        document.getElementById('lb-counter').textContent = (_lbIndex + 1) + ' / ' + n;
+        _lbUpdateDots(_lbIndex);
+
+        setTimeout(function() { _lbBusy = false; }, 540);
+    }, 440);
 }
 
 function _lbBuildDots() {

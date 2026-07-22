@@ -123,108 +123,47 @@
              class="hidden lg:block absolute top-full left-0 right-0 border-t border-brown-700/[0.06] dark:border-white/[0.06] bg-cream-50/97 dark:bg-dark-900/97 backdrop-blur-2xl shadow-xl"
              style="display:none;">
             <div class="max-w-7xl mx-auto px-6 lg:px-8 py-5">
-                <div class="grid grid-cols-6 gap-3">
-                    {% if request.resolver_match.url_name == 'home' %}
-                    {% with links="home:smoothScroll:home,about:smoothScroll:about,amenities:smoothScroll:amenities,gallery:smoothScroll:gallery,pricing:smoothScroll:pricing,contact:smoothScroll:contact" %}
-                    <!-- Home -->
-                    <a href="#home" onclick="smoothScroll(event,'home')" class="group flex flex-col items-center gap-2.5 px-3 py-4 rounded-xl hover:bg-brown-800/5 dark:hover:bg-white/5 transition-all duration-200">
+                <div class="grid grid-cols-4 gap-3">
+                    <!-- Brochure -->
+                    <a href="{% url 'brochure' %}" class="group flex flex-col items-center gap-2.5 px-3 py-4 rounded-xl hover:bg-brown-800/5 dark:hover:bg-white/5 transition-all duration-200">
                         <div class="w-9 h-9 rounded-lg bg-brown-800/8 dark:bg-white/8 border border-brown-700/10 dark:border-white/10 flex items-center justify-center group-hover:bg-gold-500/15 group-hover:border-gold-500/30 transition-all duration-200">
-                            <svg class="w-4 h-4 text-brown-600 dark:text-cream-300/60 group-hover:text-gold-500 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                            <svg class="w-4 h-4 text-brown-600 dark:text-cream-300/60 group-hover:text-gold-500 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                         </div>
                         <div class="text-center">
-                            <p class="text-[11px] font-bold tracking-[0.12em] uppercase text-brown-700 dark:text-cream-100 group-hover:text-brown-900 dark:group-hover:text-gold-400 transition-colors">Home</p>
-                            <p class="text-[9px] tracking-wider text-brown-400 dark:text-cream-400/40 mt-0.5">The Beginning</p>
+                            <p class="text-[11px] font-bold tracking-[0.12em] uppercase text-brown-700 dark:text-cream-100 group-hover:text-brown-900 dark:group-hover:text-gold-400 transition-colors">Brochure</p>
+                            <p class="text-[9px] tracking-wider text-brown-400 dark:text-cream-400/40 mt-0.5">Project Details</p>
                         </div>
                     </a>
-                    <!-- About -->
-                    <a href="#about" onclick="smoothScroll(event,'about')" class="group flex flex-col items-center gap-2.5 px-3 py-4 rounded-xl hover:bg-brown-800/5 dark:hover:bg-white/5 transition-all duration-200">
+                    <!-- Blueprint -->
+                    <a href="{% url 'blueprint' %}" class="group flex flex-col items-center gap-2.5 px-3 py-4 rounded-xl hover:bg-brown-800/5 dark:hover:bg-white/5 transition-all duration-200">
                         <div class="w-9 h-9 rounded-lg bg-brown-800/8 dark:bg-white/8 border border-brown-700/10 dark:border-white/10 flex items-center justify-center group-hover:bg-gold-500/15 group-hover:border-gold-500/30 transition-all duration-200">
-                            <svg class="w-4 h-4 text-brown-600 dark:text-cream-300/60 group-hover:text-gold-500 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <svg class="w-4 h-4 text-brown-600 dark:text-cream-300/60 group-hover:text-gold-500 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
                         </div>
                         <div class="text-center">
-                            <p class="text-[11px] font-bold tracking-[0.12em] uppercase text-brown-700 dark:text-cream-100 group-hover:text-brown-900 dark:group-hover:text-gold-400 transition-colors">About</p>
-                            <p class="text-[9px] tracking-wider text-brown-400 dark:text-cream-400/40 mt-0.5">Our Story</p>
+                            <p class="text-[11px] font-bold tracking-[0.12em] uppercase text-brown-700 dark:text-cream-100 group-hover:text-brown-900 dark:group-hover:text-gold-400 transition-colors">Blueprint</p>
+                            <p class="text-[9px] tracking-wider text-brown-400 dark:text-cream-400/40 mt-0.5">Floor Plans</p>
                         </div>
                     </a>
-                    <!-- Amenities -->
-                    <a href="#amenities" onclick="smoothScroll(event,'amenities')" class="group flex flex-col items-center gap-2.5 px-3 py-4 rounded-xl hover:bg-brown-800/5 dark:hover:bg-white/5 transition-all duration-200">
+                    <!-- Plot Metrics -->
+                    <a href="{% url 'plots' %}" class="group flex flex-col items-center gap-2.5 px-3 py-4 rounded-xl hover:bg-brown-800/5 dark:hover:bg-white/5 transition-all duration-200">
                         <div class="w-9 h-9 rounded-lg bg-brown-800/8 dark:bg-white/8 border border-brown-700/10 dark:border-white/10 flex items-center justify-center group-hover:bg-gold-500/15 group-hover:border-gold-500/30 transition-all duration-200">
-                            <svg class="w-4 h-4 text-brown-600 dark:text-cream-300/60 group-hover:text-gold-500 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                            <svg class="w-4 h-4 text-brown-600 dark:text-cream-300/60 group-hover:text-gold-500 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" stroke-linecap="round" stroke-linejoin="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 9h18M9 21V9"/></svg>
                         </div>
                         <div class="text-center">
-                            <p class="text-[11px] font-bold tracking-[0.12em] uppercase text-brown-700 dark:text-cream-100 group-hover:text-brown-900 dark:group-hover:text-gold-400 transition-colors">Amenities</p>
-                            <p class="text-[9px] tracking-wider text-brown-400 dark:text-cream-400/40 mt-0.5">World-Class Living</p>
+                            <p class="text-[11px] font-bold tracking-[0.12em] uppercase text-brown-700 dark:text-cream-100 group-hover:text-brown-900 dark:group-hover:text-gold-400 transition-colors">Plot Metrics</p>
+                            <p class="text-[9px] tracking-wider text-brown-400 dark:text-cream-400/40 mt-0.5">Unit Sizes</p>
                         </div>
                     </a>
-                    <!-- Gallery -->
-                    <a href="#gallery" onclick="smoothScroll(event,'gallery')" class="group flex flex-col items-center gap-2.5 px-3 py-4 rounded-xl hover:bg-brown-800/5 dark:hover:bg-white/5 transition-all duration-200">
+                    <!-- Login -->
+                    <a href="{% url 'admin_login' %}" class="group flex flex-col items-center gap-2.5 px-3 py-4 rounded-xl hover:bg-brown-800/5 dark:hover:bg-white/5 transition-all duration-200">
                         <div class="w-9 h-9 rounded-lg bg-brown-800/8 dark:bg-white/8 border border-brown-700/10 dark:border-white/10 flex items-center justify-center group-hover:bg-gold-500/15 group-hover:border-gold-500/30 transition-all duration-200">
-                            <svg class="w-4 h-4 text-brown-600 dark:text-cream-300/60 group-hover:text-gold-500 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <svg class="w-4 h-4 text-brown-600 dark:text-cream-300/60 group-hover:text-gold-500 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" stroke-linecap="round" stroke-linejoin="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M7 11V7a5 5 0 0110 0v4"/></svg>
                         </div>
                         <div class="text-center">
-                            <p class="text-[11px] font-bold tracking-[0.12em] uppercase text-brown-700 dark:text-cream-100 group-hover:text-brown-900 dark:group-hover:text-gold-400 transition-colors">Gallery</p>
-                            <p class="text-[9px] tracking-wider text-brown-400 dark:text-cream-400/40 mt-0.5">Visual Journey</p>
+                            <p class="text-[11px] font-bold tracking-[0.12em] uppercase text-brown-700 dark:text-cream-100 group-hover:text-brown-900 dark:group-hover:text-gold-400 transition-colors">Login</p>
+                            <p class="text-[9px] tracking-wider text-brown-400 dark:text-cream-400/40 mt-0.5">Admin Access</p>
                         </div>
                     </a>
-                    <!-- Pricing -->
-                    <a href="#pricing" onclick="smoothScroll(event,'pricing')" class="group flex flex-col items-center gap-2.5 px-3 py-4 rounded-xl hover:bg-brown-800/5 dark:hover:bg-white/5 transition-all duration-200">
-                        <div class="w-9 h-9 rounded-lg bg-brown-800/8 dark:bg-white/8 border border-brown-700/10 dark:border-white/10 flex items-center justify-center group-hover:bg-gold-500/15 group-hover:border-gold-500/30 transition-all duration-200">
-                            <svg class="w-4 h-4 text-brown-600 dark:text-cream-300/60 group-hover:text-gold-500 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                        </div>
-                        <div class="text-center">
-                            <p class="text-[11px] font-bold tracking-[0.12em] uppercase text-brown-700 dark:text-cream-100 group-hover:text-brown-900 dark:group-hover:text-gold-400 transition-colors">Pricing</p>
-                            <p class="text-[9px] tracking-wider text-brown-400 dark:text-cream-400/40 mt-0.5">Investment Plans</p>
-                        </div>
-                    </a>
-                    <!-- Contact -->
-                    <a href="#contact" onclick="smoothScroll(event,'contact')" class="group flex flex-col items-center gap-2.5 px-3 py-4 rounded-xl hover:bg-brown-800/5 dark:hover:bg-white/5 transition-all duration-200">
-                        <div class="w-9 h-9 rounded-lg bg-brown-800/8 dark:bg-white/8 border border-brown-700/10 dark:border-white/10 flex items-center justify-center group-hover:bg-gold-500/15 group-hover:border-gold-500/30 transition-all duration-200">
-                            <svg class="w-4 h-4 text-brown-600 dark:text-cream-300/60 group-hover:text-gold-500 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                        </div>
-                        <div class="text-center">
-                            <p class="text-[11px] font-bold tracking-[0.12em] uppercase text-brown-700 dark:text-cream-100 group-hover:text-brown-900 dark:group-hover:text-gold-400 transition-colors">Contact</p>
-                            <p class="text-[9px] tracking-wider text-brown-400 dark:text-cream-400/40 mt-0.5">Get in Touch</p>
-                        </div>
-                    </a>
-                    {% endwith %}
-                    {% else %}
-                    <a href="{% url 'home' %}#home" class="group flex flex-col items-center gap-2.5 px-3 py-4 rounded-xl hover:bg-brown-800/5 dark:hover:bg-white/5 transition-all duration-200">
-                        <div class="w-9 h-9 rounded-lg bg-brown-800/8 dark:bg-white/8 border border-brown-700/10 dark:border-white/10 flex items-center justify-center group-hover:bg-gold-500/15 group-hover:border-gold-500/30 transition-all duration-200">
-                            <svg class="w-4 h-4 text-brown-600 dark:text-cream-300/60 group-hover:text-gold-500 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                        </div>
-                        <div class="text-center"><p class="text-[11px] font-bold tracking-[0.12em] uppercase text-brown-700 dark:text-cream-100 group-hover:text-brown-900 dark:group-hover:text-gold-400 transition-colors">Home</p><p class="text-[9px] tracking-wider text-brown-400 dark:text-cream-400/40 mt-0.5">The Beginning</p></div>
-                    </a>
-                    <a href="{% url 'home' %}#about" class="group flex flex-col items-center gap-2.5 px-3 py-4 rounded-xl hover:bg-brown-800/5 dark:hover:bg-white/5 transition-all duration-200">
-                        <div class="w-9 h-9 rounded-lg bg-brown-800/8 dark:bg-white/8 border border-brown-700/10 dark:border-white/10 flex items-center justify-center group-hover:bg-gold-500/15 group-hover:border-gold-500/30 transition-all duration-200">
-                            <svg class="w-4 h-4 text-brown-600 dark:text-cream-300/60 group-hover:text-gold-500 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </div>
-                        <div class="text-center"><p class="text-[11px] font-bold tracking-[0.12em] uppercase text-brown-700 dark:text-cream-100 group-hover:text-brown-900 dark:group-hover:text-gold-400 transition-colors">About</p><p class="text-[9px] tracking-wider text-brown-400 dark:text-cream-400/40 mt-0.5">Our Story</p></div>
-                    </a>
-                    <a href="{% url 'home' %}#amenities" class="group flex flex-col items-center gap-2.5 px-3 py-4 rounded-xl hover:bg-brown-800/5 dark:hover:bg-white/5 transition-all duration-200">
-                        <div class="w-9 h-9 rounded-lg bg-brown-800/8 dark:bg-white/8 border border-brown-700/10 dark:border-white/10 flex items-center justify-center group-hover:bg-gold-500/15 group-hover:border-gold-500/30 transition-all duration-200">
-                            <svg class="w-4 h-4 text-brown-600 dark:text-cream-300/60 group-hover:text-gold-500 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
-                        </div>
-                        <div class="text-center"><p class="text-[11px] font-bold tracking-[0.12em] uppercase text-brown-700 dark:text-cream-100 group-hover:text-brown-900 dark:group-hover:text-gold-400 transition-colors">Amenities</p><p class="text-[9px] tracking-wider text-brown-400 dark:text-cream-400/40 mt-0.5">World-Class Living</p></div>
-                    </a>
-                    <a href="{% url 'home' %}#gallery" class="group flex flex-col items-center gap-2.5 px-3 py-4 rounded-xl hover:bg-brown-800/5 dark:hover:bg-white/5 transition-all duration-200">
-                        <div class="w-9 h-9 rounded-lg bg-brown-800/8 dark:bg-white/8 border border-brown-700/10 dark:border-white/10 flex items-center justify-center group-hover:bg-gold-500/15 group-hover:border-gold-500/30 transition-all duration-200">
-                            <svg class="w-4 h-4 text-brown-600 dark:text-cream-300/60 group-hover:text-gold-500 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        </div>
-                        <div class="text-center"><p class="text-[11px] font-bold tracking-[0.12em] uppercase text-brown-700 dark:text-cream-100 group-hover:text-brown-900 dark:group-hover:text-gold-400 transition-colors">Gallery</p><p class="text-[9px] tracking-wider text-brown-400 dark:text-cream-400/40 mt-0.5">Visual Journey</p></div>
-                    </a>
-                    <a href="{% url 'home' %}#pricing" class="group flex flex-col items-center gap-2.5 px-3 py-4 rounded-xl hover:bg-brown-800/5 dark:hover:bg-white/5 transition-all duration-200">
-                        <div class="w-9 h-9 rounded-lg bg-brown-800/8 dark:bg-white/8 border border-brown-700/10 dark:border-white/10 flex items-center justify-center group-hover:bg-gold-500/15 group-hover:border-gold-500/30 transition-all duration-200">
-                            <svg class="w-4 h-4 text-brown-600 dark:text-cream-300/60 group-hover:text-gold-500 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                        </div>
-                        <div class="text-center"><p class="text-[11px] font-bold tracking-[0.12em] uppercase text-brown-700 dark:text-cream-100 group-hover:text-brown-900 dark:group-hover:text-gold-400 transition-colors">Pricing</p><p class="text-[9px] tracking-wider text-brown-400 dark:text-cream-400/40 mt-0.5">Investment Plans</p></div>
-                    </a>
-                    <a href="{% url 'home' %}#contact" class="group flex flex-col items-center gap-2.5 px-3 py-4 rounded-xl hover:bg-brown-800/5 dark:hover:bg-white/5 transition-all duration-200">
-                        <div class="w-9 h-9 rounded-lg bg-brown-800/8 dark:bg-white/8 border border-brown-700/10 dark:border-white/10 flex items-center justify-center group-hover:bg-gold-500/15 group-hover:border-gold-500/30 transition-all duration-200">
-                            <svg class="w-4 h-4 text-brown-600 dark:text-cream-300/60 group-hover:text-gold-500 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                        </div>
-                        <div class="text-center"><p class="text-[11px] font-bold tracking-[0.12em] uppercase text-brown-700 dark:text-cream-100 group-hover:text-brown-900 dark:group-hover:text-gold-400 transition-colors">Contact</p><p class="text-[9px] tracking-wider text-brown-400 dark:text-cream-400/40 mt-0.5">Get in Touch</p></div>
-                    </a>
-                    {% endif %}
                 </div>
             </div>
         </div>

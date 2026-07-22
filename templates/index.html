@@ -1149,6 +1149,12 @@ document.getElementById('gallery-lightbox').addEventListener('click', function(e
 </script>
 
 <!-- Gallery Lightbox — 3D card stack — lives outside all sections to avoid scroll-opacity interference -->
+<style>
+/* Shift entire stage up by half the thumbnail strip height (54px/2=27px) so the card sits in the true visual centre */
+@media (max-width: 767px) {
+  #lb-stage { transform: translateY(-27px); }
+}
+</style>
 <div id="gallery-lightbox" style="position:fixed;inset:0;z-index:99999;background:#08060a;display:none;">
     <!-- Close -->
     <button onclick="closeLightbox()" title="Close (Esc)"

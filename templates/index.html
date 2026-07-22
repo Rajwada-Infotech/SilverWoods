@@ -331,18 +331,18 @@
                 <div class="amenity-flip-inner">
                     <!-- Front -->
                     <div class="amenity-flip-front glass-warm rounded-2xl p-4">
-                        <div class="w-10 h-10 rounded-xl bg-brown-700/5 dark:bg-gold-500/10 flex items-center justify-center mb-3">
-                            {% if amenity.icon == 'pool' %}<i class="fas fa-swimming-pool text-brown-500 dark:text-gold-500 text-sm"></i>
-                            {% elif amenity.icon == 'fitness' %}<i class="fas fa-dumbbell text-brown-500 dark:text-gold-500 text-sm"></i>
-                            {% elif amenity.icon == 'child' %}<i class="fas fa-child text-brown-500 dark:text-gold-500 text-sm"></i>
-                            {% elif amenity.icon == 'club' %}<i class="fas fa-glass-cheers text-brown-500 dark:text-gold-500 text-sm"></i>
-                            {% elif amenity.icon == 'garden' %}<i class="fas fa-tree text-brown-500 dark:text-gold-500 text-sm"></i>
-                            {% elif amenity.icon == 'security' %}<i class="fas fa-shield-alt text-brown-500 dark:text-gold-500 text-sm"></i>
-                            {% elif amenity.icon == 'power' %}<i class="fas fa-bolt text-brown-500 dark:text-gold-500 text-sm"></i>
-                            {% elif amenity.icon == 'parking' %}<i class="fas fa-parking text-brown-500 dark:text-gold-500 text-sm"></i>
-                            {% elif amenity.icon == 'sports' %}<i class="fas fa-running text-brown-500 dark:text-gold-500 text-sm"></i>
-                            {% elif amenity.icon == 'banquet' %}<i class="fas fa-utensils text-brown-500 dark:text-gold-500 text-sm"></i>
-                            {% else %}<i class="fas fa-star text-brown-500 dark:text-gold-500 text-sm"></i>{% endif %}
+                        <div class="w-10 h-10 rounded-xl bg-brown-700/5 dark:bg-gold-500/10 flex items-center justify-center mb-3" style="flex-shrink:0;">
+                            {% if amenity.icon == 'pool' %}<i class="fas fa-swimming-pool fa-fw text-brown-500 dark:text-gold-500" style="font-size:16px;"></i>
+                            {% elif amenity.icon == 'fitness' %}<i class="fas fa-dumbbell fa-fw text-brown-500 dark:text-gold-500" style="font-size:16px;"></i>
+                            {% elif amenity.icon == 'child' %}<i class="fas fa-child fa-fw text-brown-500 dark:text-gold-500" style="font-size:16px;"></i>
+                            {% elif amenity.icon == 'club' %}<i class="fas fa-glass-cheers fa-fw text-brown-500 dark:text-gold-500" style="font-size:16px;"></i>
+                            {% elif amenity.icon == 'garden' %}<i class="fas fa-tree fa-fw text-brown-500 dark:text-gold-500" style="font-size:16px;"></i>
+                            {% elif amenity.icon == 'security' %}<i class="fas fa-shield-alt fa-fw text-brown-500 dark:text-gold-500" style="font-size:16px;"></i>
+                            {% elif amenity.icon == 'power' %}<i class="fas fa-bolt fa-fw text-brown-500 dark:text-gold-500" style="font-size:16px;"></i>
+                            {% elif amenity.icon == 'parking' %}<i class="fas fa-parking fa-fw text-brown-500 dark:text-gold-500" style="font-size:16px;"></i>
+                            {% elif amenity.icon == 'sports' %}<i class="fas fa-running fa-fw text-brown-500 dark:text-gold-500" style="font-size:16px;"></i>
+                            {% elif amenity.icon == 'banquet' %}<i class="fas fa-utensils fa-fw text-brown-500 dark:text-gold-500" style="font-size:16px;"></i>
+                            {% else %}<i class="fas fa-star fa-fw text-brown-500 dark:text-gold-500" style="font-size:16px;"></i>{% endif %}
                         </div>
                         <h3 class="font-display text-sm font-bold text-brown-800 dark:text-cream-100 mb-2 tracking-wide uppercase amenity-heading">{{ amenity.name }}</h3>
                         <p class="text-brown-400 dark:text-cream-300/30 text-[11px] leading-relaxed">{{ amenity.description }}</p>
@@ -997,8 +997,8 @@ function openLightbox(index) {
     _lbBuildDots();
     _startAuto();
     var w = window.innerWidth;
-    document.getElementById('lb-arrow-prev').style.display = w < 640 ? 'flex' : 'none';
-    document.getElementById('lb-arrow-next').style.display = w < 640 ? 'flex' : 'none';
+    document.getElementById('lb-arrow-prev').style.display = 'none';
+    document.getElementById('lb-arrow-next').style.display = 'none';
 }
 
 function closeLightbox() {

@@ -1150,9 +1150,9 @@ document.getElementById('gallery-lightbox').addEventListener('click', function(e
 
 <!-- Gallery Lightbox — 3D card stack — lives outside all sections to avoid scroll-opacity interference -->
 <style>
-/* On mobile, shift the active card up so it's visually centered above the thumbnail strip */
+/* On mobile, shift all 3 cards up together so the group is visually centered above the thumbnail strip */
 @media (max-width: 639px) {
-  #lb-card-active { top: calc(50% - 35px) !important; }
+  #lb-card-prev, #lb-card-active, #lb-card-next { top: calc(50% - 35px) !important; }
 }
 </style>
 <div id="gallery-lightbox" style="position:fixed;inset:0;z-index:99999;background:#08060a;display:none;">

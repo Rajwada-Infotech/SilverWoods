@@ -1002,10 +1002,13 @@ function openLightbox(index) {
     var isMobile = w < 640;
     var cardPrev = document.getElementById('lb-card-prev');
     var cardNext = document.getElementById('lb-card-next');
+    var cardActive = document.getElementById('lb-card-active');
     cardPrev.style.opacity = isMobile ? '0' : '0.35';
     cardNext.style.opacity = isMobile ? '0' : '0.35';
     cardPrev.style.pointerEvents = isMobile ? 'none' : 'all';
     cardNext.style.pointerEvents = isMobile ? 'none' : 'all';
+    /* On mobile shift the active card up so it's centered in the area above the thumbnail strip (bottom:24px + 30px height ≈ 54px → shift up 27px) */
+    cardActive.style.top = isMobile ? 'calc(50% - 27px)' : '50%';
 }
 
 function closeLightbox() {

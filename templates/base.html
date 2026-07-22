@@ -49,12 +49,12 @@
 
     <!-- Navbar -->
     <nav id="navbar" class="fixed top-0 left-0 right-0 z-50"
-         x-data="{ mobileOpen: false, scrolled: false, navHover: false }"
-         @scroll.window="scrolled = (window.scrollY > 50)"
-         @mouseenter="navHover = true"
-         @mouseleave="navHover = false">
+         x-data="{ mobileOpen: false, scrolled: false, navHover: false, _nt: null }"
+         @scroll.window="scrolled = (window.scrollY > 50)">
         <div :class="scrolled ? 'py-3 bg-cream-100/90 dark:bg-dark-900/90 backdrop-blur-2xl border-brown-700/[0.05] dark:border-white/[0.05]' : 'py-5 bg-transparent border-transparent'"
-             class="transition-all duration-500 border-b border-transparent">
+             class="transition-all duration-500 border-b border-transparent"
+             @mouseenter="clearTimeout(_nt); navHover = true"
+             @mouseleave="clearTimeout(_nt); if($event.clientY > $el.getBoundingClientRect().bottom - 4){ _nt = setTimeout(()=>{ navHover = false }, 450) } else { navHover = false }">
             <div class="max-w-7xl mx-auto px-6 lg:px-8">
                 <div class="flex items-center justify-between">
                     <!-- Logo -->
@@ -124,69 +124,96 @@
              x-effect="if(navHover) arcNavPosition()"
              class="hidden lg:block absolute top-full left-0 right-0"
              style="display:none; height:300px; pointer-events:none; z-index:49;">
-            <!-- SVG: filled semicircle backdrop + arc stroke + dots -->
+            <!-- Semicircle background div — exact same style as flat mega panel -->
+            <div id="arc-bg-div" onmouseenter="arcKeepOpen()" onmouseleave="arcStartClose()" style="position:absolute;top:0;pointer-events:auto;backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);box-shadow:0 20px 25px -5px rgba(0,0,0,0.1),0 8px 10px -6px rgba(0,0,0,0.1);"></div>
+            <!-- SVG: gold arc stroke + endpoint dots only -->
             <svg id="arc-nav-svg" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:visible;pointer-events:none;">
                 <defs>
                     <linearGradient id="arc-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" style="stop-color:#c9a84c;stop-opacity:0.2"/>
-                        <stop offset="50%" style="stop-color:#c9a84c;stop-opacity:0.5"/>
-                        <stop offset="100%" style="stop-color:#c9a84c;stop-opacity:0.2"/>
+                        <stop offset="0%"   stop-color="#c9a84c" stop-opacity="0.15"/>
+                        <stop offset="50%"  stop-color="#c9a84c" stop-opacity="0.35"/>
+                        <stop offset="100%" stop-color="#c9a84c" stop-opacity="0.15"/>
                     </linearGradient>
-                    <radialGradient id="arc-bg-grad" cx="50%" cy="0%" r="100%" fx="50%" fy="0%">
-                        <stop offset="0%"   stop-color="#0c0906" stop-opacity="0.88"/>
-                        <stop offset="65%"  stop-color="#0c0906" stop-opacity="0.75"/>
-                        <stop offset="100%" stop-color="#0c0906" stop-opacity="0"/>
-                    </radialGradient>
-                    <!-- Clip path to the semicircle shape -->
-                    <clipPath id="arc-clip">
-                        <path id="arc-clip-path" d=""/>
-                    </clipPath>
                 </defs>
-                <!-- Filled semicircle backdrop clipped to arc shape -->
-                <path id="arc-bg-fill" d="" fill="url(#arc-bg-grad)" opacity="0.92"/>
-                <!-- Gold arc stroke on top -->
                 <path id="arc-nav-path" d="" fill="none" stroke="url(#arc-grad)" stroke-width="1.5"/>
-                <!-- Endpoint dots -->
-                <circle id="arc-dot-l" cx="0" cy="0" r="3.5" fill="#c9a84c" opacity="0.6"/>
-                <circle id="arc-dot-r" cx="0" cy="0" r="3.5" fill="#c9a84c" opacity="0.6"/>
+                <circle id="arc-dot-l" cx="0" cy="0" r="3" fill="#c9a84c" opacity="0.5"/>
+                <circle id="arc-dot-r" cx="0" cy="0" r="3" fill="#c9a84c" opacity="0.5"/>
             </svg>
             <!-- Arc items (4) -->
             <div style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;">
-                <a href="{% url 'brochure' %}" id="arc-item-0" class="arc-nav-item" style="position:absolute;pointer-events:all;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:5px;text-decoration:none;opacity:0;transition:opacity 0.3s ease, transform 0.3s ease;">
-                    <div class="arc-icon-box" style="width:42px;height:42px;border-radius:12px;background:rgba(20,15,10,0.75);border:1px solid rgba(201,168,76,0.4);box-shadow:0 4px 16px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;transition:background 0.2s,border-color 0.2s,transform 0.2s;backdrop-filter:blur(6px);">
-                        <i class="fas fa-book-open" style="color:#c9a84c;font-size:15px;"></i>
+                <a href="{% url 'brochure' %}" id="arc-item-0" class="arc-nav-item" onmouseenter="arcKeepOpen()" onmouseleave="arcStartClose()" style="position:absolute;pointer-events:all;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:5px;text-decoration:none;opacity:0;transition:opacity 0.3s ease, transform 0.3s ease;">
+                    <div class="arc-icon-box" style="width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;transition:background 0.2s,border-color 0.2s,transform 0.2s;">
+                        <i class="fas fa-book-open" style="font-size:15px;"></i>
                     </div>
-                    <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.9);white-space:nowrap;text-shadow:0 1px 8px rgba(0,0,0,0.9),0 0 16px rgba(0,0,0,0.8);">Brochure</span>
+                    <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;white-space:nowrap;">Brochure</span>
                 </a>
-                <a href="{% url 'blueprint' %}" id="arc-item-1" class="arc-nav-item" style="position:absolute;pointer-events:all;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:5px;text-decoration:none;opacity:0;transition:opacity 0.3s ease 0.05s, transform 0.3s ease 0.05s;">
-                    <div class="arc-icon-box" style="width:42px;height:42px;border-radius:12px;background:rgba(20,15,10,0.75);border:1px solid rgba(201,168,76,0.4);box-shadow:0 4px 16px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;transition:background 0.2s,border-color 0.2s,transform 0.2s;backdrop-filter:blur(6px);">
-                        <i class="fas fa-drafting-compass" style="color:#c9a84c;font-size:15px;"></i>
+                <a href="{% url 'blueprint' %}" id="arc-item-1" class="arc-nav-item" onmouseenter="arcKeepOpen()" onmouseleave="arcStartClose()" style="position:absolute;pointer-events:all;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:5px;text-decoration:none;opacity:0;transition:opacity 0.3s ease 0.05s, transform 0.3s ease 0.05s;">
+                    <div class="arc-icon-box" style="width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;transition:background 0.2s,border-color 0.2s,transform 0.2s;">
+                        <i class="fas fa-drafting-compass" style="font-size:15px;"></i>
                     </div>
-                    <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.9);white-space:nowrap;text-shadow:0 1px 8px rgba(0,0,0,0.9),0 0 16px rgba(0,0,0,0.8);">Blueprint</span>
+                    <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;white-space:nowrap;">Blueprint</span>
                 </a>
-                <a href="{% url 'plots' %}" id="arc-item-2" class="arc-nav-item" style="position:absolute;pointer-events:all;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:5px;text-decoration:none;opacity:0;transition:opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;">
-                    <div class="arc-icon-box" style="width:42px;height:42px;border-radius:12px;background:rgba(20,15,10,0.75);border:1px solid rgba(201,168,76,0.4);box-shadow:0 4px 16px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;transition:background 0.2s,border-color 0.2s,transform 0.2s;backdrop-filter:blur(6px);">
-                        <i class="fas fa-vector-square" style="color:#c9a84c;font-size:15px;"></i>
+                <a href="{% url 'plots' %}" id="arc-item-2" class="arc-nav-item" onmouseenter="arcKeepOpen()" onmouseleave="arcStartClose()" style="position:absolute;pointer-events:all;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:5px;text-decoration:none;opacity:0;transition:opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;">
+                    <div class="arc-icon-box" style="width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;transition:background 0.2s,border-color 0.2s,transform 0.2s;">
+                        <i class="fas fa-vector-square" style="font-size:15px;"></i>
                     </div>
-                    <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.9);white-space:nowrap;text-shadow:0 1px 8px rgba(0,0,0,0.9),0 0 16px rgba(0,0,0,0.8);">Plot Metrics</span>
+                    <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;white-space:nowrap;">Plot Metrics</span>
                 </a>
-                <a href="{% url 'admin_login' %}" id="arc-item-3" class="arc-nav-item" style="position:absolute;pointer-events:all;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:5px;text-decoration:none;opacity:0;transition:opacity 0.3s ease 0.15s, transform 0.3s ease 0.15s;">
-                    <div class="arc-icon-box" style="width:42px;height:42px;border-radius:12px;background:rgba(20,15,10,0.75);border:1px solid rgba(201,168,76,0.4);box-shadow:0 4px 16px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;transition:background 0.2s,border-color 0.2s,transform 0.2s;backdrop-filter:blur(6px);">
-                        <i class="fas fa-lock" style="color:#c9a84c;font-size:15px;"></i>
+                <a href="{% url 'admin_login' %}" id="arc-item-3" class="arc-nav-item" onmouseenter="arcKeepOpen()" onmouseleave="arcStartClose()" style="position:absolute;pointer-events:all;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:5px;text-decoration:none;opacity:0;transition:opacity 0.3s ease 0.15s, transform 0.3s ease 0.15s;">
+                    <div class="arc-icon-box" style="width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;transition:background 0.2s,border-color 0.2s,transform 0.2s;">
+                        <i class="fas fa-lock" style="font-size:15px;"></i>
                     </div>
-                    <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.9);white-space:nowrap;text-shadow:0 1px 8px rgba(0,0,0,0.9),0 0 16px rgba(0,0,0,0.8);">Login</span>
+                    <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;white-space:nowrap;">Login</span>
                 </a>
             </div>
         </div>
         <style>
+            /* Light mode icon box */
+            .arc-icon-box {
+                background: rgba(61,43,31,0.08) !important;
+                border: 1px solid rgba(201,168,76,0.35) !important;
+                box-shadow: 0 4px 16px rgba(61,43,31,0.12) !important;
+                backdrop-filter: blur(6px);
+            }
+            .arc-nav-item span {
+                color: rgba(61,43,31,0.85) !important;
+                text-shadow: none !important;
+            }
+            /* Dark mode icon box */
+            .dark .arc-icon-box {
+                background: rgba(20,15,10,0.75) !important;
+                border: 1px solid rgba(201,168,76,0.4) !important;
+                box-shadow: 0 4px 16px rgba(0,0,0,0.5) !important;
+            }
+            .dark .arc-nav-item span {
+                color: rgba(255,255,255,0.9) !important;
+                text-shadow: 0 1px 8px rgba(0,0,0,0.9), 0 0 16px rgba(0,0,0,0.8) !important;
+            }
+            /* Icon colors by theme */
+            .arc-icon-box i { color: #8b6b4a !important; font-size: 15px; }
+            .dark .arc-icon-box i { color: #c9a84c !important; }
+            /* Hover state (both themes) */
             .arc-nav-item:hover .arc-icon-box {
-                background: rgba(201,168,76,0.15) !important;
-                border-color: rgba(201,168,76,0.5) !important;
+                background: rgba(201,168,76,0.18) !important;
+                border-color: rgba(201,168,76,0.6) !important;
                 transform: scale(1.12);
             }
             .arc-nav-item:hover span { color: #c9a84c !important; }
         </style>
         <script>
+        function arcKeepOpen() {
+            var nav = document.getElementById('navbar');
+            if (!nav) return;
+            var alpineData = Alpine.$data(nav);
+            clearTimeout(alpineData._nt);
+            alpineData.navHover = true;
+        }
+        function arcStartClose() {
+            var nav = document.getElementById('navbar');
+            if (!nav) return;
+            var alpineData = Alpine.$data(nav);
+            alpineData._nt = setTimeout(function() { alpineData.navHover = false; }, 150);
+        }
         function arcNavPosition() {
             var nav = document.getElementById('navbar');
             if (!nav) return;
@@ -208,15 +235,25 @@
             var cx = (leftX + rightX) / 2;
             var r  = (rightX - leftX) / 2;
 
-            // Draw SVG arc stroke: sweep-flag=0 → curves DOWNWARD in screen coords
-            var arcD = 'M ' + leftX + ' 0 A ' + r + ' ' + r + ' 0 0 0 ' + rightX + ' 0';
+            // Arc curving downward: sweep-flag=1 (clockwise)
+            var arcD = 'M ' + leftX + ' 0 A ' + r + ' ' + r + ' 0 0 1 ' + rightX + ' 0';
             var path = document.getElementById('arc-nav-path');
             if (path) path.setAttribute('d', arcD);
 
-            // Filled semicircle backdrop: arc going down + line back along top chord
-            var fillD = 'M ' + leftX + ' 0 A ' + r + ' ' + r + ' 0 0 0 ' + rightX + ' 0 L ' + leftX + ' 0 Z';
-            var bgFill = document.getElementById('arc-bg-fill');
-            if (bgFill) bgFill.setAttribute('d', fillD);
+            // Shape background div as a downward semicircle using border-radius
+            var bgDiv = document.getElementById('arc-bg-div');
+            if (bgDiv) {
+                bgDiv.style.left   = leftX + 'px';
+                bgDiv.style.width  = (rightX - leftX) + 'px';
+                bgDiv.style.height = r + 'px';
+                bgDiv.style.borderRadius = '0 0 ' + r + 'px ' + r + 'px';
+                var isDark = document.documentElement.classList.contains('dark');
+                bgDiv.style.background = isDark
+                    ? 'rgba(13,10,6,0.55)'
+                    : 'rgba(250,247,242,0.55)';
+                bgDiv.style.borderTop = 'none';
+                bgDiv.style.boxShadow = '0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)';
+            }
 
             var dl = document.getElementById('arc-dot-l');
             var dr = document.getElementById('arc-dot-r');
@@ -300,11 +337,15 @@
         </div>
     </nav>
 
-    <!-- Invisible overlay: closes menu when clicking outside -->
+    <!-- =====================================================================
+         CLOUD POPUP — commented out, preserved for future use
+         To re-enable: uncomment below AND restore onclick on #drop-click-area
+         ===================================================================== -->
+
+    <!--
     <div id="ldi-overlay" onclick="(function(){var m=document.getElementById('liquid-drop-menu');if(m)m.style.display='none';['cloud-dot1','cloud-dot2','cloud-dot3','cloud-dot4'].forEach(function(id){var d=document.getElementById(id);if(d)d.style.display='none';});this.style.display='none';}).call(this);"
          style="display:none;position:fixed;inset:0;z-index:59;"></div>
 
-    <!-- Hidden SVG defining the cloud clip path for CSS clip-path -->
     <svg width="0" height="0" style="position:absolute;overflow:hidden;">
         <defs>
             <clipPath id="cloudClipPath" clipPathUnits="userSpaceOnUse">
@@ -317,31 +358,18 @@
                 <circle cx="70"  cy="68"  r="30"/>
                 <circle cx="142" cy="65"  r="27"/>
                 <circle cx="105" cy="54"  r="25"/>
-                <!-- Rect only fills upper/mid seams — stops at y=168 so bottom circles give rounded corners -->
                 <rect x="50" y="58"  width="110" height="110"/>
             </clipPath>
         </defs>
     </svg>
 
-    <!-- Thought cloud menu — dots + cloud positioned relative to ball (right:44px top:18px) -->
-    <!-- Ball center ≈ top:36px right:61px. Dots trail down-left from ball bottom. -->
-
-    <!-- Dot 1 (smallest, closest to ball) -->
     <div id="cloud-dot1" style="display:none;position:fixed;top:38px;right:102px;width:6px;height:6px;border-radius:50%;z-index:200;"></div>
-    <!-- Dot 2 -->
     <div id="cloud-dot2" style="display:none;position:fixed;top:51px;right:123px;width:10px;height:10px;border-radius:50%;z-index:200;"></div>
-    <!-- Dot 3 -->
     <div id="cloud-dot3" style="display:none;position:fixed;top:64px;right:146px;width:14px;height:14px;border-radius:50%;z-index:200;"></div>
-    <!-- Dot 4 (largest, closest to cloud) -->
     <div id="cloud-dot4" style="display:none;position:fixed;top:79px;right:172px;width:18px;height:18px;border-radius:50%;z-index:200;"></div>
 
-    <!-- Cloud menu panel -->
     <div id="liquid-drop-menu" style="display:none;position:fixed;top:95px;right:110px;z-index:200;width:210px;height:220px;clip-path:url(#cloudClipPath);">
-
-        <!-- Shimmer highlight -->
         <div id="cloud-shimmer" style="position:absolute;top:8px;left:52px;width:60px;height:20px;border-radius:50%;pointer-events:none;"></div>
-
-        <!-- Menu items -->
         <div id="cloud-items" style="position:absolute;top:63px;left:56%;bottom:51px;transform:translateX(-50%);width:120px;display:flex;flex-direction:column;justify-content:space-around;">
             <a href="{% url 'brochure' %}" class="cloud-link" style="display:flex;align-items:center;gap:8px;font-size:9.5px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;text-decoration:none;">
                 <i class="fas fa-book-open cloud-icon" style="font-size:9px;min-width:11px;"></i>Brochure
@@ -357,6 +385,7 @@
             </a>
         </div>
     </div>
+    -->
 
     <!-- Menu tooltip for lamp shade hover -->
     <div id="menu-tooltip" style="display:none;position:fixed;z-index:300;pointer-events:none;transform:translateY(-50%);">
@@ -446,18 +475,17 @@
             <!-- Inner highlight -->
             <ellipse cx="24" cy="18" rx="14" ry="10" fill="rgba(255,255,255,0.32)" pointer-events="none"/>
 
-            <!-- Hamburger lines -->
-            <g id="menu-lines" pointer-events="none">
+            <!-- Hamburger lines — hidden for now -->
+            <!-- <g id="menu-lines" pointer-events="none">
                 <line x1="18" y1="28" x2="58" y2="28" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" opacity="0.85"/>
                 <line x1="18" y1="37" x2="58" y2="37" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" opacity="0.85"/>
                 <line x1="18" y1="46" x2="58" y2="46" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" opacity="0.85"/>
-            </g>
+            </g> -->
 
-            <!-- Click area (circle) -->
+            <!-- Click area (circle) — onclick disabled; cloud popup commented out -->
             <circle id="drop-click-area" cx="38" cy="38" r="44"
-                    fill="#fff" fill-opacity="0.001" pointer-events="all"
-                    style="cursor:pointer;"
-                    onclick="(function(e){e.stopPropagation();var m=document.getElementById('liquid-drop-menu');var o=document.getElementById('ldi-overlay');if(!m)return;var open=m.style.display==='block';var show=open?'none':'block';m.style.display=show;['cloud-dot1','cloud-dot2','cloud-dot3','cloud-dot4'].forEach(function(id){var d=document.getElementById(id);if(d)d.style.display=show;});if(o)o.style.display=show;if(show==='block'&&typeof swCloseChat==='function')swCloseChat();})(event)"/>
+                    fill="#fff" fill-opacity="0.001" pointer-events="none"
+                    style="cursor:default;"/>
 
 
             <!-- Base — drum shape -->
@@ -504,8 +532,6 @@
     </div>
     <script>
     (function(){
-        // Lamp, rope, knob colors all handled by CSS .dark rules
-        // Only knob icon text needs JS (SVG text content can't be CSS)
         var d = localStorage.getItem('theme') === 'dark';
         var i = document.getElementById('knob-icon');
         if(i){ i.textContent=d?'':''; i.style.fill=d?'#ffe8a0':'#e8d0a0'; }

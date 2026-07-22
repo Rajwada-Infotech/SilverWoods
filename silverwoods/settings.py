@@ -163,6 +163,9 @@ X_FRAME_OPTIONS = "SAMEORIGIN"
 CORS_ALLOW_ALL_ORIGINS = True
 LOGIN_URL = "/admin-panel/login/"
 
+# ── Session expiry — expire on browser close so visitor count resets per session
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
 # ── HTTPS / Cookie Security (active when DEBUG=False) ─────────────────
 if not DEBUG:
     SESSION_COOKIE_SECURE = True

@@ -149,13 +149,16 @@ def visitor_count(request):
 
 def track_visit(request):
     if request.method == 'POST':
+        from django.utils import timezone
+        from datetime import timedelta
         x_forwarded = request.META.get('HTTP_X_FORWARDED_FOR')
-        ip = x_forwarded.split(',')[0] if x_forwarded else request.META.get('REMOTE_ADDR')
-        SiteVisitor.objects.create(
-            ip_address=ip,
-            user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
-            page_visited='/',
-        )
+        ip = x_forwarded.split(',')[0].strip() if x_forwarded else request.META.get('REMOTE_ADDR', '')
+        ua = request.META.get('HTTP_USER_AGENT', '')[:500]
+        # 5-second dedup to prevent double-fire on same page load
+        cutoff = timezone.now() - timedelta(seconds=5)
+        already = SiteVisitor.objects.filter(ip_address=ip, user_agent=ua, visited_at__gte=cutoff).exists()
+        if not already:
+            SiteVisitor.objects.create(ip_address=ip, user_agent=ua, page_visited='/')
     count = SiteVisitor.objects.count()
     return JsonResponse({'count': count})
 

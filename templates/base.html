@@ -124,21 +124,31 @@
              x-effect="if(navHover) arcNavPosition()"
              class="hidden lg:block absolute top-full left-0 right-0"
              style="display:none; height:300px; pointer-events:none; z-index:49;">
-            <!-- Dark radial backdrop so items are always readable over page content -->
-            <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:70%;height:320px;background:radial-gradient(ellipse 80% 90% at 50% 0%, rgba(8,6,10,0.82) 0%, rgba(8,6,10,0.45) 60%, transparent 100%);pointer-events:none;"></div>
-            <!-- SVG arc line -->
+            <!-- SVG: filled semicircle backdrop + arc stroke + dots -->
             <svg id="arc-nav-svg" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:visible;pointer-events:none;">
                 <defs>
                     <linearGradient id="arc-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" style="stop-color:#c9a84c;stop-opacity:0.15"/>
-                        <stop offset="50%" style="stop-color:#c9a84c;stop-opacity:0.35"/>
-                        <stop offset="100%" style="stop-color:#c9a84c;stop-opacity:0.15"/>
+                        <stop offset="0%" style="stop-color:#c9a84c;stop-opacity:0.2"/>
+                        <stop offset="50%" style="stop-color:#c9a84c;stop-opacity:0.5"/>
+                        <stop offset="100%" style="stop-color:#c9a84c;stop-opacity:0.2"/>
                     </linearGradient>
+                    <radialGradient id="arc-bg-grad" cx="50%" cy="0%" r="100%" fx="50%" fy="0%">
+                        <stop offset="0%"   stop-color="#0c0906" stop-opacity="0.88"/>
+                        <stop offset="65%"  stop-color="#0c0906" stop-opacity="0.75"/>
+                        <stop offset="100%" stop-color="#0c0906" stop-opacity="0"/>
+                    </radialGradient>
+                    <!-- Clip path to the semicircle shape -->
+                    <clipPath id="arc-clip">
+                        <path id="arc-clip-path" d=""/>
+                    </clipPath>
                 </defs>
+                <!-- Filled semicircle backdrop clipped to arc shape -->
+                <path id="arc-bg-fill" d="" fill="url(#arc-bg-grad)" opacity="0.92"/>
+                <!-- Gold arc stroke on top -->
                 <path id="arc-nav-path" d="" fill="none" stroke="url(#arc-grad)" stroke-width="1.5"/>
-                <!-- endpoint dots -->
-                <circle id="arc-dot-l" cx="0" cy="0" r="3" fill="#c9a84c" opacity="0.5"/>
-                <circle id="arc-dot-r" cx="0" cy="0" r="3" fill="#c9a84c" opacity="0.5"/>
+                <!-- Endpoint dots -->
+                <circle id="arc-dot-l" cx="0" cy="0" r="3.5" fill="#c9a84c" opacity="0.6"/>
+                <circle id="arc-dot-r" cx="0" cy="0" r="3.5" fill="#c9a84c" opacity="0.6"/>
             </svg>
             <!-- Arc items (4) -->
             <div style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;">
@@ -198,11 +208,16 @@
             var cx = (leftX + rightX) / 2;
             var r  = (rightX - leftX) / 2;
 
-            // Draw SVG arc: from (leftX,0) curving down to (rightX,0)
+            // Draw SVG arc stroke: sweep-flag=0 → curves DOWNWARD in screen coords
+            var arcD = 'M ' + leftX + ' 0 A ' + r + ' ' + r + ' 0 0 0 ' + rightX + ' 0';
             var path = document.getElementById('arc-nav-path');
-            if (path) {
-                path.setAttribute('d', 'M ' + leftX + ' 0 A ' + r + ' ' + r + ' 0 0 1 ' + rightX + ' 0');
-            }
+            if (path) path.setAttribute('d', arcD);
+
+            // Filled semicircle backdrop: arc going down + line back along top chord
+            var fillD = 'M ' + leftX + ' 0 A ' + r + ' ' + r + ' 0 0 0 ' + rightX + ' 0 L ' + leftX + ' 0 Z';
+            var bgFill = document.getElementById('arc-bg-fill');
+            if (bgFill) bgFill.setAttribute('d', fillD);
+
             var dl = document.getElementById('arc-dot-l');
             var dr = document.getElementById('arc-dot-r');
             if (dl) { dl.setAttribute('cx', leftX); dl.setAttribute('cy', 0); }

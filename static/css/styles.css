@@ -213,8 +213,14 @@
 /* ── Amenity Flip Cards ── */
 .amenity-flip-card {
     perspective: 1000px;
-    height: 200px;
+    height: 260px; /* Taller on mobile to fit wrapped text */
     cursor: pointer;
+}
+@media (min-width: 768px) {
+    .amenity-flip-card { height: 220px; }
+}
+@media (min-width: 1024px) {
+    .amenity-flip-card { height: 240px; }
 }
 .amenity-flip-inner {
     position: relative;

@@ -1188,7 +1188,9 @@ document.getElementById('gallery-lightbox').addEventListener('click', function(e
     </div>
 
     <!-- Dot indicators -->
-    <div id="lb-dots" style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:10;display:flex;gap:10px;align-items:center;"></div>
+    <div style="position:absolute;bottom:24px;left:0;width:100%;z-index:10;display:flex;justify-content:center;pointer-events:none;">
+        <div id="lb-dots" style="display:flex;gap:10px;align-items:center;max-width:100%;overflow-x:auto;padding:10px 20px;box-sizing:border-box;scrollbar-width:none;pointer-events:auto;"></div>
+    </div>
 
     <!-- Mobile arrows -->
     <button onclick="lightboxPrev()" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);z-index:10;width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);background:rgba(0,0,0,0.4);color:rgba(255,255,255,0.6);display:none;align-items:center;justify-content:center;cursor:pointer;" id="lb-arrow-prev">

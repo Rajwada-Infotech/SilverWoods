@@ -999,6 +999,13 @@ function openLightbox(index) {
     var w = window.innerWidth;
     document.getElementById('lb-arrow-prev').style.display = 'none';
     document.getElementById('lb-arrow-next').style.display = 'none';
+    var isMobile = w < 640;
+    var cardPrev = document.getElementById('lb-card-prev');
+    var cardNext = document.getElementById('lb-card-next');
+    cardPrev.style.opacity = isMobile ? '0' : '0.35';
+    cardNext.style.opacity = isMobile ? '0' : '0.35';
+    cardPrev.style.pointerEvents = isMobile ? 'none' : 'all';
+    cardNext.style.pointerEvents = isMobile ? 'none' : 'all';
 }
 
 function closeLightbox() {
@@ -1171,7 +1178,7 @@ document.getElementById('gallery-lightbox').addEventListener('click', function(e
             <div style="position:absolute;inset:0;background:rgba(0,0,0,0.4);pointer-events:none;"></div>
         </div>
         <!-- Active card -->
-        <div id="lb-card-active" style="position:absolute;top:50%;left:50%;width:min(74vw,800px);aspect-ratio:16/10;margin-top:calc(min(74vw,800px)*-5/16);margin-left:calc(min(74vw,800px)*-1/2);transform:translateX(0) rotateY(0deg) scale(1);opacity:1;transition:all 0.55s cubic-bezier(.22,.68,0,1.2);border-radius:16px;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,0.9),0 0 0 1px rgba(255,255,255,0.07);z-index:2;">
+        <div id="lb-card-active" style="position:absolute;top:50%;left:50%;width:min(88vw,800px);aspect-ratio:16/10;margin-top:calc(min(88vw,800px)*-5/16);margin-left:calc(min(88vw,800px)*-1/2);transform:translateX(0) rotateY(0deg) scale(1);opacity:1;transition:all 0.55s cubic-bezier(.22,.68,0,1.2);border-radius:16px;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,0.9),0 0 0 1px rgba(255,255,255,0.07);z-index:2;">
             <img id="lb-img-active" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
         </div>
         <!-- Next card -->

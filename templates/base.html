@@ -124,6 +124,8 @@
              x-effect="if(navHover) arcNavPosition()"
              class="hidden lg:block absolute top-full left-0 right-0"
              style="display:none; height:300px; pointer-events:none; z-index:49;">
+            <!-- Dark radial backdrop so items are always readable over page content -->
+            <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:70%;height:320px;background:radial-gradient(ellipse 80% 90% at 50% 0%, rgba(8,6,10,0.82) 0%, rgba(8,6,10,0.45) 60%, transparent 100%);pointer-events:none;"></div>
             <!-- SVG arc line -->
             <svg id="arc-nav-svg" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:visible;pointer-events:none;">
                 <defs>
@@ -141,28 +143,28 @@
             <!-- Arc items (4) -->
             <div style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;">
                 <a href="{% url 'brochure' %}" id="arc-item-0" class="arc-nav-item" style="position:absolute;pointer-events:all;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:5px;text-decoration:none;opacity:0;transition:opacity 0.3s ease, transform 0.3s ease;">
-                    <div class="arc-icon-box" style="width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.25);display:flex;align-items:center;justify-content:center;transition:background 0.2s,border-color 0.2s,transform 0.2s;">
+                    <div class="arc-icon-box" style="width:42px;height:42px;border-radius:12px;background:rgba(20,15,10,0.75);border:1px solid rgba(201,168,76,0.4);box-shadow:0 4px 16px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;transition:background 0.2s,border-color 0.2s,transform 0.2s;backdrop-filter:blur(6px);">
                         <i class="fas fa-book-open" style="color:#c9a84c;font-size:15px;"></i>
                     </div>
-                    <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.75);white-space:nowrap;">Brochure</span>
+                    <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.9);white-space:nowrap;text-shadow:0 1px 8px rgba(0,0,0,0.9),0 0 16px rgba(0,0,0,0.8);">Brochure</span>
                 </a>
                 <a href="{% url 'blueprint' %}" id="arc-item-1" class="arc-nav-item" style="position:absolute;pointer-events:all;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:5px;text-decoration:none;opacity:0;transition:opacity 0.3s ease 0.05s, transform 0.3s ease 0.05s;">
-                    <div class="arc-icon-box" style="width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.25);display:flex;align-items:center;justify-content:center;transition:background 0.2s,border-color 0.2s,transform 0.2s;">
+                    <div class="arc-icon-box" style="width:42px;height:42px;border-radius:12px;background:rgba(20,15,10,0.75);border:1px solid rgba(201,168,76,0.4);box-shadow:0 4px 16px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;transition:background 0.2s,border-color 0.2s,transform 0.2s;backdrop-filter:blur(6px);">
                         <i class="fas fa-drafting-compass" style="color:#c9a84c;font-size:15px;"></i>
                     </div>
-                    <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.75);white-space:nowrap;">Blueprint</span>
+                    <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.9);white-space:nowrap;text-shadow:0 1px 8px rgba(0,0,0,0.9),0 0 16px rgba(0,0,0,0.8);">Blueprint</span>
                 </a>
                 <a href="{% url 'plots' %}" id="arc-item-2" class="arc-nav-item" style="position:absolute;pointer-events:all;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:5px;text-decoration:none;opacity:0;transition:opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;">
-                    <div class="arc-icon-box" style="width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.25);display:flex;align-items:center;justify-content:center;transition:background 0.2s,border-color 0.2s,transform 0.2s;">
+                    <div class="arc-icon-box" style="width:42px;height:42px;border-radius:12px;background:rgba(20,15,10,0.75);border:1px solid rgba(201,168,76,0.4);box-shadow:0 4px 16px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;transition:background 0.2s,border-color 0.2s,transform 0.2s;backdrop-filter:blur(6px);">
                         <i class="fas fa-vector-square" style="color:#c9a84c;font-size:15px;"></i>
                     </div>
-                    <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.75);white-space:nowrap;">Plot Metrics</span>
+                    <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.9);white-space:nowrap;text-shadow:0 1px 8px rgba(0,0,0,0.9),0 0 16px rgba(0,0,0,0.8);">Plot Metrics</span>
                 </a>
                 <a href="{% url 'admin_login' %}" id="arc-item-3" class="arc-nav-item" style="position:absolute;pointer-events:all;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:5px;text-decoration:none;opacity:0;transition:opacity 0.3s ease 0.15s, transform 0.3s ease 0.15s;">
-                    <div class="arc-icon-box" style="width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.25);display:flex;align-items:center;justify-content:center;transition:background 0.2s,border-color 0.2s,transform 0.2s;">
+                    <div class="arc-icon-box" style="width:42px;height:42px;border-radius:12px;background:rgba(20,15,10,0.75);border:1px solid rgba(201,168,76,0.4);box-shadow:0 4px 16px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;transition:background 0.2s,border-color 0.2s,transform 0.2s;backdrop-filter:blur(6px);">
                         <i class="fas fa-lock" style="color:#c9a84c;font-size:15px;"></i>
                     </div>
-                    <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.75);white-space:nowrap;">Login</span>
+                    <span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.9);white-space:nowrap;text-shadow:0 1px 8px rgba(0,0,0,0.9),0 0 16px rgba(0,0,0,0.8);">Login</span>
                 </a>
             </div>
         </div>

@@ -121,7 +121,6 @@
              x-transition:leave="transition ease-in duration-75"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
-             x-effect="if(navHover) arcNavPosition()"
              class="hidden lg:block absolute top-full left-0 right-0"
              style="display:none; height:300px; pointer-events:none; z-index:49;">
             <!-- Semicircle background div — exact same style as flat mega panel -->
@@ -596,6 +595,14 @@
     </div>
 
     <script src="{% static 'js/main.js' %}?v=13"></script>
+    <script>
+    // Initialize on load and resize so it's already calculated before hover
+    document.addEventListener('DOMContentLoaded', function() {
+        // Need a slight delay to ensure fonts and layout are loaded for accurate getBoundingClientRect
+        setTimeout(arcNavPosition, 50);
+    });
+    window.addEventListener('resize', arcNavPosition);
+    </script>
     {% block extra_js %}{% endblock %}
 
 

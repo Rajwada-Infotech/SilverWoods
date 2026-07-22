@@ -58,7 +58,7 @@
                 sideOpen ? 'lg:w-64' : 'lg:w-20'
             ]"
         >
-            <div class="p-5 flex items-center gap-3 border-b border-brown-700/20 dark:border-white/[0.04]">
+            <a href="{% url 'home' %}" class="p-5 flex items-center gap-3 border-b border-brown-700/20 dark:border-white/[0.04] hover:opacity-80 transition-opacity">
                 <img src="{% static 'images/logo.webp' %}" alt="Silverwoods" class="w-10 h-10 rounded-xl object-cover flex-shrink-0" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
                 <div class="w-10 h-10 bg-gradient-to-br from-gold-500 to-brown-400 rounded-xl items-center justify-center flex-shrink-0 hidden">
                     <svg class="w-6 h-6 text-brown-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg>
@@ -67,7 +67,7 @@
                     <span class="font-bold text-lg whitespace-nowrap tracking-wide block" style="font-family:'Playfair Display',serif">SILVER<span class="text-gold-500">WOODS</span></span>
                     <span class="italic text-[9px] tracking-[0.1em] text-gold-500/50 block -mt-0.5">Live the Villa Life</span>
                 </div>
-            </div>
+            </a>
             <nav class="flex-1 py-4 space-y-1 px-3">
                 <a href="{% url 'admin_dashboard' %}" @click="mobileOpen=false" class="relative group flex items-center text-sm font-medium transition-colors {% if request.resolver_match.url_name == 'admin_dashboard' %}bg-gold-500/20 text-gold-400{% else %}text-cream-400/50 hover:bg-white/5 hover:text-cream-100{% endif %}" :class="(mobileOpen || sideOpen) ? 'gap-3 px-3 py-2.5 rounded-xl' : 'justify-center w-10 h-10 rounded-full mx-auto'">
                     <i class="ti ti-chart-pie w-5 text-center text-xl"></i><span x-show="mobileOpen || sideOpen">Dashboard</span>

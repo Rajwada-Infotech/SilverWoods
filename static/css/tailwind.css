@@ -1427,10 +1427,6 @@ video {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-.grid-cols-6 {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-}
-
 .flex-col {
   flex-direction: column;
 }
@@ -3185,11 +3181,6 @@ video {
 .group:hover .group-hover\:text-brown-900 {
   --tw-text-opacity: 1;
   color: rgb(26 19 12 / var(--tw-text-opacity, 1));
-}
-
-.group:hover .group-hover\:text-gold-500 {
-  --tw-text-opacity: 1;
-  color: rgb(201 168 76 / var(--tw-text-opacity, 1));
 }
 
 .group:hover .group-hover\:opacity-100 {

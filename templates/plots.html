@@ -1635,16 +1635,14 @@ function buildScene() {
   mkFlat(5, 77, 0x3a3838, 54, -268.5);
   // Far-left road + blank plot
   mkFlat(5, 77, 0x3a3838, -13, -268.5);
-  mkFlat(10, 77, 0xf5c842, -21, -269.5, 0, 1, { type: 'phase3', title: 'Plot' }); // blank plot left — extended to road corner below
 
   // North horizontal road between 24-villa and 25-villa sections
-  mkFlat(104,5,0x3a3838,36.5,-307);  // trimmed left end to x=-15.5 to match N-S roads
+  mkFlat(38,5,0x3a3838,3,-307);   // left segment — x=-15.5 to x=22
+  mkFlat(35,5,0x3a3838,71,-307);  // right segment — x=54 to x=88.5
   mkP(-3, -320, 'left'); mkP(11, -320, 'right');
   mkP(31, -320, 'left'); mkP(45, -320, 'right'); mkP(63, -320, 'left');
-  mkFlat(8, 8, 0xf5c842, 78, -340, 0, 1, { type: 'phase3', title: 'Plot' }); // blank plot — above villa 88
-  mkP(77, -340, 'right');  // new villa above villa 88
-  mkFlat(8, 8, 0xf5c842, 78, -320, 0, 1, { type: 'phase3', title: 'Plot' }); // blank plot right of villa 87
-  mkP(77, -320, 'right');  // villa on blank plot — right of villa 87
+  mkP(77, -340, 'right');
+  mkP(77, -320, 'right');
   // Row 2 (front): z=-332
   mkP(-3, -332, 'left'); mkP(11, -332, 'right');
   mkP(31, -332, 'left'); mkP(45, -332, 'right'); mkP(63, -332, 'left');
@@ -1655,16 +1653,6 @@ function buildScene() {
   mkP(-3, -356, 'left'); mkP(11, -356, 'right');
   mkP(31, -356, 'left'); mkP(45, -356, 'right'); mkP(63, -356, 'left');
   // Row 5 (back): z=-368
-  // Gold plot beneath villa 106 (brochure) — same style as villa 65's plot
-  {
-    var _gpm106 = new THREE.MeshLambertMaterial({ color: 0xf5c842, depthTest: false });
-    var _gp106  = new THREE.Mesh(new THREE.PlaneGeometry(10, 10), _gpm106);
-    _gp106.rotation.x = -Math.PI / 2;
-    _gp106.position.set(-3, 0.08, -368);
-    _gp106.renderOrder = 9;
-    _gp106.userData = { type: 'phase3', title: 'Plot' };
-    interactables.push(_gp106); scene.add(_gp106);
-  }
   mkP(-3, -368, 'left'); mkP(11, -368, 'right');
   mkP(31, -368, 'left'); mkP(45, -368, 'right'); mkP(63, -368, 'left');
   mkP(-22, -364, 'right');  // villa at top of left blank plot — east facing
@@ -1677,44 +1665,28 @@ function buildScene() {
   mkFlat(5,65,0x3a3838,22,-339.5);    // between col2 and col3 — extended south to z=-307 to meet horizontal road
   mkFlat(5,65,0x3a3838,54,-339.5);    // between col4 and col5
   mkFlat(5,65,0x3a3838,-13,-339.5);   // far-left road
-  mkFlat(10,62,0xf5c842,-21,-338,0,1,{type:'phase3',title:'Plot'}); // blank plot far-left — styled like villa 109 plot
   mkFlat(13, 5, 0x3a3838, -19.5, -333); // horizontal road connecting villas 111/112 to N-S road at x=-13
   mkFlat(13, 5, 0x3a3838, -19.5, -276.5); // horizontal road connecting villas 113/114 to N-S road at x=-13
-  mkFlat(10,52,0xf5c842,78,-340,0,1,{type:'phase3',title:'Plot'}); // blank plot far-right — styled like villa 109 plot
   mkFlat(5, 269, 0x3a3838, 86, -233.5);  // N-S road: trimmed south end to z=-99 (removed spur beside plot #023)
   
   // Above (north of) rightmost columns: garden (2 cols wide) + villa + blank plot
   mkP(63, -296, 'left');
-  // Gold plot — depthTest:false so it renders above ground, renderOrder=9 so plot marker (10+) renders on top
-  {
-    var _gpm = new THREE.MeshLambertMaterial({ color: 0xf5c842, depthTest: false });
-    var _gp  = new THREE.Mesh(new THREE.PlaneGeometry(10, 10), _gpm);
-    _gp.rotation.x = -Math.PI / 2;
-    _gp.position.set(78, 0.08, -296);
-    _gp.renderOrder = 9;
-    _gp.userData = { type: 'phase3', title: 'Plot' };
-    interactables.push(_gp); scene.add(_gp);
-  }
   mkP(77, -296, 'right');
   // ── GREEN GARDEN — 2 columns wide, left of villa ──────────────────────
   // 2 villas left of garden
   mkP(-3, -296, 'left');
   mkP(11, -296, 'right');
-  mkFlat(24, 12, 0x1e6b22, 38, -296, 0, 1, { type: 'lawn', title: 'Landscape Garden' });
-  mkFlat(22, 10, 0x2d8a35, 38, -296, 0.05);
-  mkFlat(20,  8, 0x3aaa42, 38, -296, 0.08);
+  mkFlat(24, 26, 0x1e6b22, 38, -301, 0, 1, { type: 'lawn', title: 'Landscape Garden' });
+  mkFlat(22, 24, 0x2d8a35, 38, -301, 0.05);
+  mkFlat(20, 22, 0x3aaa42, 38, -301, 0.08);
   // winding path
   mkFlat(2, 4, 0xc8b882, 34, -294, 0.12);
   mkFlat(2, 4, 0xc8b882, 38, -297, 0.12);
   mkFlat(2, 4, 0xc8b882, 42, -294, 0.12);
   // canopy trees scattered in garden
-  mkTree(28, -293, 5, 2.8, 0x1a7a28);
-  mkTree(32, -299, 4, 2.2, 0x22882e);
-  mkTree(37, -293, 4.5, 2.5, 0x1e7a26);
-  mkTree(42, -299, 4, 2.0, 0x228830);
-  mkTree(47, -293, 3.5, 1.8, 0x1a7228);
-  mkTree(29, -296, 3, 1.6, 0x2a9035);
-  mkTree(44, -295, 3.5, 1.8, 0x1d8030);
+  mkTree(32, -296, 5, 2.8, 0x1e7a26); mkTree(44, -296, 4, 2.2, 0x228830);
+  mkTree(38, -301, 4.5, 2.5, 0x1a7228); mkTree(29, -306, 3, 1.6, 0x2a9035);
+  mkTree(47, -306, 3.5, 1.8, 0x22882e);
 
   // ── KIDS PLAY AREA (6) — north of football, small road gap ──────────────
   mkFlat(30, 3, 0x3a3838, 73, -210); // extended right to connect vertical road

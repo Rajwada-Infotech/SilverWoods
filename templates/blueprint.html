@@ -855,14 +855,12 @@ function buildScene() {
   mkFlat(5, 77, 0x3a3838, 22, -268.5);
   mkFlat(5, 77, 0x3a3838, 54, -268.5);
   mkFlat(5, 77, 0x3a3838, -13, -268.5);
-  mkFlat(10, 77, 0xf5c842, -21, -269.5, 0, 1, { type: 'phase3', title: 'Plot' });
 
-  mkFlat(104, 5, 0x3a3838, 36.5, -307);
+  mkFlat(38, 5, 0x3a3838, 3, -307);   // left segment — x=-15.5 to x=22
+  mkFlat(35, 5, 0x3a3838, 71, -307);  // right segment — x=54 to x=88.5
   mkP(-3, -320, 'left'); mkP(11, -320, 'right');
   mkP(31, -320, 'left'); mkP(45, -320, 'right'); mkP(63, -320, 'left');
-  mkFlat(8, 8, 0xf5c842, 78, -340, 0, 1, { type: 'phase3', title: 'Plot' });
   mkP(77, -340, 'right');
-  mkFlat(8, 8, 0xf5c842, 78, -320, 0, 1, { type: 'phase3', title: 'Plot' });
   mkP(77, -320, 'right');
   mkP(-3, -332, 'left'); mkP(11, -332, 'right');
   mkP(31, -332, 'left'); mkP(45, -332, 'right'); mkP(63, -332, 'left');
@@ -870,7 +868,6 @@ function buildScene() {
   mkP(31, -344, 'left'); mkP(45, -344, 'right'); mkP(63, -344, 'left');
   mkP(-3, -356, 'left'); mkP(11, -356, 'right');
   mkP(31, -356, 'left'); mkP(45, -356, 'right'); mkP(63, -356, 'left');
-  mkFlat(10, 10, 0xf5c842, -3, -368, 0, 1, { type: 'phase3', title: 'Plot' });
   mkP(-3, -368, 'left'); mkP(11, -368, 'right');
   mkP(31, -368, 'left'); mkP(45, -368, 'right'); mkP(63, -368, 'left');
   mkP(-22, -364, 'right'); mkP(-22, -344, 'right'); mkP(-22, -322, 'right');
@@ -879,22 +876,19 @@ function buildScene() {
   mkFlat(5, 65, 0x3a3838, 22, -339.5);
   mkFlat(5, 65, 0x3a3838, 54, -339.5);
   mkFlat(5, 65, 0x3a3838, -13, -339.5);
-  mkFlat(10, 62, 0xf5c842, -21, -338, 0, 1, { type: 'phase3', title: 'Plot' });
   mkFlat(13, 5, 0x3a3838, -19.5, -333);
   mkFlat(13, 5, 0x3a3838, -19.5, -276.5);
-  mkFlat(10, 52, 0xf5c842, 78, -340, 0, 1, { type: 'phase3', title: 'Plot' });
   mkFlat(5, 269, 0x3a3838, 86, -233.5);
 
   mkP(63, -296, 'left');
-  mkFlat(10, 10, 0xf5c842, 78, -296, 0, 1, { type: 'phase3', title: 'Plot' });
   mkP(77, -296, 'right');
   mkP(-3, -296, 'left'); mkP(11, -296, 'right');
-  mkFlat(24, 12, 0x1e6b22, 38, -296, 0, 1, { type: 'lawn', title: 'Landscape Garden' });
-  mkFlat(22, 10, 0x2d8a35, 38, -296, 0.05);
-  mkFlat(20, 8, 0x3aaa42, 38, -296, 0.08);
-  mkTree(28, -293, 5, 2.8, 0x1a7a28); mkTree(32, -299, 4, 2.2, 0x22882e);
-  mkTree(37, -293, 4.5, 2.5, 0x1e7a26); mkTree(42, -299, 4, 2.0, 0x228830);
-  mkTree(47, -293, 3.5, 1.8, 0x1a7228); mkTree(29, -296, 3, 1.6, 0x2a9035);
+  mkFlat(24, 26, 0x1e6b22, 38, -301, 0, 1, { type: 'lawn', title: 'Landscape Garden' });
+  mkFlat(22, 24, 0x2d8a35, 38, -301, 0.05);
+  mkFlat(20, 22, 0x3aaa42, 38, -301, 0.08);
+  mkTree(32, -296, 5, 2.8, 0x1e7a26); mkTree(44, -296, 4, 2.2, 0x228830);
+  mkTree(38, -301, 4.5, 2.5, 0x1a7228); mkTree(29, -306, 3, 1.6, 0x2a9035);
+  mkTree(47, -306, 3.5, 1.8, 0x22882e);
 
   // ── KIDS PLAY AREA ──
   mkFlat(30, 3, 0x3a3838, 73, -210);

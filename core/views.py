@@ -15,7 +15,7 @@ from .models import (
     ProjectInfo, FlatType, Amenity, Lead, SiteVisitor,
     PopupAd, Review, BuildingFlat, BrochureImage, VillaPlot, ChatbotQA
 )
-from .forms import LeadForm, PopupAdForm, FlatTypeForm, ReviewForm
+from .forms import LeadForm, PopupAdForm, FlatTypeForm, ReviewForm, AmenityForm
 import os as _os
 from decouple import config as _decouple_config
 
@@ -554,6 +554,35 @@ def admin_delete_flat_type(request, pk):
     flat = get_object_or_404(FlatType, pk=pk)
     flat.delete()
     return redirect('admin_pricing')
+
+
+@login_required
+def admin_amenities(request):
+    from django.core.cache import cache
+    amenities = Amenity.objects.all()
+    if request.method == 'POST':
+        amenity_id = request.POST.get('amenity_id')
+        if amenity_id:
+            amenity = get_object_or_404(Amenity, pk=amenity_id)
+            form = AmenityForm(request.POST, instance=amenity)
+        else:
+            form = AmenityForm(request.POST)
+        if form.is_valid():
+            form.save()
+            cache.delete('index_amenities')
+            return redirect('admin_amenities')
+    else:
+        form = AmenityForm()
+    return render(request, 'admin_panel/amenities.html', {'amenities': amenities, 'form': form})
+
+
+@login_required
+def admin_delete_amenity(request, pk):
+    from django.core.cache import cache
+    amenity = get_object_or_404(Amenity, pk=pk)
+    amenity.delete()
+    cache.delete('index_amenities')
+    return redirect('admin_amenities')
 
 
 @login_required

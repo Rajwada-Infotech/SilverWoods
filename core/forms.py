@@ -1,5 +1,5 @@
 from django import forms
-from .models import Lead, PopupAd, FlatType, Review
+from .models import Lead, PopupAd, FlatType, Review, Amenity
 
 
 class LeadForm(forms.ModelForm):
@@ -31,6 +31,35 @@ class FlatTypeForm(forms.ModelForm):
     class Meta:
         model = FlatType
         fields = ['name', 'bhk', 'carpet_area', 'buildup_area', 'terrace_area', 'super_buildup_area', 'price', 'price_per_sqft', 'description', 'is_available', 'order']
+
+
+class AmenityForm(forms.ModelForm):
+    ICON_CHOICES = [
+        ('pool', 'Swimming Pool'),
+        ('fitness', 'Gym / Fitness'),
+        ('child', 'Kids / Play Area'),
+        ('club', 'Clubhouse / Banquet'),
+        ('garden', 'Garden / Greenery'),
+        ('security', 'Security / Gate'),
+        ('power', 'Power Backup'),
+        ('parking', 'Parking'),
+        ('sports', 'Sports'),
+        ('banquet', 'Banquet / Dining'),
+        ('star', 'Other'),
+    ]
+
+    class Meta:
+        model = Amenity
+        fields = ['name', 'icon', 'description', 'order']
+        widgets = {
+            'name': forms.TextInput(attrs={'placeholder': 'e.g. Infinity Pool', 'class': 'form-input'}),
+            'description': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Brief description...', 'class': 'form-input'}),
+            'order': forms.NumberInput(attrs={'class': 'form-input'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['icon'].widget = forms.Select(choices=self.ICON_CHOICES, attrs={'class': 'form-input'})
 
 
 class ReviewForm(forms.ModelForm):

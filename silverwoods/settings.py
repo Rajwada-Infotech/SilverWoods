@@ -172,9 +172,15 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
-    # Allow Railway / Render domains for CSRF
+    # Railway (and Render) terminate HTTPS at their proxy and forward to us
+    # over plain HTTP. Without this, Django thinks every request is HTTP,
+    # which makes the CSRF Origin check fail on any https:// deployment.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    # Allow Railway / Render domains for CSRF. *.up.railway.app covers any
+    # Railway-assigned subdomain by default; override with the
+    # CSRF_TRUSTED_ORIGINS env var (comma-separated) for a custom domain.
     CSRF_TRUSTED_ORIGINS = config(
         'CSRF_TRUSTED_ORIGINS',
-        default='http://localhost:8000'
+        default='https://*.up.railway.app,http://localhost:8000'
     ).split(',')
 

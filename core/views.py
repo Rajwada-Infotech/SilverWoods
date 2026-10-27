@@ -585,11 +585,14 @@ def admin_amenities(request):
         amenity_id = request.POST.get('amenity_id')
         if amenity_id:
             amenity = get_object_or_404(Amenity, pk=amenity_id)
-            form = AmenityForm(request.POST, instance=amenity)
+            form = AmenityForm(request.POST, request.FILES, instance=amenity)
         else:
-            form = AmenityForm(request.POST)
+            form = AmenityForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            amenity = form.save(commit=False)
+            if 'image' in request.FILES:
+                amenity.static_path = ''
+            amenity.save()
             cache.delete('index_amenities')
             return redirect('admin_amenities')
     else:

@@ -68,6 +68,8 @@ class Amenity(models.Model):
     name = models.CharField(max_length=100)
     icon = models.CharField(max_length=50, default="star")
     description = models.CharField(max_length=300, blank=True)
+    image = models.ImageField(upload_to="amenities/", blank=True)
+    static_path = models.CharField(max_length=300, blank=True, help_text="Bundled static image used when no upload is set")
     order = models.IntegerField(default=0)
 
     class Meta:

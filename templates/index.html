@@ -269,25 +269,8 @@
                     </div>
                     <!-- Back -->
                     <div class="amenity-flip-back rounded-2xl overflow-hidden">
-                        {% if amenity.icon == 'pool' %}
-                            <img src="{% static 'images/amenities/Infinity_Pool.webp' %}" alt="{{ amenity.name }}" loading="lazy" class="amenity-flip-img">
-                        {% elif amenity.icon == 'fitness' %}
-                            <img src="{% static 'images/amenities/Gym.webp' %}" alt="{{ amenity.name }}" loading="lazy" class="amenity-flip-img">
-                        {% elif amenity.icon == 'child' %}
-                            <img src="{% static 'images/amenities/Kids.webp' %}" alt="{{ amenity.name }}" loading="lazy" class="amenity-flip-img">
-                        {% elif amenity.icon == 'club' %}
-                            <img src="{% static 'images/amenities/Clubhouse.webp' %}" alt="{{ amenity.name }}" loading="lazy" class="amenity-flip-img">
-                        {% elif amenity.icon == 'garden' %}
-                            <img src="{% static 'images/amenities/Personal_Pool.webp' %}" alt="{{ amenity.name }}" loading="lazy" class="amenity-flip-img">
-                        {% elif amenity.icon == 'security' %}
-                            <img src="{% static 'images/amenities/Gate.webp' %}" alt="{{ amenity.name }}" loading="lazy" class="amenity-flip-img">
-                        {% elif amenity.icon == 'banquet' %}
-                            <img src="{% static 'images/amenities/Banquet.webp' %}" alt="{{ amenity.name }}" loading="lazy" class="amenity-flip-img">
-                        {% elif amenity.icon == 'sports' %}
-                            <img src="{% static 'images/amenities/Sports.webp' %}" alt="{{ amenity.name }}" loading="lazy" class="amenity-flip-img">
-                        {% else %}
-                            <img src="{% static 'images/amenities/Clubhouse.webp' %}" alt="{{ amenity.name }}" loading="lazy" class="amenity-flip-img">
-                        {% endif %}
+                        {% media_url amenity as amenity_img %}
+                        {% if amenity_img %}<img src="{{ amenity_img }}" alt="{{ amenity.name }}" loading="lazy" class="amenity-flip-img">{% endif %}
                         <div class="amenity-flip-overlay">
                             <h3 class="font-display text-sm font-bold text-white tracking-wide uppercase mb-1">{{ amenity.name }}</h3>
                             <p class="hidden sm:block text-white/70 text-[10px] leading-relaxed">{{ amenity.description }}</p>

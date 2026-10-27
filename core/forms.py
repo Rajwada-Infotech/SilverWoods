@@ -53,7 +53,7 @@ class AmenityForm(forms.ModelForm):
 
     class Meta:
         model = Amenity
-        fields = ['name', 'icon', 'description', 'order']
+        fields = ['name', 'icon', 'description', 'image', 'order']
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'e.g. Infinity Pool', 'class': 'form-input'}),
             'description': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Brief description...', 'class': 'form-input'}),

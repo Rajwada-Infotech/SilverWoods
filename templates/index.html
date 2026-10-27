@@ -551,21 +551,21 @@
                     </div>
                     {% endif %}
                     <div class="p-6 space-y-4">
-                        <div class="flex items-start gap-4">
-                            <i class="fas fa-map-marker-alt text-brown-400 dark:text-gold-500/60 text-sm mt-0.5"></i>
+                        <a href="https://www.google.com/maps/dir/?api=1&destination={{ project.address|urlencode }}+{{ project.city|urlencode }}+{{ project.state|urlencode }}+{{ project.pincode }}" target="_blank" rel="noopener" class="group flex items-start gap-4 hover:text-brown-800 dark:hover:text-gold-400 transition-colors">
+                            <i class="fas fa-map-marker-alt fa-fw text-brown-400 dark:text-gold-500/60 text-sm mt-0.5 flex-shrink-0"></i>
                             <div>
-                                <div class="text-xs font-semibold text-brown-800 dark:text-cream-100">{{ project.address }}</div>
-                                <div class="text-[11px] text-brown-400 dark:text-cream-300/30">{{ project.state }} - {{ project.pincode }}</div>
+                                <div class="text-xs font-semibold text-brown-800 dark:text-cream-100 group-hover:underline">{{ project.address }}</div>
+                                <div class="text-[11px] text-brown-400 dark:text-cream-300/30">{% if project.city and project.city not in project.address %}{{ project.city }}, {% endif %}{{ project.state }} - {{ project.pincode }}</div>
                             </div>
-                        </div>
-                        <div class="flex items-start gap-4">
-                            <i class="fas fa-phone-alt text-brown-400 dark:text-gold-500/60 text-sm mt-0.5"></i>
-                            <div class="text-xs text-brown-600 dark:text-cream-200">{{ project.phone }}</div>
-                        </div>
-                        <div class="flex items-start gap-4">
-                            <i class="fas fa-envelope text-brown-400 dark:text-gold-500/60 text-sm mt-0.5"></i>
-                            <div class="text-xs text-brown-600 dark:text-cream-200">{{ project.email }}</div>
-                        </div>
+                        </a>
+                        <a href="tel:{{ project.phone|cut:' ' }}" class="group flex items-start gap-4 hover:text-brown-800 dark:hover:text-gold-400 transition-colors">
+                            <i class="fas fa-phone-alt fa-fw text-brown-400 dark:text-gold-500/60 text-sm mt-0.5 flex-shrink-0"></i>
+                            <div class="text-xs text-brown-600 dark:text-cream-200 group-hover:underline">{{ project.phone }}</div>
+                        </a>
+                        <a href="mailto:{{ project.email }}" class="group flex items-start gap-4 hover:text-brown-800 dark:hover:text-gold-400 transition-colors">
+                            <i class="fas fa-envelope fa-fw text-brown-400 dark:text-gold-500/60 text-sm mt-0.5 flex-shrink-0"></i>
+                            <div class="text-xs text-brown-600 dark:text-cream-200 group-hover:underline break-all">{{ project.email }}</div>
+                        </a>
                     </div>
                 </div>
                 <!-- Social -->
@@ -622,8 +622,8 @@
             <div>
                 <p class="text-[10px] font-semibold tracking-[0.2em] uppercase text-brown-400 dark:text-cream-300/30 mb-4">Contact</p>
                 <div class="text-xs text-brown-600 dark:text-cream-300/50 space-y-2">
-                    <p>{{ project.email }}</p>
-                    <p>{{ project.phone }}</p>
+                    <a href="mailto:{{ project.email }}" class="block hover:text-brown-800 dark:hover:text-cream-100 transition-colors break-all">{{ project.email }}</a>
+                    <a href="tel:{{ project.phone|cut:' ' }}" class="block hover:text-brown-800 dark:hover:text-cream-100 transition-colors">{{ project.phone }}</a>
                     {% if project.website %}<a href="{{ project.website }}" target="_blank" rel="noopener" class="block hover:text-brown-800 dark:hover:text-cream-100 transition-colors break-all">{{ project.website }}</a>{% endif %}
                 </div>
             </div>

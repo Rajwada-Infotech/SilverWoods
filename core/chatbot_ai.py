@@ -333,15 +333,47 @@ def ai_extract(q, faqs):
         with urllib.request.urlopen(req, timeout=AI_TIMEOUT_SECONDS) as resp:
             payload = json.loads(resp.read().decode())
         text = payload['candidates'][0]['content']['parts'][0]['text']
-        return validate_ai_output(json.loads(text), {qa.id for qa in faqs})
+        result = validate_ai_output(json.loads(text), {qa.id for qa in faqs})
+        _record_ai_status(True, 'OK')
+        return result
     except urllib.error.HTTPError as e:
         if e.code in (429, 403):
             # quota exhausted / rate limited / key disabled: back off and use fallbacks
             cache.set('chatbot_ai_cooldown', True, AI_COOLDOWN_SECONDS)
-        log.warning('Chatbot AI HTTP %s', e.code)
+        detail = _google_error_message(e)
+        log.warning('Chatbot AI HTTP %s: %s', e.code, detail)
+        _record_ai_status(False, f'HTTP {e.code}: {detail}')
     except Exception as e:  # timeout, network, malformed response
         log.warning('Chatbot AI failed: %s', e.__class__.__name__)
+        _record_ai_status(False, e.__class__.__name__)
     return None
+
+
+def _google_error_message(err):
+    try:
+        return json.loads(err.read().decode())['error']['message'][:300]
+    except Exception:
+        return 'no details'
+
+
+def _record_ai_status(ok, detail):
+    from django.utils import timezone
+    cache.set('chatbot_ai_status', {'ok': ok, 'detail': detail, 'at': timezone.now()}, 7 * 24 * 3600)
+
+
+def ai_status(run_test=False):
+    """Admin diagnostics. Never returns the key itself."""
+    if run_test:
+        cache.delete('chatbot_ai_cooldown')
+        faqs = list(ChatbotQA.objects.filter(is_active=True).only('id', 'question'))
+        ai_extract('Which is the biggest villa?', faqs)
+    return {
+        'key_configured': bool(_ai_key()),
+        'model': _ai_model(),
+        'cooldown': bool(cache.get('chatbot_ai_cooldown')),
+        'calls_today': cache.get('chatbot_ai_calls_today', 0),
+        'last': cache.get('chatbot_ai_status'),
+    }
 
 
 def validate_ai_output(data, faq_ids):

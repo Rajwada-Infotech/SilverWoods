@@ -1095,7 +1095,10 @@ def chatbot_contact(request):
 
 @login_required
 def admin_chatbot(request):
+    from .chatbot_ai import ai_status
     qas = ChatbotQA.objects.all()
+    if request.method == 'POST' and request.POST.get('action') == 'test_ai':
+        return render(request, 'admin_panel/chatbot.html', {'qas': qas, 'ai': ai_status(run_test=True), 'ai_tested': True})
     if request.method == 'POST':
         action = request.POST.get('action')
         if action == 'add':
@@ -1126,7 +1129,7 @@ def admin_chatbot(request):
             qa.is_active = not qa.is_active
             qa.save()
         return redirect('admin_chatbot')
-    return render(request, 'admin_panel/chatbot.html', {'qas': qas})
+    return render(request, 'admin_panel/chatbot.html', {'qas': qas, 'ai': ai_status()})
 
 
 @login_required

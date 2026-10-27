@@ -3,6 +3,23 @@
 {% block page_title %}Chatbot Q&A Manager{% endblock %}
 
 {% block admin_content %}
+<div class="mb-6 bg-white dark:bg-white/[0.03] rounded-2xl border border-brown-700/[0.05] dark:border-white/[0.06] p-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+    <div class="text-sm space-y-1">
+        <div class="font-bold text-brown-800 dark:text-cream-100">Smart AI (Google Gemini)
+            {% if ai.key_configured and ai.last.ok and not ai.cooldown %}<span class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400">Working</span>
+            {% elif not ai.key_configured %}<span class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400">No API key</span>
+            {% elif ai.cooldown %}<span class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">Paused (quota/error)</span>
+            {% elif ai.last and not ai.last.ok %}<span class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400">Error</span>
+            {% else %}<span class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-cream-200 text-brown-500 dark:bg-white/[0.05] dark:text-cream-300/40">Not tested yet</span>{% endif %}
+        </div>
+        <div class="text-xs text-brown-400 dark:text-cream-300/40">API key: {% if ai.key_configured %}set{% else %}<strong>missing</strong> — add GEMINI_API_KEY in Railway → Variables{% endif %} · Model: {{ ai.model }} · AI calls today: {{ ai.calls_today }}</div>
+        {% if ai.last %}<div class="text-xs text-brown-400 dark:text-cream-300/40">Last result: {{ ai.last.detail }} ({{ ai.last.at|timesince }} ago)</div>{% endif %}
+        {% if ai_tested %}<div class="text-xs font-semibold {% if ai.last.ok %}text-green-600{% else %}text-red-600{% endif %}">Test {% if ai.last.ok %}passed — Gemini answered.{% else %}failed — see "Last result" above.{% endif %}</div>{% endif %}
+    </div>
+    <form method="post">{% csrf_token %}<input type="hidden" name="action" value="test_ai">
+        <button type="submit" class="px-5 py-2.5 bg-brown-700 dark:bg-gold-500/20 text-cream-100 dark:text-gold-400 rounded-xl text-xs font-semibold tracking-wider uppercase whitespace-nowrap"><i class="fas fa-vial mr-2"></i>Test AI now</button>
+    </form>
+</div>
 <div class="grid lg:grid-cols-5 gap-6">
 
     <!-- Add / Edit Q&A -->

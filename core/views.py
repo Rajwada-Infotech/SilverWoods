@@ -1060,7 +1060,7 @@ def chatbot_answer(request, qa_id):
 @require_POST
 def chatbot_ask(request):
     """Smart chatbot: FAQ + rules + Gemini intent, answered only from verified public data."""
-    from .chatbot_ai import answer_question, rate_limited, MAX_QUESTION_LEN
+    from .chatbot_ai import answer_question, rate_limited, client_ip, visitor_id, MAX_QUESTION_LEN
     if rate_limited(request):
         return JsonResponse({'error': 'Too many questions. Please wait a minute and try again.'}, status=429)
     try:
@@ -1071,7 +1071,7 @@ def chatbot_ask(request):
     if not isinstance(question, str) or len(question) > MAX_QUESTION_LEN * 2:
         return JsonResponse({'error': 'Please keep your question short.'}, status=400)
     try:
-        return JsonResponse(answer_question(question))
+        return JsonResponse(answer_question(question, visitor_id(client_ip(request))))
     except Exception:
         import logging
         logging.getLogger(__name__).exception('chatbot_ask failed')

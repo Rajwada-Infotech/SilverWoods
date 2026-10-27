@@ -284,3 +284,36 @@ class ChatbotQA(models.Model):
 
     def __str__(self):
         return self.question[:80]
+
+
+class ChatbotAICache(models.Model):
+    """Gemini's understanding of a question (intent + fields), reused for identical questions.
+    Answers are still built from live data, so cached entries never show stale prices."""
+    key = models.CharField(max_length=64, unique=True)
+    question = models.CharField(max_length=300)
+    info = models.JSONField()
+    hits = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_used = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-hits']
+        verbose_name = "Chatbot AI cache entry"
+        verbose_name_plural = "Chatbot AI cache"
+
+    def __str__(self):
+        return self.question[:80]
+
+
+class ChatbotAIUsage(models.Model):
+    """Gemini calls per visitor per day. `visitor` is a salted hash, never the raw IP."""
+    visitor = models.CharField(max_length=64)
+    day = models.DateField()
+    count = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        unique_together = ['visitor', 'day']
+        indexes = [models.Index(fields=['day'])]
+
+    def __str__(self):
+        return f"{self.day} {self.visitor[:8]}… {self.count}"

@@ -5,6 +5,7 @@ budget...). Every fact shown to the visitor comes from the database through the
 whitelisted read-only helpers below, so the model can never invent prices or
 availability, and it never sees or touches private data (leads, owners, notes).
 """
+import hashlib
 import json
 import logging
 import re
@@ -13,9 +14,10 @@ import urllib.request
 from decimal import Decimal
 
 from django.core.cache import cache
+from django.db import models
 from django.utils.html import escape
 
-from .models import ChatbotQA, FlatType, ProjectInfo, VillaPlot
+from .models import ChatbotAICache, ChatbotAIUsage, ChatbotQA, FlatType, ProjectInfo, VillaPlot
 
 log = logging.getLogger(__name__)
 
@@ -23,7 +25,9 @@ MAX_QUESTION_LEN = 300
 FAQ_CONFIDENT_SCORE = 2
 AI_TIMEOUT_SECONDS = 10
 AI_COOLDOWN_SECONDS = 600          # pause AI calls after a quota / rate-limit error
-AI_DAILY_CAP = 1000                # stay comfortably inside the free tier
+AI_DAILY_CAP = 1000                # all visitors together; stay comfortably inside the free tier
+AI_PER_VISITOR_DAILY = 10          # Gemini calls per visitor per day (cache hits, FAQ and rules are free)
+AI_CACHE_DAYS = 30                 # reuse Gemini's understanding of an identical question this long
 
 INTENTS = (
     'villa_pricing', 'budget_search', 'area_search', 'plot_availability',
@@ -274,20 +278,78 @@ def ai_available():
     return bool(_ai_key()) and not cache.get('chatbot_ai_cooldown')
 
 
-def _bump_daily_ai_count():
-    key = 'chatbot_ai_calls_today'
-    count = cache.get(key, 0) + 1
-    cache.set(key, count, 24 * 3600)
-    return count
+# ── AI usage limits and cache (stored in the database: shared by all workers, survives restarts) ──
+
+def visitor_id(ip):
+    """Salted hash of the visitor's IP, so raw IP addresses are never stored."""
+    from django.conf import settings
+    return hashlib.sha256(f'{settings.SECRET_KEY}:{ip}'.encode()).hexdigest()
 
 
-def ai_extract(q, faqs):
+def ai_calls_today():
+    from django.db.models import Sum
+    from django.utils import timezone
+    return ChatbotAIUsage.objects.filter(day=timezone.localdate()).aggregate(n=Sum('count'))['n'] or 0
+
+
+def visitor_ai_calls_today(visitor):
+    from django.utils import timezone
+    row = ChatbotAIUsage.objects.filter(visitor=visitor, day=timezone.localdate()).only('count').first()
+    return row.count if row else 0
+
+
+def _record_ai_call(visitor):
+    from datetime import timedelta
+    from django.db.models import F
+    from django.utils import timezone
+    today = timezone.localdate()
+    row, created = ChatbotAIUsage.objects.get_or_create(visitor=visitor, day=today)
+    ChatbotAIUsage.objects.filter(pk=row.pk).update(count=F('count') + 1)
+    if created:  # first call of a visitor's day: drop old rows so the table stays small
+        ChatbotAIUsage.objects.filter(day__lt=today - timedelta(days=7)).delete()
+
+
+def normalize_question(q):
+    """Same question with different case, spacing, punctuation or digits -> same cache key."""
+    t = q.lower().translate(BN_DIGITS)
+    t = re.sub(r'[?!.,;:\'"()\[\]{}<>/\\|৷।\-–—_*~`]+', ' ', t)
+    return re.sub(r'\s+', ' ', t).strip()
+
+
+def _cache_key(q):
+    return hashlib.sha256(normalize_question(q).encode()).hexdigest()
+
+
+def cached_understanding(q, faq_ids):
+    from datetime import timedelta
+    from django.db.models import F
+    from django.utils import timezone
+    row = ChatbotAICache.objects.filter(
+        key=_cache_key(q), created_at__gte=timezone.now() - timedelta(days=AI_CACHE_DAYS),
+    ).first()
+    if not row:
+        return None
+    ChatbotAICache.objects.filter(pk=row.pk).update(hits=F('hits') + 1, last_used=timezone.now())
+    # re-validate: FAQs may have been deleted since the entry was stored
+    return validate_ai_output(row.info, faq_ids)
+
+
+def store_understanding(q, info):
+    data = {k: (str(v) if isinstance(v, Decimal) else v) for k, v in info.items()}
+    ChatbotAICache.objects.update_or_create(
+        key=_cache_key(q), defaults={'question': normalize_question(q)[:300], 'info': data},
+    )
+
+
+def ai_extract(q, faqs, visitor='system'):
     """Ask Gemini to classify the question. Returns a validated dict or None on any failure."""
     if not ai_available():
         return None
-    if _bump_daily_ai_count() > AI_DAILY_CAP:
+    if ai_calls_today() >= AI_DAILY_CAP:
         cache.set('chatbot_ai_cooldown', True, AI_COOLDOWN_SECONDS)
+        _record_ai_status(False, f'Daily limit of {AI_DAILY_CAP} AI calls reached; using FAQ and rules until tomorrow')
         return None
+    _record_ai_call(visitor)
 
     faq_list = '\n'.join(f'{qa.id}: {qa.question}' for qa in faqs)
     prompt = (
@@ -371,7 +433,11 @@ def ai_status(run_test=False):
         'key_configured': bool(_ai_key()),
         'model': _ai_model(),
         'cooldown': bool(cache.get('chatbot_ai_cooldown')),
-        'calls_today': cache.get('chatbot_ai_calls_today', 0),
+        'calls_today': ai_calls_today(),
+        'daily_cap': AI_DAILY_CAP,
+        'per_visitor': AI_PER_VISITOR_DAILY,
+        'cache_entries': ChatbotAICache.objects.count(),
+        'cache_hits': ChatbotAICache.objects.aggregate(n=models.Sum('hits'))['n'] or 0,
         'last': cache.get('chatbot_ai_status'),
     }
 
@@ -515,8 +581,8 @@ def rate_limited(request, per_minute=15, per_day=300):
 
 # ── Main entry point ───────────────────────────────────────────────────
 
-def answer_question(raw_question):
-    """Returns a JSON-safe dict for the chatbot UI."""
+def answer_question(raw_question, visitor='anonymous'):
+    """Returns a JSON-safe dict for the chatbot UI. `visitor` is a visitor_id() hash."""
     q = clean_question(raw_question)
     lang = detect_lang(q)
     if len(q) < 2:
@@ -535,8 +601,16 @@ def answer_question(raw_question):
     # 3. Gemini for everything else (multilingual understanding only)
     if info is None:
         faqs = list(ChatbotQA.objects.filter(is_active=True).only('id', 'question'))
-        info = ai_extract(q, faqs)
-        source = 'ai'
+        faq_ids = {qa.id for qa in faqs}
+        # 3a. Someone asked this exact question before: reuse that understanding, no AI call
+        info = cached_understanding(q, faq_ids)
+        source = 'ai_cache'
+        # 3b. New question: call Gemini if this visitor still has AI requests left today
+        if info is None and visitor_ai_calls_today(visitor) < AI_PER_VISITOR_DAILY:
+            info = ai_extract(q, faqs, visitor)
+            source = 'ai'
+            if info:
+                store_understanding(q, info)
         if info and info.get('lang'):
             lang = info['lang']
 

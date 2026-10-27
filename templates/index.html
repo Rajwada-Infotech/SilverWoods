@@ -504,7 +504,7 @@
                     {% cms "home" "contact_title" "Bring Intention<br>Into <span class='italic'>Your</span> Space" "Contact title" %}
                 </h2>
                 <p class="text-brown-500 dark:text-cream-300/60 text-sm md:text-base leading-relaxed">
-                    {% cms "home" "contact_text" "Escape the urban hustle and embrace a life of serene luxury at Silverwoods, an exclusive residential villa project meticulously designed for those who seek comfort, privacy, and sophisticated living. Nestled amidst lush greenery on a generous 8.1 Acre expanse, Silverwoods offers an unparalleled lifestyle just a short drive from the city's Southern Bypass." "Contact paragraph" %}
+                    {% cms "home" "contact_text" "Escape the urban hustle and embrace a life of serene luxury at Silverwoods, an exclusive residential villa project meticulously designed for those who seek comfort, privacy, and sophisticated living. Nestled amidst lush greenery on a generous 9.1 Acre expanse, Silverwoods offers an unparalleled lifestyle just a short drive from the city's Southern Bypass." "Contact paragraph" %}
                 </p>
             </div>
             <div class="about-img-slide">
@@ -562,6 +562,12 @@
                             <i class="fas fa-phone-alt fa-fw text-brown-400 dark:text-gold-500/60 text-sm mt-0.5 flex-shrink-0"></i>
                             <div class="text-xs text-brown-600 dark:text-cream-200 group-hover:underline">{{ project.phone }}</div>
                         </a>
+                        {% if project.whatsapp %}
+                        <a href="https://wa.me/{{ project.whatsapp|digits }}" target="_blank" rel="noopener" class="group flex items-start gap-4 hover:text-brown-800 dark:hover:text-gold-400 transition-colors">
+                            <i class="fab fa-whatsapp fa-fw text-brown-400 dark:text-gold-500/60 text-sm mt-0.5 flex-shrink-0"></i>
+                            <div class="text-xs text-brown-600 dark:text-cream-200 group-hover:underline">{{ project.whatsapp }} <span class="text-brown-400 dark:text-cream-300/30">(WhatsApp)</span></div>
+                        </a>
+                        {% endif %}
                         <a href="mailto:{{ project.email }}" class="group flex items-start gap-4 hover:text-brown-800 dark:hover:text-gold-400 transition-colors">
                             <i class="fas fa-envelope fa-fw text-brown-400 dark:text-gold-500/60 text-sm mt-0.5 flex-shrink-0"></i>
                             <div class="text-xs text-brown-600 dark:text-cream-200 group-hover:underline break-all">{{ project.email }}</div>
@@ -624,6 +630,7 @@
                 <div class="text-xs text-brown-600 dark:text-cream-300/50 space-y-2">
                     <a href="mailto:{{ project.email }}" class="block hover:text-brown-800 dark:hover:text-cream-100 transition-colors break-all">{{ project.email }}</a>
                     <a href="tel:{{ project.phone|cut:' ' }}" class="block hover:text-brown-800 dark:hover:text-cream-100 transition-colors">{{ project.phone }}</a>
+                    {% if project.whatsapp %}<a href="https://wa.me/{{ project.whatsapp|digits }}" target="_blank" rel="noopener" class="block hover:text-brown-800 dark:hover:text-cream-100 transition-colors"><i class="fab fa-whatsapp mr-1"></i>{{ project.whatsapp }}</a>{% endif %}
                     {% if project.website %}<a href="{{ project.website }}" target="_blank" rel="noopener" class="block hover:text-brown-800 dark:hover:text-cream-100 transition-colors break-all">{{ project.website }}</a>{% endif %}
                 </div>
             </div>

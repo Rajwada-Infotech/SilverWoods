@@ -52,3 +52,9 @@ def media_url(obj):
 @register.filter
 def fill_area(text, area_range):
     return text.replace('{area_range}', str(area_range))
+
+
+@register.filter
+def digits(value):
+    """Keep only digits, e.g. for wa.me links: '+91 98314 05414' -> '919831405414'."""
+    return ''.join(ch for ch in str(value or '') if ch.isdigit())

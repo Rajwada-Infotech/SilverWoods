@@ -23,14 +23,19 @@ def admin_photo(request):
 
 
 DEFAULT_SITE_PHONE = '+91 7411781881'
+DEFAULT_SITE_WHATSAPP = '+91 9831405414'
 
 
 def site_phone(request):
-    """Phone number for the floating call button shown on every public page."""
+    """Phone and WhatsApp numbers for the floating contact buttons on every public page."""
     from django.core.cache import cache
-    phone = cache.get('site_phone')
-    if phone is None:
+    numbers = cache.get('site_phone')
+    if numbers is None:
         from .models import ProjectInfo
-        phone = ProjectInfo.load().phone or DEFAULT_SITE_PHONE
-        cache.set('site_phone', phone, 300)
-    return {'site_phone': phone}
+        project = ProjectInfo.load()
+        numbers = {
+            'site_phone': project.phone or DEFAULT_SITE_PHONE,
+            'site_whatsapp': project.whatsapp or DEFAULT_SITE_WHATSAPP,
+        }
+        cache.set('site_phone', numbers, 300)
+    return numbers

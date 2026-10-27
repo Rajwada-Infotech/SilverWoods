@@ -21,7 +21,7 @@ class Command(BaseCommand):
             "Escape the urban hustle and embrace a life of serene luxury at Silverwoods, "
             "an exclusive residential villa project meticulously designed for those who seek "
             "comfort, privacy, and sophisticated living. Nestled amidst lush greenery on a "
-            "generous 8.1 Acre expanse, Silverwoods offers an unparalleled lifestyle just "
+            "generous 9.1 Acre expanse, Silverwoods offers an unparalleled lifestyle just "
             "a short drive from the city's Southern Bypass."
         )
         project.address = "Dr. B.C. Roy Road, Dingelpota"
@@ -29,6 +29,7 @@ class Command(BaseCommand):
         project.state = "West Bengal"
         project.pincode = "700151"
         project.phone = "+91 7411781881"
+        project.whatsapp = "+91 9831405414"
         project.email = "info@silverwoods.co.in"
         project.website = "https://deltarealtech.in/"
         project.director_name = "Delta Realtech"
@@ -43,7 +44,7 @@ class Command(BaseCommand):
         project.total_units = 121
         project.total_floors = 2
         project.total_towers = 6
-        project.project_area = "8.1 Acres"
+        project.project_area = "9.1 Acres"
         project.possession_date = "October 2029"
         project.map_embed_url = "https://maps.google.com/maps?q=Dr.+B.C.+Roy+Road%2C+Dingelpota%2C+West+Bengal+700151&z=15&output=embed"
         project.save()

@@ -49,7 +49,7 @@
   "fields": {
     "name": "Silverwoods",
     "tagline": "Silverwoods is more than just a home, it's a lifestyle statement. Come, discover your dream villa and embark on a journey of serene luxury.",
-    "description": "Escape the urban hustle and embrace a life of serene luxury at Silverwoods, an exclusive residential villa project meticulously designed for those who seek comfort, privacy, and sophisticated living. Nestled amidst lush greenery on a generous 8.1 Acre expanse, Silverwoods offers an unparalleled lifestyle just a short drive from the city's Southern Bypass.",
+    "description": "Escape the urban hustle and embrace a life of serene luxury at Silverwoods, an exclusive residential villa project meticulously designed for those who seek comfort, privacy, and sophisticated living. Nestled amidst lush greenery on a generous 9.1 Acre expanse, Silverwoods offers an unparalleled lifestyle just a short drive from the city's Southern Bypass.",
     "address": "Dr. B.C. Roy Road, Dingelpota",
     "city": "Dingelpota",
     "state": "West Bengal",
@@ -69,7 +69,7 @@
     "total_units": 121,
     "total_floors": 2,
     "total_towers": 6,
-    "project_area": "8.1 Acres",
+    "project_area": "9.1 Acres",
     "possession_date": "October 2029"
   }
 },
@@ -12592,7 +12592,7 @@
   "pk": 14,
   "fields": {
     "question": "How many total villas are in the project?",
-    "answer": "Silverwoods is an exclusive community of <strong>121 premium villas</strong> spread across 8.1 Acres. Of these, <strong>119 are saleable plots</strong>. The project spans 6 unique villa types, each a fully independent 3.5 to 4 BHK home.",
+    "answer": "Silverwoods is an exclusive community of <strong>121 premium villas</strong> spread across 9.1 Acres. Of these, <strong>119 are saleable plots</strong>. The project spans 6 unique villa types, each a fully independent 3.5 to 4 BHK home.",
     "keywords": "total,how many,count,number of villas,121,119,units,community",
     "is_active": true,
     "order": 6,
@@ -12664,8 +12664,8 @@
   "pk": 20,
   "fields": {
     "question": "What is the total project area?",
-    "answer": "Silverwoods is spread across a generous <strong>8.1 Acres</strong> of lush land, featuring 121 premium villas, a 50,000 sq.ft clubhouse, landscaped gardens, sports arenas, an infinity pool, and wide internal roads — all in a gated, traffic-free community.",
-    "keywords": "area,acres,size,land,project area,8.1,how big,large,spread",
+    "answer": "Silverwoods is spread across a generous <strong>9.1 Acres</strong> of lush land, featuring 121 premium villas, a 50,000 sq.ft clubhouse, landscaped gardens, sports arenas, an infinity pool, and wide internal roads — all in a gated, traffic-free community.",
+    "keywords": "area,acres,size,land,project area,9.1,how big,large,spread",
     "is_active": true,
     "order": 12,
     "created_at": "2026-07-16T08:27:03.355Z"
@@ -12856,7 +12856,7 @@
   "pk": 36,
   "fields": {
     "question": "What makes Silverwoods special?",
-    "answer": "Silverwoods is <strong>South Kolkata's most exclusive villa township</strong>. Here's what sets it apart:\n\n🏡 <strong>Fully Independent Villas</strong> — No shared walls, complete privacy\n🌊 <strong>Private Plunge Pool</strong> in every villa\n🌿 <strong>Private Backyard Garden</strong> in every villa\n🏛️ <strong>50,000 sq.ft Clubhouse</strong>\n🔒 <strong>Gated Community</strong> with 24/7 security\n🚶 <strong>Traffic-Free Podium</strong> — cars stay outside living zones\n📍 <strong>8.1 Acre green haven</strong> near Southern Bypass\n✅ <strong>RERA Approved</strong> by Delta Realtech\n\nThis is villa living at its finest!",
+    "answer": "Silverwoods is <strong>South Kolkata's most exclusive villa township</strong>. Here's what sets it apart:\n\n🏡 <strong>Fully Independent Villas</strong> — No shared walls, complete privacy\n🌊 <strong>Private Plunge Pool</strong> in every villa\n🌿 <strong>Private Backyard Garden</strong> in every villa\n🏛️ <strong>50,000 sq.ft Clubhouse</strong>\n🔒 <strong>Gated Community</strong> with 24/7 security\n🚶 <strong>Traffic-Free Podium</strong> — cars stay outside living zones\n📍 <strong>9.1 Acre green haven</strong> near Southern Bypass\n✅ <strong>RERA Approved</strong> by Delta Realtech\n\nThis is villa living at its finest!",
     "keywords": "special,unique,different,why,best,feature,highlight,advantage,luxury,premium",
     "is_active": true,
     "order": 28,

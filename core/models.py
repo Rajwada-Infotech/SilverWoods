@@ -10,6 +10,7 @@ class ProjectInfo(models.Model):
     state = models.CharField(max_length=100, default="")
     pincode = models.CharField(max_length=10, default="")
     phone = models.CharField(max_length=20, default="")
+    whatsapp = models.CharField(max_length=20, default="+91 9831405414", blank=True, help_text="WhatsApp number with country code")
     email = models.EmailField(default="info@silverwoods.com")
     website = models.URLField(blank=True)
     map_embed_url = models.URLField(blank=True)

@@ -55,6 +55,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.media",
                 "core.context_processors.admin_photo",
+                "core.context_processors.site_phone",
             ],
         },
     },

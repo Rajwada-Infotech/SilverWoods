@@ -1121,5 +1121,28 @@
     </script>
     <!-- ═══ END CHATBOT ═══ -->
 
+    <!-- ═══ FLOATING CALL BUTTON ═══ -->
+    {% if site_phone %}
+    <a id="sw-call-btn" href="tel:{{ site_phone|cut:' ' }}" aria-label="Call {{ site_phone }}" title="Call {{ site_phone }}">
+        <span class="sw-call-ring"></span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg>
+    </a>
+    <style>
+    #sw-call-btn{position:fixed;left:24px;bottom:24px;z-index:10100;width:60px;height:60px;border-radius:50%;
+        display:flex;align-items:center;justify-content:center;
+        background:linear-gradient(145deg,#f6e3a1 0%,#c9a84c 45%,#8a6a22 100%);
+        border:2px solid #0a0a0a;box-shadow:0 8px 24px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.5);
+        transition:transform .2s ease,box-shadow .2s ease;-webkit-tap-highlight-color:transparent;}
+    #sw-call-btn:hover{transform:scale(1.08);box-shadow:0 10px 30px rgba(201,168,76,.55);}
+    #sw-call-btn svg{width:26px;height:26px;fill:#0a0a0a;position:relative;z-index:1;animation:sw-call-shake 3s ease-in-out infinite;}
+    #sw-call-btn .sw-call-ring{position:absolute;inset:-2px;border-radius:50%;border:2px solid #c9a84c;animation:sw-call-ring 2.2s ease-out infinite;pointer-events:none;}
+    @keyframes sw-call-ring{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.6);opacity:0}}
+    @keyframes sw-call-shake{0%,80%,100%{transform:rotate(0)}84%{transform:rotate(-14deg)}88%{transform:rotate(12deg)}92%{transform:rotate(-8deg)}96%{transform:rotate(6deg)}}
+    @media (max-width:640px){#sw-call-btn{left:16px;bottom:16px;width:52px;height:52px}#sw-call-btn svg{width:22px;height:22px}}
+    @media (prefers-reduced-motion:reduce){#sw-call-btn svg,#sw-call-btn .sw-call-ring{animation:none}}
+    </style>
+    {% endif %}
+    <!-- ═══ END FLOATING CALL BUTTON ═══ -->
+
 </body>
 </html>

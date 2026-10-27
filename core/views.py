@@ -1122,7 +1122,7 @@ def admin_reviews(request):
 
 # ── Site content management ───────────────────────────────────────────
 
-_INDEX_CACHE_KEYS = ['index_project', 'index_gallery', 'index_features', 'index_landmarks']
+_INDEX_CACHE_KEYS = ['index_project', 'site_phone', 'index_gallery', 'index_features', 'index_landmarks']
 
 # kind -> (model, form, redirect url name)
 _CONTENT_KINDS = {

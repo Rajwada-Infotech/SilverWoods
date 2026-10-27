@@ -289,7 +289,6 @@ def plots(request):
     plots_data = {
         p.villa_no: {
             'status': p.status,
-            'owner': p.owner_name,
             'completion_pct': p.completion_pct,
             'reserved_until': p.reserved_until.isoformat() if p.reserved_until else None,
         }
@@ -332,7 +331,8 @@ def plots(request):
 
 def api_plots(request):
     plot_qs = VillaPlot.objects.all()
-    data = {p.villa_no: {'status': p.status, 'owner': p.owner_name, 'completion_pct': p.completion_pct} for p in plot_qs}
+    # Public endpoint: owner names are personal data and only shown in the admin panel
+    data = {p.villa_no: {'status': p.status, 'completion_pct': p.completion_pct} for p in plot_qs}
     return JsonResponse(data)
 
 

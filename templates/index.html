@@ -1034,9 +1034,9 @@ function _resetAuto() {
     _startAuto();
 }
 
-// Close lightbox on backdrop click
-document.getElementById('gallery-lightbox').addEventListener('click', function(e) {
-    if (e.target === this) closeLightbox();
+// Close lightbox on backdrop click (delegated: the lightbox markup comes after this script)
+document.addEventListener('click', function(e) {
+    if (e.target && e.target.id === 'gallery-lightbox') closeLightbox();
 });
 </script>
 

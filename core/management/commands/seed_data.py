@@ -45,7 +45,7 @@ class Command(BaseCommand):
         project.total_towers = 6
         project.project_area = "8.1 Acres"
         project.possession_date = "October 2029"
-        project.map_embed_url = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3684.0!2d88.35!3d22.57!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjLCsDM0JzEyLjAiTiA4OMKwMjEnMDAuMCJF!5e0!3m2!1sen!2sin!4v1"
+        project.map_embed_url = "https://maps.google.com/maps?q=Dr.+B.C.+Roy+Road%2C+Dingelpota%2C+West+Bengal+700151&z=15&output=embed"
         project.save()
         self.stdout.write(self.style.SUCCESS('Project info seeded'))
 

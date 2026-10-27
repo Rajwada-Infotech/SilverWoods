@@ -570,23 +570,19 @@
                 </div>
                 <!-- Social -->
                 <div class="glass-warm rounded-2xl p-6">
-                    <p class="text-[10px] font-semibold tracking-[0.2em] uppercase text-brown-400 dark:text-cream-300/30 mb-4">Follow Us</p>
-                    <div class="grid grid-cols-4 gap-3">
-                        <a href="{{ project.instagram|default:'#' }}" target="_blank" class="flex flex-col items-center py-3 rounded-xl border border-brown-700/[0.05] dark:border-white/[0.05] hover:border-brown-400 dark:hover:border-gold-500/30 transition-all text-brown-400 dark:text-cream-300/30 hover:text-brown-700 dark:hover:text-gold-500">
+                    <p class="text-[10px] font-semibold tracking-[0.2em] uppercase text-brown-400 dark:text-cream-300/30 mb-4 text-center">Follow Us</p>
+                    <div class="flex justify-center gap-3">
+                        <a href="{{ project.instagram|default:'#' }}" target="_blank" rel="noopener" class="flex flex-col items-center py-3 w-24 rounded-xl border border-brown-700/[0.05] dark:border-white/[0.05] hover:border-brown-400 dark:hover:border-gold-500/30 transition-all text-brown-400 dark:text-cream-300/30 hover:text-brown-700 dark:hover:text-gold-500">
                             <i class="fab fa-instagram text-lg mb-1"></i>
                             <span class="text-[8px] tracking-[0.1em] uppercase">Instagram</span>
                         </a>
-                        <a href="{{ project.facebook|default:'#' }}" target="_blank" class="flex flex-col items-center py-3 rounded-xl border border-brown-700/[0.05] dark:border-white/[0.05] hover:border-brown-400 dark:hover:border-gold-500/30 transition-all text-brown-400 dark:text-cream-300/30 hover:text-brown-700 dark:hover:text-gold-500">
+                        <a href="{{ project.facebook|default:'#' }}" target="_blank" rel="noopener" class="flex flex-col items-center py-3 w-24 rounded-xl border border-brown-700/[0.05] dark:border-white/[0.05] hover:border-brown-400 dark:hover:border-gold-500/30 transition-all text-brown-400 dark:text-cream-300/30 hover:text-brown-700 dark:hover:text-gold-500">
                             <i class="fab fa-facebook-f text-lg mb-1"></i>
                             <span class="text-[8px] tracking-[0.1em] uppercase">Facebook</span>
                         </a>
-                        <a href="{{ project.youtube|default:'#' }}" target="_blank" class="flex flex-col items-center py-3 rounded-xl border border-brown-700/[0.05] dark:border-white/[0.05] hover:border-brown-400 dark:hover:border-gold-500/30 transition-all text-brown-400 dark:text-cream-300/30 hover:text-brown-700 dark:hover:text-gold-500">
-                            <i class="fab fa-youtube text-lg mb-1"></i>
-                            <span class="text-[8px] tracking-[0.1em] uppercase">YouTube</span>
-                        </a>
-                        <a href="{{ project.twitter|default:'#' }}" target="_blank" class="flex flex-col items-center py-3 rounded-xl border border-brown-700/[0.05] dark:border-white/[0.05] hover:border-brown-400 dark:hover:border-gold-500/30 transition-all text-brown-400 dark:text-cream-300/30 hover:text-brown-700 dark:hover:text-gold-500">
-                            <i class="fab fa-twitter text-lg mb-1"></i>
-                            <span class="text-[8px] tracking-[0.1em] uppercase">Twitter</span>
+                        <a href="mailto:{{ project.email }}" class="flex flex-col items-center py-3 w-24 rounded-xl border border-brown-700/[0.05] dark:border-white/[0.05] hover:border-brown-400 dark:hover:border-gold-500/30 transition-all text-brown-400 dark:text-cream-300/30 hover:text-brown-700 dark:hover:text-gold-500">
+                            <i class="fas fa-envelope text-lg mb-1"></i>
+                            <span class="text-[8px] tracking-[0.1em] uppercase">Email</span>
                         </a>
                     </div>
                 </div>
@@ -613,7 +609,7 @@
                 <ul class="space-y-2 text-xs text-brown-600 dark:text-cream-300/50">
                     <li><a href="{{ project.instagram|default:'#' }}" target="_blank" rel="noopener" class="hover:text-brown-800 dark:hover:text-cream-100 transition-colors">Instagram</a></li>
                     <li><a href="{{ project.facebook|default:'#' }}" target="_blank" rel="noopener" class="hover:text-brown-800 dark:hover:text-cream-100 transition-colors">Facebook</a></li>
-                    <li><a href="{{ project.youtube|default:'#' }}" target="_blank" rel="noopener" class="hover:text-brown-800 dark:hover:text-cream-100 transition-colors">YouTube</a></li>
+                    <li><a href="mailto:{{ project.email }}" class="hover:text-brown-800 dark:hover:text-cream-100 transition-colors">Email</a></li>
                 </ul>
             </div>
             <div>

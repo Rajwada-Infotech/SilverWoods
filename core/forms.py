@@ -96,7 +96,7 @@ class AdminStyledForm(forms.ModelForm):
 class ProjectInfoForm(AdminStyledForm):
     class Meta:
         model = ProjectInfo
-        fields = '__all__'
+        exclude = ['twitter', 'youtube']
 
 
 class GalleryImageForm(AdminStyledForm):

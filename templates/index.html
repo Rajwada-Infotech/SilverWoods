@@ -644,7 +644,14 @@
 {% endblock %}
 
 {% block extra_js %}
+{{ page_config|json_script:"page-config" }}
 <script>
+var PAGE_CONFIG = JSON.parse(document.getElementById('page-config').textContent);
+function csrfToken() {
+    var el = document.querySelector('input[name=csrfmiddlewaretoken]');
+    return el ? el.value : '';
+}
+
 // Real-time visitor count — sessionStorage clears on tab/window close
 function formatVisitorCount(n) {
     if (n >= 1000) {
@@ -677,7 +684,7 @@ function updateVisitorStat(count) {
     var isFreshOpen = (navType === 'navigate');
     if (isFreshOpen) {
         // Fresh open (new tab, typed URL, closed+reopened) — track the visit
-        fetch('/api/track-visit/', { method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'} })
+        fetch('/api/track-visit/', { method: 'POST', headers: {'X-CSRFToken': csrfToken()} })
             .then(r => r.json())
             .then(data => updateVisitorStat(data.count))
             .catch(function(){});
@@ -704,7 +711,7 @@ document.getElementById('lead-form').addEventListener('submit', function(e) {
     e.preventDefault();
     const formData = new FormData(this);
     formData.append('lead_submit', '1');
-    fetch('{% url "submit_lead" %}', { method: 'POST', body: formData })
+    fetch(PAGE_CONFIG.urls.submit_lead, { method: 'POST', body: formData })
         .then(r => r.json())
         .then(data => {
             const msg = document.getElementById('lead-message');
@@ -720,7 +727,7 @@ document.getElementById('lead-form').addEventListener('submit', function(e) {
 document.getElementById('review-form').addEventListener('submit', function(e) {
     e.preventDefault();
     const formData = new FormData(this);
-    fetch('{% url "submit_review" %}', { method: 'POST', body: formData })
+    fetch(PAGE_CONFIG.urls.submit_review, { method: 'POST', body: formData })
         .then(r => r.json())
         .then(data => {
             const msg = document.getElementById('review-message');
@@ -784,7 +791,7 @@ function loadReviews() {
     document.getElementById('reviews-modal-loading').classList.remove('hidden');
     document.getElementById('reviews-modal-grid').innerHTML = '';
     document.getElementById('reviews-modal-empty').classList.add('hidden');
-    fetch('{% url "all_reviews" %}')
+    fetch(PAGE_CONFIG.urls.all_reviews)
         .then(r => r.json())
         .then(data => {
             _allReviews = data.reviews;
@@ -851,9 +858,7 @@ document.addEventListener('keydown', function(e) {
 });
 
 // Gallery Lightbox
-var _lbImages = [
-    {% for g in gallery %}"{% media_url g %}"{% if not forloop.last %},{% endif %}{% endfor %}
-];
+var _lbImages = PAGE_CONFIG.gallery;
 var _lbIndex = 0;
 var _lbAutoTimer = null;
 

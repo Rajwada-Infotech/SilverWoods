@@ -129,7 +129,19 @@ def index(request):
                 return JsonResponse({'success': True, 'message': 'Thank you for your review!'})
             return JsonResponse({'success': False, 'errors': review_form.errors})
 
+    from django.urls import reverse
+    from .templatetags.cms import media_url
+    page_config = {
+        'gallery': [media_url(g) for g in gallery],
+        'urls': {
+            'submit_lead': reverse('submit_lead'),
+            'submit_review': reverse('submit_review'),
+            'all_reviews': reverse('all_reviews'),
+        },
+    }
+
     return render(request, 'index.html', {
+        'page_config': page_config,
         'project': project,
         'flat_types': flat_types,
         'area_range': area_range,
@@ -265,9 +277,9 @@ def blueprint(request):
             }
 
     return render(request, 'blueprint.html', {
-        'flats': json.dumps(flat_data),
-        'villa_prices_json': json.dumps(villa_prices),
-        'villa_areas_json': json.dumps(villa_areas),
+        'flat_data': flat_data,
+        'villa_prices': villa_prices,
+        'villa_areas': villa_areas,
     })
 
 
@@ -319,9 +331,9 @@ def plots(request):
             }
 
     return render(request, 'plots.html', {
-        'plots_json': json.dumps(plots_data),
-        'villa_prices_json': json.dumps(villa_prices),
-        'villa_areas_json': json.dumps(villa_areas),
+        'plots_data': plots_data,
+        'villa_prices': villa_prices,
+        'villa_areas': villa_areas,
         'sold': sold,
         'reserved': reserved,
         'nfs': nfs,

@@ -203,11 +203,15 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+{{ plots_data|json_script:"plot-data" }}
+{{ villa_prices|json_script:"villa-prices" }}
+{{ villa_areas|json_script:"villa-areas" }}
 <script>
 // ── DATA ─────────────────────────────────────────────────────────────
-const PLOT_DATA = {{ plots_json|safe }};
-const VILLA_TYPE_PRICES = {{ villa_prices_json|safe }};
-const VILLA_TYPE_AREAS = {{ villa_areas_json|safe }};;
+const readJSON = id => JSON.parse(document.getElementById(id).textContent);
+const PLOT_DATA = readJSON('plot-data');
+const VILLA_TYPE_PRICES = readJSON('villa-prices');
+const VILLA_TYPE_AREAS = readJSON('villa-areas');
 var UNDEFINED_PLOTS=[65,66,67,106,116,117,118,119,120,121];
 function getVillaType(n){
   if(UNDEFINED_PLOTS.indexOf(n)!==-1) return null;

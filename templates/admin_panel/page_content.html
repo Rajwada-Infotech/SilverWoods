@@ -1,0 +1,60 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% block title %}Page Content{% endblock %}
+{% block page_title %}Page Content{% endblock %}
+
+{% block admin_content %}
+<div class="flex flex-wrap gap-2 mb-6">
+    {% for p in pages %}
+    <a href="?page={{ p }}" class="px-4 py-2 rounded-xl text-xs font-semibold tracking-wider uppercase {% if p == current %}bg-brown-700 dark:bg-gold-500/20 text-cream-100 dark:text-gold-400{% else %}bg-white dark:bg-white/[0.03] text-brown-500 dark:text-cream-300/40 border border-brown-700/[0.05] dark:border-white/[0.06]{% endif %}">{{ p }}</a>
+    {% empty %}
+    <p class="text-sm text-brown-400 dark:text-cream-300/30">Open the website once so its text blocks appear here.</p>
+    {% endfor %}
+</div>
+
+<div class="grid lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 min-w-0 bg-white dark:bg-white/[0.03] rounded-2xl border border-brown-700/[0.05] dark:border-white/[0.06]">
+        <div class="p-6 border-b border-brown-700/[0.05] dark:border-white/[0.05]">
+            <h2 class="text-lg font-bold text-brown-800 dark:text-cream-100" style="font-family:'Playfair Display',serif">{{ current|default:"Text blocks"|title }} page text</h2>
+            <p class="text-xs text-brown-400 dark:text-cream-300/30">Edit any heading or paragraph. Simple HTML like <code>&lt;span class="italic"&gt;…&lt;/span&gt;</code> and <code>&lt;br&gt;</code> is allowed. Leave a box empty to hide that text. Deleting a block restores its original text.</p>
+        </div>
+        <form method="post" class="p-6 space-y-5">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="save">
+            <input type="hidden" name="page" value="{{ current }}">
+            {% for c in items %}
+            <div>
+                <div class="flex items-center justify-between mb-1">
+                    <label for="v{{ c.pk }}" class="text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 tracking-wider uppercase">{{ c.label }} <span class="normal-case font-normal text-brown-300 dark:text-cream-300/20">({{ c.key }})</span></label>
+                    <button type="submit" form="del{{ c.pk }}" onclick="return confirm('Delete this block? Built-in text returns to its original wording.')" class="text-[10px] text-red-500 hover:text-red-700"><i class="fas fa-trash mr-1"></i>Delete</button>
+                </div>
+                <textarea id="v{{ c.pk }}" name="value_{{ c.pk }}" rows="{% if c.value|length > 120 %}4{% else %}2{% endif %}" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100">{{ c.value }}</textarea>
+            </div>
+            {% empty %}
+            <p class="text-sm text-brown-300 dark:text-cream-300/20 text-center py-8">No text blocks on this page yet.</p>
+            {% endfor %}
+            {% if items %}<button type="submit" class="px-8 py-3 bg-brown-700 dark:bg-gold-500/20 text-cream-100 dark:text-gold-400 rounded-xl text-xs font-semibold tracking-wider uppercase"><i class="fas fa-save mr-2"></i> Save All</button>{% endif %}
+        </form>
+        {% for c in items %}
+        <form id="del{{ c.pk }}" method="post" class="hidden">{% csrf_token %}<input type="hidden" name="action" value="delete"><input type="hidden" name="pk" value="{{ c.pk }}"><input type="hidden" name="page" value="{{ current }}"></form>
+        {% endfor %}
+    </div>
+
+    <div class="bg-white dark:bg-white/[0.03] rounded-2xl border border-brown-700/[0.05] dark:border-white/[0.06] h-fit sticky top-28">
+        <div class="p-6 border-b border-brown-700/[0.05] dark:border-white/[0.05]">
+            <h2 class="text-lg font-bold text-brown-800 dark:text-cream-100" style="font-family:'Playfair Display',serif">Add Text Block</h2>
+            <p class="text-xs text-brown-400 dark:text-cream-300/30">A developer can show it with <code>{% templatetag openblock %} cms "page" "key" {% templatetag closeblock %}</code></p>
+        </div>
+        <form method="post" class="p-6 space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add">
+            {% with cls="w-full px-3 py-2.5 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100" %}
+            <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Page</label><input type="text" name="page" value="{{ current }}" required class="{{ cls }}"></div>
+            <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Key</label><input type="text" name="key" required placeholder="e.g. offer_banner" class="{{ cls }}"></div>
+            <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Label</label><input type="text" name="label" class="{{ cls }}"></div>
+            <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Text</label><textarea name="value" rows="3" class="{{ cls }}"></textarea></div>
+            {% endwith %}
+            <button type="submit" class="w-full py-3 bg-brown-700 dark:bg-gold-500/20 text-cream-100 dark:text-gold-400 rounded-xl text-xs font-semibold tracking-wider uppercase"><i class="fas fa-plus mr-2"></i> Add Block</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -193,7 +193,8 @@ class VillaPlot(models.Model):
 
 
 class BrochureImage(models.Model):
-    image = models.ImageField(upload_to="brochure/")
+    image = models.ImageField(upload_to="brochure/", blank=True)
+    static_path = models.CharField(max_length=300, blank=True, help_text="Bundled static image used when no upload is set")
     order = models.IntegerField(default=0)
     caption = models.CharField(max_length=200, blank=True)
 
@@ -202,6 +203,61 @@ class BrochureImage(models.Model):
 
     def __str__(self):
         return f"Brochure Page {self.order}"
+
+
+class GalleryImage(models.Model):
+    image = models.ImageField(upload_to="gallery/", blank=True)
+    static_path = models.CharField(max_length=300, blank=True, help_text="Bundled static image used when no upload is set")
+    caption = models.CharField(max_length=200, blank=True)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        return self.caption or f"Gallery Image {self.order}"
+
+
+class VillaFeature(models.Model):
+    icon = models.CharField(max_length=60, default="fa-home", help_text="Font Awesome icon name, e.g. fa-home")
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        return self.title
+
+
+class Landmark(models.Model):
+    icon = models.CharField(max_length=60, default="fa-map-marker-alt", help_text="Font Awesome icon name, e.g. fa-subway")
+    name = models.CharField(max_length=200)
+    distance = models.CharField(max_length=50)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        return f"{self.name} ({self.distance})"
+
+
+class PageContent(models.Model):
+    """Editable text block. Rows are created on first render from the template default."""
+    page = models.CharField(max_length=50)
+    key = models.CharField(max_length=100)
+    label = models.CharField(max_length=200, blank=True)
+    value = models.TextField(blank=True)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['page', 'order', 'id']
+        unique_together = ['page', 'key']
+
+    def __str__(self):
+        return f"{self.page} / {self.key}"
 
 
 class ChatbotQA(models.Model):

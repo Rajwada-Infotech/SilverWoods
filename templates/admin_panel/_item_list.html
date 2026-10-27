@@ -1,0 +1,49 @@
+{% with input_cls="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100" label_cls="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase" %}
+<div class="min-w-0 bg-white dark:bg-white/[0.03] rounded-2xl border border-brown-700/[0.05] dark:border-white/[0.06] h-fit">
+    <div class="p-6 border-b border-brown-700/[0.05] dark:border-white/[0.05]">
+        <h2 class="text-lg font-bold text-brown-800 dark:text-cream-100" style="font-family:'Playfair Display',serif">{{ title }}</h2>
+        <p class="text-xs text-brown-400 dark:text-cream-300/30">{{ hint }}</p>
+    </div>
+    <div class="divide-y divide-brown-700/[0.03] dark:divide-white/[0.03]">
+        {% for item in items %}
+        <div class="p-5 hover:bg-cream-200/30 dark:hover:bg-white/[0.02] transition-colors" x-data="{editing:false}">
+            <div x-show="!editing" class="flex items-center justify-between gap-4">
+                <div class="flex items-center gap-4 min-w-0">
+                    <div class="w-10 h-10 bg-gold-500/10 rounded-xl flex items-center justify-center text-gold-600 dark:text-gold-400 flex-shrink-0"><i class="fas {{ item.icon }}"></i></div>
+                    <div class="min-w-0">
+                        <div class="font-bold text-brown-800 dark:text-cream-100 text-sm truncate">{% if kind == 'feature' %}{{ item.title }}{% else %}{{ item.name }}{% endif %}</div>
+                        <div class="text-xs text-brown-400 dark:text-cream-300/30 truncate">{% if kind == 'feature' %}{{ item.description }}{% else %}{{ item.distance }}{% endif %}</div>
+                    </div>
+                </div>
+                <div class="flex gap-1.5 shrink-0">
+                    <span class="text-[10px] px-2 py-1 rounded-full bg-cream-200 dark:bg-white/[0.05] text-brown-500 dark:text-cream-300/40 self-center">#{{ item.order }}</span>
+                    <button @click="editing=true" class="w-7 h-7 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center"><i class="fas fa-edit text-xs"></i></button>
+                    <form method="post" action="{% url 'admin_delete_content' kind item.pk %}" onsubmit="return confirm('Delete this item?')">{% csrf_token %}<button class="w-7 h-7 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 text-red-600 dark:text-red-400 rounded-lg flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button></form>
+                </div>
+            </div>
+            <form x-show="editing" method="post" class="space-y-3">
+                {% csrf_token %}
+                <input type="hidden" name="kind" value="{{ kind }}">
+                <input type="hidden" name="obj_id" value="{{ item.pk }}">
+                {% include 'admin_panel/_item_fields.html' %}
+                <div class="flex gap-3">
+                    <button type="submit" class="px-5 py-2 bg-brown-700 dark:bg-gold-500/20 text-cream-100 dark:text-gold-400 rounded-xl text-xs font-semibold tracking-wider uppercase">Save</button>
+                    <button type="button" @click="editing=false" class="px-5 py-2 bg-cream-200 dark:bg-white/[0.04] text-brown-600 dark:text-cream-300/50 rounded-xl text-xs font-semibold tracking-wider uppercase">Cancel</button>
+                </div>
+            </form>
+        </div>
+        {% empty %}
+        <div class="p-10 text-center text-brown-300 dark:text-cream-300/20">Nothing here yet.</div>
+        {% endfor %}
+    </div>
+    <div class="p-6 border-t border-brown-700/[0.05] dark:border-white/[0.05]" x-data="{open:false}">
+        <button type="button" x-show="!open" @click="open=true" class="w-full py-3 bg-brown-700 dark:bg-gold-500/20 text-cream-100 dark:text-gold-400 rounded-xl text-xs font-semibold tracking-wider uppercase"><i class="fas fa-plus mr-2"></i> Add New</button>
+        <form x-show="open" method="post" class="space-y-3">
+            {% csrf_token %}
+            <input type="hidden" name="kind" value="{{ kind }}">
+            {% with item=None %}{% include 'admin_panel/_item_fields.html' %}{% endwith %}
+            <button type="submit" class="w-full py-3 bg-brown-700 dark:bg-gold-500/20 text-cream-100 dark:text-gold-400 rounded-xl text-xs font-semibold tracking-wider uppercase"><i class="fas fa-plus mr-2"></i> Add</button>
+        </form>
+    </div>
+</div>
+{% endwith %}

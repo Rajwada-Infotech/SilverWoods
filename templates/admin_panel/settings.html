@@ -1,0 +1,28 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% block title %}Site Settings{% endblock %}
+{% block page_title %}Site Settings{% endblock %}
+
+{% block admin_content %}
+<div class="bg-white dark:bg-white/[0.03] rounded-2xl border border-brown-700/[0.05] dark:border-white/[0.06]">
+    <div class="p-6 border-b border-brown-700/[0.05] dark:border-white/[0.05]">
+        <h2 class="text-lg font-bold text-brown-800 dark:text-cream-100" style="font-family:'Playfair Display',serif">Project Information</h2>
+        <p class="text-xs text-brown-400 dark:text-cream-300/30">Name, contact details, map address, social links, director and stats used across the site</p>
+    </div>
+    {% if saved %}<div class="mx-6 mt-6 p-3 rounded-xl bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 text-sm"><i class="fas fa-check mr-2"></i>Settings saved. The site is updated.</div>{% endif %}
+    <form method="post" class="p-6 space-y-6">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="text-red-600 text-sm">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {% for field in form %}
+            <div class="{% if field.field.widget.input_type is None %}md:col-span-2{% endif %}">
+                <label for="{{ field.id_for_label }}" class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}<p class="text-[10px] text-brown-300 dark:text-cream-300/20 mt-1">{{ field.help_text }}</p>{% endif %}
+                {% for error in field.errors %}<p class="text-[11px] text-red-600 mt-1">{{ error }}</p>{% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        <button type="submit" class="px-8 py-3 bg-brown-700 dark:bg-gold-500/20 text-cream-100 dark:text-gold-400 rounded-xl text-xs font-semibold hover:bg-brown-800 dark:hover:bg-gold-500/30 transition-colors tracking-wider uppercase"><i class="fas fa-save mr-2"></i> Save Settings</button>
+    </form>
+</div>
+{% endblock %}

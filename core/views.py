@@ -13,9 +13,13 @@ from django.db import models
 from django.db.models import Max
 from .models import (
     ProjectInfo, FlatType, Amenity, Lead, SiteVisitor,
-    PopupAd, Review, BuildingFlat, BrochureImage, VillaPlot, ChatbotQA
+    PopupAd, Review, BuildingFlat, BrochureImage, VillaPlot, ChatbotQA,
+    GalleryImage, VillaFeature, Landmark, PageContent,
 )
-from .forms import LeadForm, PopupAdForm, FlatTypeForm, ReviewForm, AmenityForm
+from .forms import (
+    LeadForm, PopupAdForm, FlatTypeForm, ReviewForm, AmenityForm,
+    ProjectInfoForm, GalleryImageForm, BrochureImageForm, VillaFeatureForm, LandmarkForm,
+)
 import os as _os
 from decouple import config as _decouple_config
 
@@ -91,6 +95,21 @@ def index(request):
     if popups is None:
         popups = list(PopupAd.objects.filter(is_active=True))
         cache.set('index_popups', popups, 300)
+    gallery = cache.get('index_gallery')
+    if gallery is None:
+        gallery = list(GalleryImage.objects.all())
+        cache.set('index_gallery', gallery, 300)
+
+    features = cache.get('index_features')
+    if features is None:
+        features = list(VillaFeature.objects.all())
+        cache.set('index_features', features, 300)
+
+    landmarks = cache.get('index_landmarks')
+    if landmarks is None:
+        landmarks = list(Landmark.objects.all())
+        cache.set('index_landmarks', landmarks, 300)
+
     lead_form = LeadForm()
     review_form = ReviewForm()
 
@@ -117,6 +136,9 @@ def index(request):
         'amenities': amenities,
         'reviews': reviews,
         'popups': popups,
+        'gallery': gallery,
+        'features': features,
+        'landmarks': landmarks,
         'lead_form': lead_form,
         'review_form': review_form,
     })
@@ -200,9 +222,8 @@ def download_brochure(request):
 
 
 def brochure(request):
-    from django.templatetags.static import static
-    # Brochure pages are 1.webp to 25.webp in static/brochure/
-    image_urls = [static(f'brochure/{i}.webp') for i in range(1, 26)]
+    from .templatetags.cms import media_url
+    image_urls = [u for u in (media_url(p) for p in BrochureImage.objects.all()) if u]
     return render(request, 'brochure.html', {'image_urls': image_urls})
 
 
@@ -1097,3 +1118,137 @@ def admin_reviews(request):
         return redirect('admin_reviews')
     reviews = Review.objects.all().order_by('-created_at')
     return render(request, 'admin_panel/reviews.html', {'reviews': reviews})
+
+
+# ── Site content management ───────────────────────────────────────────
+
+_INDEX_CACHE_KEYS = ['index_project', 'index_gallery', 'index_features', 'index_landmarks']
+
+# kind -> (model, form, redirect url name)
+_CONTENT_KINDS = {
+    'gallery': (GalleryImage, GalleryImageForm, 'admin_gallery'),
+    'brochure': (BrochureImage, BrochureImageForm, 'admin_brochure'),
+    'feature': (VillaFeature, VillaFeatureForm, 'admin_features'),
+    'landmark': (Landmark, LandmarkForm, 'admin_features'),
+}
+
+
+def _clear_site_cache():
+    from django.core.cache import cache
+    from .templatetags.cms import clear_content_cache
+    cache.delete_many(_INDEX_CACHE_KEYS)
+    clear_content_cache()
+
+
+def _save_content_item(request, kind):
+    """Create or update one item of `kind` from a POST. Returns the bound form."""
+    model, form_class, _ = _CONTENT_KINDS[kind]
+    obj_id = request.POST.get('obj_id')
+    instance = get_object_or_404(model, pk=obj_id) if obj_id else None
+    form = form_class(request.POST, request.FILES, instance=instance)
+    if form.is_valid():
+        obj = form.save(commit=False)
+        if 'image' in request.FILES and hasattr(obj, 'static_path'):
+            obj.static_path = ''
+        obj.save()
+        _clear_site_cache()
+    return form
+
+
+@login_required
+def admin_settings(request):
+    project = ProjectInfo.load()
+    saved = False
+    if request.method == 'POST':
+        form = ProjectInfoForm(request.POST, instance=project)
+        if form.is_valid():
+            form.save()
+            _clear_site_cache()
+            saved = True
+    else:
+        form = ProjectInfoForm(instance=project)
+    return render(request, 'admin_panel/settings.html', {'form': form, 'saved': saved})
+
+
+@login_required
+def admin_gallery(request):
+    form = None
+    if request.method == 'POST':
+        form = _save_content_item(request, 'gallery')
+        if form.is_valid():
+            return redirect('admin_gallery')
+    return render(request, 'admin_panel/media_list.html', {
+        'items': GalleryImage.objects.all(), 'kind': 'gallery', 'form': form,
+        'heading': 'Gallery', 'subheading': 'Images in the homepage Portfolio section, in display order',
+    })
+
+
+@login_required
+def admin_brochure(request):
+    form = None
+    if request.method == 'POST':
+        form = _save_content_item(request, 'brochure')
+        if form.is_valid():
+            return redirect('admin_brochure')
+    return render(request, 'admin_panel/media_list.html', {
+        'items': BrochureImage.objects.all(), 'kind': 'brochure', 'form': form,
+        'heading': 'Brochure Pages', 'subheading': 'Pages of the digital brochure viewer, in page order',
+    })
+
+
+@login_required
+def admin_features(request):
+    form = None
+    if request.method == 'POST':
+        kind = request.POST.get('kind')
+        if kind not in ('feature', 'landmark'):
+            return redirect('admin_features')
+        form = _save_content_item(request, kind)
+        if form.is_valid():
+            return redirect('admin_features')
+    return render(request, 'admin_panel/features.html', {
+        'features': VillaFeature.objects.all(), 'landmarks': Landmark.objects.all(), 'form': form,
+    })
+
+
+@login_required
+@require_POST
+def admin_delete_content(request, kind, pk):
+    if kind not in _CONTENT_KINDS:
+        return redirect('admin_dashboard')
+    model, _, redirect_name = _CONTENT_KINDS[kind]
+    get_object_or_404(model, pk=pk).delete()
+    _clear_site_cache()
+    return redirect(redirect_name)
+
+
+@login_required
+def admin_page_content(request):
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'save':
+            for c in PageContent.objects.all():
+                field = f'value_{c.pk}'
+                if field in request.POST and request.POST[field] != c.value:
+                    c.value = request.POST[field]
+                    c.save(update_fields=['value'])
+        elif action == 'add':
+            page = request.POST.get('page', '').strip()
+            key = request.POST.get('key', '').strip().replace(' ', '_').lower()
+            if page and key:
+                PageContent.objects.get_or_create(page=page, key=key, defaults={
+                    'label': request.POST.get('label', '').strip() or key.replace('_', ' ').title(),
+                    'value': request.POST.get('value', ''),
+                    'order': PageContent.objects.filter(page=page).count(),
+                })
+        elif action == 'delete':
+            PageContent.objects.filter(pk=request.POST.get('pk')).delete()
+        _clear_site_cache()
+        return redirect(f"{request.path}?page={request.POST.get('page', '')}")
+
+    pages = list(PageContent.objects.values_list('page', flat=True).distinct().order_by('page'))
+    current = request.GET.get('page') or (pages[0] if pages else '')
+    return render(request, 'admin_panel/page_content.html', {
+        'pages': pages, 'current': current,
+        'items': PageContent.objects.filter(page=current),
+    })

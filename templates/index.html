@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static cms %}
 
 {% block content %}
 
@@ -13,20 +13,19 @@
     </div>
     <div class="relative z-20 max-w-7xl mx-auto px-6 lg:px-8 w-full py-20 md:py-32">
         <div class="max-w-3xl">
-            <p class="hero-badge text-[9px] sm:text-[10px] font-semibold tracking-[0.15em] sm:tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/60 mb-4 md:mb-6">A Signature Landmark by Delta Realtech</p>
+            <p class="hero-badge text-[9px] sm:text-[10px] font-semibold tracking-[0.15em] sm:tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/60 mb-4 md:mb-6">{% cms "home" "hero_badge" "A Signature Landmark by Delta Realtech" "Hero badge" %}</p>
             <h1 class="hero-title font-display text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold leading-[0.95] tracking-wide sm:tracking-normal text-brown-800 dark:text-cream-100 mb-3 md:mb-4 mt-5 md:mt-8" :style="darkMode ? '' : 'text-shadow: 0 2px 20px rgba(245,240,232,0.3)'">
-                Building <span class="italic">Dreams,</span><br>
-                Shaping <span class="italic">Homes</span>
+                {% cms "home" "hero_title" "Building <span class='italic'>Dreams,</span><br>Shaping <span class='italic'>Homes</span>" "Hero title" %}
             </h1>
             <p class="hero-subtitle text-brown-500 dark:text-cream-300/50 text-sm md:text-lg max-w-lg leading-relaxed mb-6 md:mb-10 mt-4 md:mt-6">
                 {{ project.tagline }}
             </p>
             <div class="inline-flex flex-col sm:flex-row gap-4 hero-buttons">
                 <a href="#pricing" onclick="smoothScroll(event,'pricing')" class="btn-primary rounded-xl inline-flex items-center justify-center gap-2">
-                    Explore Villas <i class="fas fa-arrow-right"></i>
+                    {% cms "home" "hero_btn_primary" "Explore Villas" "Hero primary button" %} <i class="fas fa-arrow-right"></i>
                 </a>
                 <a href="#contact" onclick="smoothScroll(event,'contact')" class="btn-outline rounded-xl inline-flex items-center justify-center gap-2">
-                    Get in Touch <i class="fas fa-arrow-right"></i>
+                    {% cms "home" "hero_btn_secondary" "Get in Touch" "Hero secondary button" %} <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
         </div>
@@ -55,7 +54,7 @@
     </div>
     <!-- Scroll -->
     <div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5">
-        <p class="text-[8px] tracking-[0.25em] uppercase text-brown-400 dark:text-cream-300/30">Scroll to explore</p>
+        <p class="text-[8px] tracking-[0.25em] uppercase text-brown-400 dark:text-cream-300/30">{% cms "home" "hero_scroll" "Scroll to explore" "Scroll hint" %}</p>
         <div class="w-4 h-7 border border-brown-400/30 dark:border-cream-300/20 rounded-full flex justify-center">
             <div class="w-0.5 h-2 bg-brown-400/50 dark:bg-cream-300/30 rounded-full mt-1.5 animate-bounce"></div>
         </div>
@@ -69,48 +68,48 @@
         <div class="grid grid-cols-3 md:hidden gap-6 mb-6">
             <div class="text-center stat-item">
                 <div class="visitor-count-stat font-display text-3xl font-bold text-brown-800 dark:text-cream-100">—</div>
-                <div class="text-[9px] tracking-[0.15em] uppercase text-brown-400 dark:text-cream-300/30 mt-1">Visitors</div>
+                <div class="text-[9px] tracking-[0.15em] uppercase text-brown-400 dark:text-cream-300/30 mt-1">{% cms "home" "stat_visitors" "Visitors" "Stat label: Visitors" %}</div>
             </div>
             <div class="text-center stat-item">
                 <div class="font-display text-3xl font-bold text-brown-800 dark:text-cream-100" data-count="{{ project.total_units }}">0</div>
-                <div class="text-[9px] tracking-[0.15em] uppercase text-brown-400 dark:text-cream-300/30 mt-1">Villas</div>
+                <div class="text-[9px] tracking-[0.15em] uppercase text-brown-400 dark:text-cream-300/30 mt-1">{% cms "home" "stat_villas" "Villas" "Stat label: Villas" %}</div>
             </div>
             <div class="text-center stat-item">
                 <div class="font-display text-3xl font-bold text-brown-800 dark:text-cream-100" data-count="{{ project.total_floors }}">0</div>
-                <div class="text-[9px] tracking-[0.15em] uppercase text-brown-400 dark:text-cream-300/30 mt-1">Floors</div>
+                <div class="text-[9px] tracking-[0.15em] uppercase text-brown-400 dark:text-cream-300/30 mt-1">{% cms "home" "stat_floors" "Floors" "Stat label: Floors" %}</div>
             </div>
         </div>
         <div class="flex md:hidden justify-around">
             <div class="text-center stat-item">
                 <div class="font-display text-3xl font-bold text-brown-800 dark:text-cream-100" data-count="{{ project.total_towers }}">0</div>
-                <div class="text-[9px] tracking-[0.15em] uppercase text-brown-400 dark:text-cream-300/30 mt-1">Villa Types</div>
+                <div class="text-[9px] tracking-[0.15em] uppercase text-brown-400 dark:text-cream-300/30 mt-1">{% cms "home" "stat_types" "Villa Types" "Stat label: Villa Types" %}</div>
             </div>
             <div class="text-center stat-item">
                 <div class="font-display text-3xl font-bold text-brown-800 dark:text-cream-100">{{ project.project_area }}</div>
-                <div class="text-[9px] tracking-[0.15em] uppercase text-brown-400 dark:text-cream-300/30 mt-1">Project Area</div>
+                <div class="text-[9px] tracking-[0.15em] uppercase text-brown-400 dark:text-cream-300/30 mt-1">{% cms "home" "stat_area" "Project Area" "Stat label: Project Area" %}</div>
             </div>
         </div>
         <!-- Desktop: single row of 5 -->
         <div class="hidden md:grid md:grid-cols-5 gap-6 lg:gap-8">
             <div class="text-center stat-item">
                 <div class="visitor-count-stat font-display text-3xl lg:text-5xl font-bold text-brown-800 dark:text-cream-100">—</div>
-                <div class="text-[10px] tracking-[0.2em] uppercase text-brown-400 dark:text-cream-300/30 mt-2">Visitors</div>
+                <div class="text-[10px] tracking-[0.2em] uppercase text-brown-400 dark:text-cream-300/30 mt-2">{% cms "home" "stat_visitors" "Visitors" "Stat label: Visitors" %}</div>
             </div>
             <div class="text-center stat-item">
                 <div class="font-display text-3xl lg:text-5xl font-bold text-brown-800 dark:text-cream-100" data-count="{{ project.total_units }}">0</div>
-                <div class="text-[10px] tracking-[0.2em] uppercase text-brown-400 dark:text-cream-300/30 mt-2">Villas</div>
+                <div class="text-[10px] tracking-[0.2em] uppercase text-brown-400 dark:text-cream-300/30 mt-2">{% cms "home" "stat_villas" "Villas" "Stat label: Villas" %}</div>
             </div>
             <div class="text-center stat-item">
                 <div class="font-display text-3xl lg:text-5xl font-bold text-brown-800 dark:text-cream-100" data-count="{{ project.total_floors }}">0</div>
-                <div class="text-[10px] tracking-[0.2em] uppercase text-brown-400 dark:text-cream-300/30 mt-2">Floors</div>
+                <div class="text-[10px] tracking-[0.2em] uppercase text-brown-400 dark:text-cream-300/30 mt-2">{% cms "home" "stat_floors" "Floors" "Stat label: Floors" %}</div>
             </div>
             <div class="text-center stat-item">
                 <div class="font-display text-3xl lg:text-5xl font-bold text-brown-800 dark:text-cream-100" data-count="{{ project.total_towers }}">0</div>
-                <div class="text-[10px] tracking-[0.2em] uppercase text-brown-400 dark:text-cream-300/30 mt-2">Villa Types</div>
+                <div class="text-[10px] tracking-[0.2em] uppercase text-brown-400 dark:text-cream-300/30 mt-2">{% cms "home" "stat_types" "Villa Types" "Stat label: Villa Types" %}</div>
             </div>
             <div class="text-center stat-item">
                 <div class="font-display text-3xl lg:text-4xl font-bold text-brown-800 dark:text-cream-100">{{ project.project_area }}</div>
-                <div class="text-[10px] tracking-[0.2em] uppercase text-brown-400 dark:text-cream-300/30 mt-2">Project Area</div>
+                <div class="text-[10px] tracking-[0.2em] uppercase text-brown-400 dark:text-cream-300/30 mt-2">{% cms "home" "stat_area" "Project Area" "Stat label: Project Area" %}</div>
             </div>
         </div>
     </div>
@@ -121,37 +120,36 @@
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
         <div class="grid lg:grid-cols-2 gap-10 lg:gap-20 items-stretch">
             <div class="section-reveal">
-                <p class="text-[10px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/60 mb-4">Vision</p>
+                <p class="text-[10px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/60 mb-4">{% cms "home" "about_eyebrow" "Vision" "About eyebrow" %}</p>
                 <h2 class="font-display text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-brown-800 dark:text-cream-100 leading-[0.95] mb-8 md:mb-12">
-                    Timeless<br>by <span class="italic">Design</span>
+                    {% cms "home" "about_title" "Timeless<br>by <span class='italic'>Design</span>" "About title" %}
                 </h2>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="glass-warm rounded-xl p-5 glass-hover">
                         <i class="fas fa-map-marker-alt text-brown-400 dark:text-gold-500 text-sm mb-3 block"></i>
-                        <div class="text-xs font-semibold text-brown-800 dark:text-cream-100 mb-1">Location</div>
+                        <div class="text-xs font-semibold text-brown-800 dark:text-cream-100 mb-1">{% cms "home" "about_card_location" "Location" "About card: Location" %}</div>
                         <div class="text-[11px] text-brown-400 dark:text-cream-300/40">{{ project.address }}</div>
                     </div>
                     <div class="glass-warm rounded-xl p-5 glass-hover">
                         <i class="fas fa-calendar-check text-brown-400 dark:text-gold-500 text-sm mb-3 block"></i>
-                        <div class="text-xs font-semibold text-brown-800 dark:text-cream-100 mb-1">Possession</div>
+                        <div class="text-xs font-semibold text-brown-800 dark:text-cream-100 mb-1">{% cms "home" "about_card_possession" "Possession" "About card: Possession" %}</div>
                         <div class="text-[11px] text-brown-400 dark:text-cream-300/40">{{ project.possession_date }}</div>
                     </div>
                     <div class="glass-warm rounded-xl p-5 glass-hover">
                         <i class="fas fa-certificate text-brown-400 dark:text-gold-500 text-sm mb-3 block"></i>
-                        <div class="text-xs font-semibold text-brown-800 dark:text-cream-100 mb-1">RERA Approved</div>
+                        <div class="text-xs font-semibold text-brown-800 dark:text-cream-100 mb-1">{% cms "home" "about_card_rera" "RERA Approved" "About card: RERA Approved" %}</div>
                         <div class="text-[11px] text-brown-400 dark:text-cream-300/40 break-all">{{ project.rera_number }}</div>
                     </div>
                     <div class="glass-warm rounded-xl p-5 glass-hover">
                         <i class="fas fa-ruler-combined text-brown-400 dark:text-gold-500 text-sm mb-3 block"></i>
-                        <div class="text-xs font-semibold text-brown-800 dark:text-cream-100 mb-1">Spread Across</div>
+                        <div class="text-xs font-semibold text-brown-800 dark:text-cream-100 mb-1">{% cms "home" "about_card_area" "Spread Across" "About card: Spread Across" %}</div>
                         <div class="text-[11px] text-brown-400 dark:text-cream-300/40">{{ project.project_area }}</div>
                     </div>
                 </div>
             </div>
             <div class="section-reveal flex flex-col justify-end h-full">
                 <p class="text-brown-500 dark:text-cream-300/50 text-sm leading-[1.9] mb-10">
-                    Rooted in the principles of quality craftsmanship and thoughtful design, our approach is about creating
-                    homes that feel timeless, grounded, and luminous &mdash; spaces that breathe with life, not trends.
+                    {% cms "home" "about_text" "Rooted in the principles of quality craftsmanship and thoughtful design, our approach is about creating homes that feel timeless, grounded, and luminous &mdash; spaces that breathe with life, not trends." "About paragraph" %}
                 </p>
                 <!-- Developer Card -->
                 <div class="glass-warm rounded-2xl p-8 glass-hover">
@@ -183,47 +181,22 @@
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
         <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
             <div class="section-reveal">
-                <p class="text-[10px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/60 mb-4">The Villa Experience</p>
+                <p class="text-[10px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/60 mb-4">{% cms "home" "villa_eyebrow" "The Villa Experience" "Villa section eyebrow" %}</p>
                 <h2 class="font-display text-4xl md:text-5xl font-bold text-brown-800 dark:text-cream-100 leading-[0.95] mb-8">
-                    Luxury 4 BHK<br><span class="italic">Independent Villas</span>
+                    {% cms "home" "villa_title" "Luxury 4 BHK<br><span class='italic'>Independent Villas</span>" "Villa section title" %}
                 </h2>
                 <div class="space-y-6">
+                    {% for f in features %}
                     <div class="flex items-start gap-4">
                         <div class="w-10 h-10 rounded-xl bg-brown-700/5 dark:bg-gold-500/10 flex items-center justify-center flex-shrink-0 mt-1">
-                            <i class="fas fa-home text-brown-500 dark:text-gold-500 text-sm"></i>
+                            <i class="fas {{ f.icon }} text-brown-500 dark:text-gold-500 text-sm"></i>
                         </div>
                         <div>
-                            <h4 class="font-semibold text-brown-800 dark:text-cream-100 text-sm mb-1">Independent G+2 Design</h4>
-                            <p class="text-brown-400 dark:text-cream-300/40 text-xs leading-relaxed">Each villa is designed for maximum space, light, and ventilation with independent access and premium privacy.</p>
+                            <h4 class="font-semibold text-brown-800 dark:text-cream-100 text-sm mb-1">{{ f.title|fill_area:area_range }}</h4>
+                            <p class="text-brown-400 dark:text-cream-300/40 text-xs leading-relaxed">{{ f.description }}</p>
                         </div>
                     </div>
-                    <div class="flex items-start gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-brown-700/5 dark:bg-gold-500/10 flex items-center justify-center flex-shrink-0 mt-1">
-                            <i class="fas fa-ruler-combined text-brown-500 dark:text-gold-500 text-sm"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-brown-800 dark:text-cream-100 text-sm mb-1">{{ area_range }} Buildup Area</h4>
-                            <p class="text-brown-400 dark:text-cream-300/40 text-xs leading-relaxed">6 villa types to choose from — generous living spaces across 3 floors with 4 bedrooms each.</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-brown-700/5 dark:bg-gold-500/10 flex items-center justify-center flex-shrink-0 mt-1">
-                            <i class="fas fa-swimming-pool text-brown-500 dark:text-gold-500 text-sm"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-brown-800 dark:text-cream-100 text-sm mb-1">Private Garden & Plunge Pool</h4>
-                            <p class="text-brown-400 dark:text-cream-300/40 text-xs leading-relaxed">Every home includes a private backyard garden and a personal plunge pool for your exclusive enjoyment.</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-brown-700/5 dark:bg-gold-500/10 flex items-center justify-center flex-shrink-0 mt-1">
-                            <i class="fas fa-expand-arrows-alt text-brown-500 dark:text-gold-500 text-sm"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold text-brown-800 dark:text-cream-100 text-sm mb-1">8.1 Acres &middot; 121 Premium Villas</h4>
-                            <p class="text-brown-400 dark:text-cream-300/40 text-xs leading-relaxed">Sprawling gated community nestled amidst lush greenery, just 2.9 km from Southern Bypass.</p>
-                        </div>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
             <div class="about-img-slide about-img-slide-2">
@@ -242,73 +215,20 @@
 <section class="py-16 md:py-28 lg:py-36">
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
         <div class="text-center mb-10 md:mb-20 section-reveal">
-            <p class="text-[10px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/60 mb-4">Location</p>
+            <p class="text-[10px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/60 mb-4">{% cms "home" "location_eyebrow" "Location" "Location eyebrow" %}</p>
             <h2 class="font-display text-4xl md:text-5xl font-bold text-brown-800 dark:text-cream-100">
-                2.9 Km From <span class="italic">Southern Bypass</span>
+                {% cms "home" "location_title" "2.9 Km From <span class='italic'>Southern Bypass</span>" "Location title" %}
             </h2>
-            <p class="text-brown-400 dark:text-cream-300/30 text-sm mt-4 max-w-xl mx-auto">Strategically located with excellent connectivity to key landmarks across the city.</p>
+            <p class="text-brown-400 dark:text-cream-300/30 text-sm mt-4 max-w-xl mx-auto">{% cms "home" "location_text" "Strategically located with excellent connectivity to key landmarks across the city." "Location paragraph" %}</p>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {% for l in landmarks %}
             <div class="glass-warm rounded-xl p-5 glass-hover text-center">
-                <i class="fas fa-hospital text-brown-400 dark:text-gold-500 text-lg mb-3"></i>
-                <div class="text-xs font-semibold text-brown-800 dark:text-cream-100 mb-1">Ruby Hospital</div>
-                <div class="text-[11px] text-brown-400 dark:text-cream-300/40">14 km</div>
+                <i class="fas {{ l.icon }} text-brown-400 dark:text-gold-500 text-lg mb-3"></i>
+                <div class="text-xs font-semibold text-brown-800 dark:text-cream-100 mb-1">{{ l.name }}</div>
+                <div class="text-[11px] text-brown-400 dark:text-cream-300/40">{{ l.distance }}</div>
             </div>
-            <div class="glass-warm rounded-xl p-5 glass-hover text-center">
-                <i class="fas fa-subway text-brown-400 dark:text-gold-500 text-lg mb-3"></i>
-                <div class="text-xs font-semibold text-brown-800 dark:text-cream-100 mb-1">Kavi Nazrul Metro</div>
-                <div class="text-[11px] text-brown-400 dark:text-cream-300/40">8.1 km</div>
-            </div>
-            <div class="glass-warm rounded-xl p-5 glass-hover text-center">
-                <i class="fas fa-subway text-brown-400 dark:text-gold-500 text-lg mb-3"></i>
-                <div class="text-xs font-semibold text-brown-800 dark:text-cream-100 mb-1">Shahid Khudiram Metro</div>
-                <div class="text-[11px] text-brown-400 dark:text-cream-300/40">7.4 km</div>
-            </div>
-            <div class="glass-warm rounded-xl p-5 glass-hover text-center">
-                <i class="fas fa-road text-brown-400 dark:text-gold-500 text-lg mb-3"></i>
-                <div class="text-xs font-semibold text-brown-800 dark:text-cream-100 mb-1">Dhalai Bridge</div>
-                <div class="text-[11px] text-brown-400 dark:text-cream-300/40">7 km</div>
-            </div>
-            <div class="glass-warm rounded-xl p-5 glass-hover text-center">
-                <i class="fas fa-map-marker-alt text-brown-400 dark:text-gold-500 text-lg mb-3"></i>
-                <div class="text-xs font-semibold text-brown-800 dark:text-cream-100 mb-1">Patuli</div>
-                <div class="text-[11px] text-brown-400 dark:text-cream-300/40">8.6 km</div>
-            </div>
-            <div class="glass-warm rounded-xl p-5 glass-hover text-center">
-                <i class="fas fa-train text-brown-400 dark:text-gold-500 text-lg mb-3"></i>
-                <div class="text-xs font-semibold text-brown-800 dark:text-cream-100 mb-1">Sonarpur Station</div>
-                <div class="text-[11px] text-brown-400 dark:text-cream-300/40">9 km</div>
-            </div>
-            <div class="glass-warm rounded-xl p-5 glass-hover text-center">
-                <i class="fas fa-map-pin text-brown-400 dark:text-gold-500 text-lg mb-3"></i>
-                <div class="text-xs font-semibold text-brown-800 dark:text-cream-100 mb-1">Kamalgazi More</div>
-                <div class="text-[11px] text-brown-400 dark:text-cream-300/40">6 km</div>
-            </div>
-            <div class="glass-warm rounded-xl p-5 glass-hover text-center">
-                <i class="fas fa-school text-brown-400 dark:text-gold-500 text-lg mb-3"></i>
-                <div class="text-xs font-semibold text-brown-800 dark:text-cream-100 mb-1">BDMI School</div>
-                <div class="text-[11px] text-brown-400 dark:text-cream-300/40">6.5 km</div>
-            </div>
-            <div class="glass-warm rounded-xl p-5 glass-hover text-center">
-                <i class="fas fa-gas-pump text-brown-400 dark:text-gold-500 text-lg mb-3"></i>
-                <div class="text-xs font-semibold text-brown-800 dark:text-cream-100 mb-1">Narendrapur Petrol Pump</div>
-                <div class="text-[11px] text-brown-400 dark:text-cream-300/40">5.3 km</div>
-            </div>
-            <div class="glass-warm rounded-xl p-5 glass-hover text-center">
-                <i class="fas fa-shopping-bag text-brown-400 dark:text-gold-500 text-lg mb-3"></i>
-                <div class="text-xs font-semibold text-brown-800 dark:text-cream-100 mb-1">Woodsquare Mall</div>
-                <div class="text-[11px] text-brown-400 dark:text-cream-300/40">5.1 km</div>
-            </div>
-            <div class="glass-warm rounded-xl p-5 glass-hover text-center">
-                <i class="fas fa-om text-brown-400 dark:text-gold-500 text-lg mb-3"></i>
-                <div class="text-xs font-semibold text-brown-800 dark:text-cream-100 mb-1">RKM Ashram</div>
-                <div class="text-[11px] text-brown-400 dark:text-cream-300/40">5 km</div>
-            </div>
-            <div class="glass-warm rounded-xl p-5 glass-hover text-center">
-                <i class="fas fa-car text-brown-400 dark:text-gold-500 text-lg mb-3"></i>
-                <div class="text-xs font-semibold text-brown-800 dark:text-cream-100 mb-1">Southern Bypass</div>
-                <div class="text-[11px] text-brown-400 dark:text-cream-300/40">3 km</div>
-            </div>
+            {% endfor %}
         </div>
     </div>
 </section>
@@ -319,9 +239,9 @@
 <section id="amenities" class="py-16 md:py-28 lg:py-36">
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
         <div class="text-center mb-10 md:mb-20 section-reveal">
-            <p class="text-[10px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/60 mb-4">Amenities</p>
+            <p class="text-[10px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/60 mb-4">{% cms "home" "amenities_eyebrow" "Amenities" "Amenities eyebrow" %}</p>
             <h2 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-brown-800 dark:text-cream-100">
-                <span class="italic">Our</span> Approach
+                {% cms "home" "amenities_title" "<span class='italic'>Our</span> Approach" "Amenities title" %}
             </h2>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -387,30 +307,18 @@
 <section id="gallery" class="py-16 md:py-28 lg:py-36">
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
         <div class="text-center mb-10 md:mb-20 section-reveal">
-            <p class="text-[10px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/60 mb-4">Portfolio</p>
+            <p class="text-[10px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/60 mb-4">{% cms "home" "gallery_eyebrow" "Portfolio" "Gallery eyebrow" %}</p>
             <h2 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-brown-800 dark:text-cream-100">
-                Impressions That <span class="italic">Endure</span>
+                {% cms "home" "gallery_title" "Impressions That <span class='italic'>Endure</span>" "Gallery title" %}
             </h2>
         </div>
         <div class="grid grid-cols-12 gap-3 md:gap-4">
-            <div class="col-span-12 md:col-span-7 rounded-2xl overflow-hidden group section-reveal h-[220px] md:h-[400px] cursor-pointer" onclick="openLightbox(0)">
-                <img src="{% static 'images/gallery1.webp' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
+            {% for g in gallery %}
+            {% cycle 'col-span-12 md:col-span-7 h-[220px] md:h-[400px]' 'col-span-12 md:col-span-5 h-[220px] md:h-[400px]' 'col-span-6 md:col-span-4 h-[160px] md:h-[300px]' 'col-span-6 md:col-span-4 h-[160px] md:h-[300px]' 'col-span-12 md:col-span-4 h-[160px] md:h-[300px]' 'col-span-12 h-[35vh] md:h-[50vh]' as span silent %}
+            <div class="{{ span }} rounded-2xl overflow-hidden group section-reveal cursor-pointer" onclick="openLightbox({{ forloop.counter0 }})">
+                <img src="{% media_url g %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="{{ g.caption|default:'Silverwoods Gallery' }}">
             </div>
-            <div class="col-span-12 md:col-span-5 rounded-2xl overflow-hidden group section-reveal h-[220px] md:h-[400px] cursor-pointer" onclick="openLightbox(1)">
-                <img src="{% static 'images/gallery2.webp' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
-            </div>
-            <div class="col-span-6 md:col-span-4 rounded-2xl overflow-hidden group section-reveal h-[160px] md:h-[300px] cursor-pointer" onclick="openLightbox(2)">
-                <img src="{% static 'images/gallery3.webp' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
-            </div>
-            <div class="col-span-6 md:col-span-4 rounded-2xl overflow-hidden group section-reveal h-[160px] md:h-[300px] cursor-pointer" onclick="openLightbox(3)">
-                <img src="{% static 'images/gallery4.webp' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
-            </div>
-            <div class="col-span-12 md:col-span-4 rounded-2xl overflow-hidden group section-reveal h-[160px] md:h-[300px] cursor-pointer" onclick="openLightbox(4)">
-                <img src="{% static 'images/gallery5.webp' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
-            </div>
-            <div class="col-span-12 rounded-2xl overflow-hidden group section-reveal h-[35vh] md:h-[50vh] cursor-pointer" onclick="openLightbox(5)">
-                <img src="{% static 'images/gallery6.webp' %}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" loading="lazy" style="transition:transform 1s" alt="Silverwoods Gallery">
-            </div>
+            {% endfor %}
         </div>
 
     </div>
@@ -423,14 +331,14 @@
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
         <div class="grid lg:grid-cols-2 gap-8 lg:gap-16 mb-10 md:mb-16">
             <div class="section-reveal">
-                <p class="text-[10px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/60 mb-4">Villas</p>
+                <p class="text-[10px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/60 mb-4">{% cms "home" "pricing_eyebrow" "Villas" "Pricing eyebrow" %}</p>
                 <h2 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-brown-800 dark:text-cream-100 leading-[0.95]">
-                    Design That<br><span class="italic">Resonates</span>
+                    {% cms "home" "pricing_title" "Design That<br><span class='italic'>Resonates</span>" "Pricing title" %}
                 </h2>
             </div>
             <div class="section-reveal flex items-end">
                 <p class="text-brown-500 dark:text-cream-300/50 text-sm leading-[1.9]">
-                    We offer more than homes &mdash; we craft experiences through clarity, texture, intention, and thoughtful presence. Each villa is a layered composition of light, form, and purpose.
+                    {% cms "home" "pricing_text" "We offer more than homes &mdash; we craft experiences through clarity, texture, intention, and thoughtful presence. Each villa is a layered composition of light, form, and purpose." "Pricing paragraph" %}
                 </p>
             </div>
         </div>
@@ -456,7 +364,7 @@
                         <span class="font-display text-2xl font-bold text-brown-800 dark:text-cream-100">&#8377;{{ flat.price|floatformat:0 }}</span>
                     </div>
                     <a href="#contact" onclick="smoothScroll(event,'contact')" class="block mt-4 w-full text-center py-3 rounded-xl text-[11px] font-semibold tracking-[0.15em] uppercase border border-brown-700/20 dark:border-cream-300/20 bg-cream-100/60 dark:bg-transparent text-brown-700 dark:text-cream-100 hover:bg-brown-700 dark:hover:bg-gold-500 hover:text-cream-100 dark:hover:text-brown-900 hover:border-transparent transition-all duration-300">
-                        Book a Visit <i class="fas fa-arrow-right text-[9px] ml-1"></i>
+                        {% cms "home" "pricing_btn" "Book a Visit" "Pricing card button" %} <i class="fas fa-arrow-right text-[9px] ml-1"></i>
                     </a>
                 </div>
             </div>
@@ -483,9 +391,9 @@
 <section id="reviews" class="py-16 md:py-28 lg:py-36">
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
         <div class="text-center mb-10 md:mb-20 section-reveal">
-            <p class="text-[10px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/60 mb-4">Testimonials</p>
+            <p class="text-[10px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/60 mb-4">{% cms "home" "reviews_eyebrow" "Testimonials" "Reviews eyebrow" %}</p>
             <h2 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-brown-800 dark:text-cream-100">
-                Notes From Our <span class="italic">Residents</span>
+                {% cms "home" "reviews_title" "Notes From Our <span class='italic'>Residents</span>" "Reviews title" %}
             </h2>
         </div>
         <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-10 auto-rows-[11rem] md:auto-rows-[13rem]">
@@ -525,7 +433,7 @@
                 <div class="flex items-center justify-between px-8 py-6 border-b border-brown-700/[0.08] dark:border-white/[0.06] flex-shrink-0">
                     <div>
                         <p class="text-[10px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/60 mb-1">All Reviews</p>
-                        <h3 class="font-display text-2xl font-bold text-brown-800 dark:text-cream-100">What Our Residents Say</h3>
+                        <h3 class="font-display text-2xl font-bold text-brown-800 dark:text-cream-100">{% cms "home" "reviews_modal_title" "What Our Residents Say" "Reviews popup title" %}</h3>
                     </div>
                     <button onclick="closeReviewsModal()" class="w-9 h-9 rounded-full bg-brown-700/[0.06] dark:bg-white/[0.05] flex items-center justify-center text-brown-400 dark:text-cream-300/40 hover:bg-brown-700/10 transition-colors">
                         <i class="fas fa-times text-xs"></i>
@@ -557,7 +465,7 @@
         <!-- Write Review -->
         <div class="max-w-2xl mx-auto section-reveal">
             <div class="glass-warm rounded-2xl p-8">
-                <h3 class="font-display text-lg font-bold text-brown-800 dark:text-cream-100 mb-6 text-center">Share Your Experience</h3>
+                <h3 class="font-display text-lg font-bold text-brown-800 dark:text-cream-100 mb-6 text-center">{% cms "home" "reviews_form_title" "Share Your Experience" "Review form title" %}</h3>
                 <form id="review-form" class="space-y-4">
                     {% csrf_token %}
                     <div class="grid sm:grid-cols-2 gap-4">
@@ -591,12 +499,12 @@
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
         <div class="grid lg:grid-cols-2 gap-10 lg:gap-20 mb-10 md:mb-20">
             <div class="section-reveal">
-                <p class="text-[10px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/60 mb-4">Contact</p>
+                <p class="text-[10px] font-semibold tracking-[0.3em] uppercase text-brown-400 dark:text-gold-500/60 mb-4">{% cms "home" "contact_eyebrow" "Contact" "Contact eyebrow" %}</p>
                 <h2 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-brown-800 dark:text-cream-100 leading-[0.95] mb-6 md:mb-8">
-                    Bring Intention<br>Into <span class="italic">Your</span> Space
+                    {% cms "home" "contact_title" "Bring Intention<br>Into <span class='italic'>Your</span> Space" "Contact title" %}
                 </h2>
                 <p class="text-brown-500 dark:text-cream-300/60 text-sm md:text-base leading-relaxed">
-                    Escape the urban hustle and embrace a life of serene luxury at Silverwoods, an exclusive residential villa project meticulously designed for those who seek comfort, privacy, and sophisticated living. Nestled amidst lush greenery on a generous 8.1 Acre expanse, Silverwoods offers an unparalleled lifestyle just a short drive from the city's Southern Bypass.
+                    {% cms "home" "contact_text" "Escape the urban hustle and embrace a life of serene luxury at Silverwoods, an exclusive residential villa project meticulously designed for those who seek comfort, privacy, and sophisticated living. Nestled amidst lush greenery on a generous 8.1 Acre expanse, Silverwoods offers an unparalleled lifestyle just a short drive from the city's Southern Bypass." "Contact paragraph" %}
                 </p>
             </div>
             <div class="about-img-slide">
@@ -610,7 +518,7 @@
         <div class="grid lg:grid-cols-2 gap-8 lg:gap-10">
             <!-- Form -->
             <div class="section-reveal glass-warm rounded-2xl p-6 md:p-10">
-                <h3 class="font-display text-xl font-bold text-brown-800 dark:text-cream-100 mb-6">Schedule a Visit</h3>
+                <h3 class="font-display text-xl font-bold text-brown-800 dark:text-cream-100 mb-6">{% cms "home" "contact_form_title" "Schedule a Visit" "Contact form title" %}</h3>
                 <form id="lead-form" class="space-y-4">
                     {% csrf_token %}
                     <div class="grid sm:grid-cols-2 gap-4">
@@ -703,9 +611,9 @@
             <div>
                 <p class="text-[10px] font-semibold tracking-[0.2em] uppercase text-brown-400 dark:text-cream-300/30 mb-4">Follow Us</p>
                 <ul class="space-y-2 text-xs text-brown-600 dark:text-cream-300/50">
-                    <li><a href="#" class="hover:text-brown-800 dark:hover:text-cream-100 transition-colors">Instagram</a></li>
-                    <li><a href="#" class="hover:text-brown-800 dark:hover:text-cream-100 transition-colors">Facebook</a></li>
-                    <li><a href="#" class="hover:text-brown-800 dark:hover:text-cream-100 transition-colors">YouTube</a></li>
+                    <li><a href="{{ project.instagram|default:'#' }}" target="_blank" rel="noopener" class="hover:text-brown-800 dark:hover:text-cream-100 transition-colors">Instagram</a></li>
+                    <li><a href="{{ project.facebook|default:'#' }}" target="_blank" rel="noopener" class="hover:text-brown-800 dark:hover:text-cream-100 transition-colors">Facebook</a></li>
+                    <li><a href="{{ project.youtube|default:'#' }}" target="_blank" rel="noopener" class="hover:text-brown-800 dark:hover:text-cream-100 transition-colors">YouTube</a></li>
                 </ul>
             </div>
             <div>
@@ -730,10 +638,10 @@
                 <img src="{% static 'images/logo.webp' %}" alt="Silverwoods" class="h-8 w-8 rounded-lg object-cover" onerror="this.style.display='none'">
                 <div>
                     <span class="font-display text-sm font-bold tracking-[0.1em] uppercase block"><span class="text-brown-800 dark:text-cream-100">SILVER</span><span class="text-gold-500">WOODS</span></span>
-                    <span class="italic text-[9px] tracking-[0.05em] text-brown-400 dark:text-gold-500/50 block -mt-0.5">Live the Villa Life</span>
+                    <span class="italic text-[9px] tracking-[0.05em] text-brown-400 dark:text-gold-500/50 block -mt-0.5">{% cms "home" "footer_slogan" "Live the Villa Life" "Footer slogan" %}</span>
                 </div>
                 <span class="hidden md:inline text-brown-300 dark:text-cream-300/20">|</span>
-                <span class="text-[10px] text-brown-400 dark:text-cream-300/30 italic text-center md:text-left">A Signature Landmark by Delta Realtech</span>
+                <span class="text-[10px] text-brown-400 dark:text-cream-300/30 italic text-center md:text-left">{% cms "home" "footer_tagline" "A Signature Landmark by Delta Realtech" "Footer tagline" %}</span>
             </div>
             <div class="text-center md:text-right">
                 <p class="text-[9px] text-brown-300 dark:text-cream-300/15 italic leading-relaxed">Disclaimer: The images, furniture, and fittings shown are for illustrative purposes only. All specifications and amenities are subject to change as per the final agreement.</p>
@@ -955,12 +863,7 @@ document.addEventListener('keydown', function(e) {
 
 // Gallery Lightbox
 var _lbImages = [
-    "{% static 'images/gallery1.webp' %}",
-    "{% static 'images/gallery2.webp' %}",
-    "{% static 'images/gallery3.webp' %}",
-    "{% static 'images/gallery4.webp' %}",
-    "{% static 'images/gallery5.webp' %}",
-    "{% static 'images/gallery6.webp' %}"
+    {% for g in gallery %}"{% media_url g %}"{% if not forloop.last %},{% endif %}{% endfor %}
 ];
 var _lbIndex = 0;
 var _lbAutoTimer = null;

@@ -1,0 +1,11 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% block title %}Features & Location{% endblock %}
+{% block page_title %}Villa Features & Location Landmarks{% endblock %}
+
+{% block admin_content %}
+{% if form and form.errors %}<div class="mb-6 p-3 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-600 text-sm">{{ form.errors }}</div>{% endif %}
+<div class="grid lg:grid-cols-2 gap-6">
+{% include 'admin_panel/_item_list.html' with kind='feature' title='Villa Experience Features' hint='Points in "The Villa Experience" section. Use {area_range} in a title to show the buildup area range.' items=features %}
+{% include 'admin_panel/_item_list.html' with kind='landmark' title='Location Landmarks' hint='Places and distances in the Location section' items=landmarks %}
+</div>
+{% endblock %}

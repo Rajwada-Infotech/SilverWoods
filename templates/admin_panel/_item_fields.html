@@ -1,0 +1,14 @@
+<div class="grid grid-cols-3 gap-3">
+    <div><label class="{{ label_cls }}">Icon</label><input type="text" name="icon" value="{{ item.icon|default:'fa-map-marker-alt' }}" placeholder="fa-home" required class="{{ input_cls }}"></div>
+    {% if kind == 'feature' %}
+    <div class="col-span-2"><label class="{{ label_cls }}">Title</label><input type="text" name="title" value="{{ item.title|default:'' }}" required class="{{ input_cls }}"></div>
+    {% else %}
+    <div><label class="{{ label_cls }}">Name</label><input type="text" name="name" value="{{ item.name|default:'' }}" required class="{{ input_cls }}"></div>
+    <div><label class="{{ label_cls }}">Distance</label><input type="text" name="distance" value="{{ item.distance|default:'' }}" placeholder="5 km" required class="{{ input_cls }}"></div>
+    {% endif %}
+</div>
+{% if kind == 'feature' %}
+<div><label class="{{ label_cls }}">Description</label><textarea name="description" rows="2" class="{{ input_cls }} resize-none">{{ item.description|default:'' }}</textarea></div>
+{% endif %}
+<div class="w-24"><label class="{{ label_cls }}">Order</label><input type="number" name="order" value="{{ item.order|default:items|length|add:1 }}" class="{{ input_cls }}"></div>
+<p class="text-[10px] text-brown-300 dark:text-cream-300/20">Icons: any <a href="https://fontawesome.com/v6/search?ic=free" target="_blank" rel="noopener" class="underline">Font Awesome</a> solid icon name, e.g. fa-subway, fa-hospital, fa-school.</p>

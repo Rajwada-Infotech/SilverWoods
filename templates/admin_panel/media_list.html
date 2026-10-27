@@ -1,0 +1,64 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% load cms %}
+{% block title %}{{ heading }}{% endblock %}
+{% block page_title %}{{ heading }} Management{% endblock %}
+
+{% block admin_content %}
+<div class="grid lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 min-w-0 bg-white dark:bg-white/[0.03] rounded-2xl border border-brown-700/[0.05] dark:border-white/[0.06]">
+        <div class="p-6 border-b border-brown-700/[0.05] dark:border-white/[0.05]">
+            <h2 class="text-lg font-bold text-brown-800 dark:text-cream-100" style="font-family:'Playfair Display',serif">{{ heading }}</h2>
+            <p class="text-xs text-brown-400 dark:text-cream-300/30">{{ subheading }}</p>
+        </div>
+        {% if form and form.errors %}<div class="m-6 p-3 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-600 text-sm">{{ form.errors }}</div>{% endif %}
+        <div class="divide-y divide-brown-700/[0.03] dark:divide-white/[0.03]">
+            {% for item in items %}
+            <div class="p-5 hover:bg-cream-200/30 dark:hover:bg-white/[0.02] transition-colors" x-data="{editing:false}">
+                <div x-show="!editing" class="flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-4 min-w-0">
+                        <img src="{% media_url item %}" alt="" class="w-20 h-14 rounded-lg object-cover flex-shrink-0 bg-cream-200 dark:bg-white/[0.05]">
+                        <div class="min-w-0">
+                            <div class="font-bold text-brown-800 dark:text-cream-100 text-sm truncate">{{ item.caption|default:"(no caption)" }}</div>
+                            <div class="text-[10px] text-brown-400 dark:text-cream-300/30 truncate">{% if item.image %}Uploaded image{% else %}Bundled: {{ item.static_path }}{% endif %}</div>
+                        </div>
+                    </div>
+                    <div class="flex gap-1.5 shrink-0">
+                        <span class="text-[10px] px-2 py-1 rounded-full bg-cream-200 dark:bg-white/[0.05] text-brown-500 dark:text-cream-300/40 self-center">#{{ item.order }}</span>
+                        <button @click="editing=true" class="w-7 h-7 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center"><i class="fas fa-edit text-xs"></i></button>
+                        <form method="post" action="{% url 'admin_delete_content' kind item.pk %}" onsubmit="return confirm('Delete this image?')">{% csrf_token %}<button class="w-7 h-7 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 text-red-600 dark:text-red-400 rounded-lg flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button></form>
+                    </div>
+                </div>
+                <form x-show="editing" method="post" enctype="multipart/form-data" class="space-y-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="obj_id" value="{{ item.pk }}">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="sm:col-span-2"><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Caption</label><input type="text" name="caption" value="{{ item.caption }}" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100"></div>
+                        <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Order</label><input type="number" name="order" value="{{ item.order }}" class="w-full px-3 py-2 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100"></div>
+                    </div>
+                    <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Replace image (optional)</label><input type="file" name="image" accept="image/*" class="text-xs text-brown-600 dark:text-cream-300/50"></div>
+                    <div class="flex gap-3">
+                        <button type="submit" class="px-5 py-2 bg-brown-700 dark:bg-gold-500/20 text-cream-100 dark:text-gold-400 rounded-xl text-xs font-semibold tracking-wider uppercase">Save</button>
+                        <button type="button" @click="editing=false" class="px-5 py-2 bg-cream-200 dark:bg-white/[0.04] text-brown-600 dark:text-cream-300/50 rounded-xl text-xs font-semibold tracking-wider uppercase">Cancel</button>
+                    </div>
+                </form>
+            </div>
+            {% empty %}
+            <div class="p-12 text-center text-brown-300 dark:text-cream-300/20">No images yet. Add your first one on the right.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-white/[0.03] rounded-2xl border border-brown-700/[0.05] dark:border-white/[0.06] h-fit sticky top-28">
+        <div class="p-6 border-b border-brown-700/[0.05] dark:border-white/[0.05]">
+            <h2 class="text-lg font-bold text-brown-800 dark:text-cream-100" style="font-family:'Playfair Display',serif">Add Image</h2>
+        </div>
+        <form method="post" enctype="multipart/form-data" class="p-6 space-y-4">
+            {% csrf_token %}
+            <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Image</label><input type="file" name="image" accept="image/*" required class="text-xs text-brown-600 dark:text-cream-300/50"></div>
+            <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Caption</label><input type="text" name="caption" class="w-full px-3 py-2.5 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100"></div>
+            <div><label class="block text-[10px] font-semibold text-brown-400 dark:text-cream-300/30 mb-1 tracking-wider uppercase">Order</label><input type="number" name="order" value="{{ items|length|add:1 }}" class="w-full px-3 py-2.5 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100"></div>
+            <button type="submit" class="w-full py-3 bg-brown-700 dark:bg-gold-500/20 text-cream-100 dark:text-gold-400 rounded-xl text-xs font-semibold tracking-wider uppercase"><i class="fas fa-plus mr-2"></i> Add Image</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

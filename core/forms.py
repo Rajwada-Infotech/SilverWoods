@@ -1,5 +1,8 @@
 from django import forms
-from .models import Lead, PopupAd, FlatType, Review, Amenity
+from .models import (
+    Lead, PopupAd, FlatType, Review, Amenity,
+    ProjectInfo, GalleryImage, BrochureImage, VillaFeature, Landmark,
+)
 
 
 class LeadForm(forms.ModelForm):
@@ -72,3 +75,49 @@ class ReviewForm(forms.ModelForm):
             'comment': forms.Textarea(attrs={'placeholder': 'Your Review', 'rows': 3, 'class': 'form-input'}),
             'designation': forms.TextInput(attrs={'placeholder': 'Your Designation (Optional)', 'class': 'form-input'}),
         }
+
+
+ADMIN_INPUT_CLASS = (
+    "w-full px-3 py-2.5 border border-brown-700/[0.06] dark:border-white/[0.06] rounded-xl text-sm "
+    "bg-cream-50/50 dark:bg-white/[0.03] text-brown-800 dark:text-cream-100"
+)
+
+
+class AdminStyledForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            if isinstance(field.widget, forms.Textarea):
+                field.widget.attrs.setdefault('rows', 3)
+            if not isinstance(field.widget, (forms.CheckboxInput, forms.FileInput)):
+                field.widget.attrs['class'] = ADMIN_INPUT_CLASS
+
+
+class ProjectInfoForm(AdminStyledForm):
+    class Meta:
+        model = ProjectInfo
+        fields = '__all__'
+
+
+class GalleryImageForm(AdminStyledForm):
+    class Meta:
+        model = GalleryImage
+        fields = ['image', 'caption', 'order']
+
+
+class BrochureImageForm(AdminStyledForm):
+    class Meta:
+        model = BrochureImage
+        fields = ['image', 'caption', 'order']
+
+
+class VillaFeatureForm(AdminStyledForm):
+    class Meta:
+        model = VillaFeature
+        fields = ['icon', 'title', 'description', 'order']
+
+
+class LandmarkForm(AdminStyledForm):
+    class Meta:
+        model = Landmark
+        fields = ['icon', 'name', 'distance', 'order']

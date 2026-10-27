@@ -39,4 +39,10 @@ urlpatterns = [
     path('api/chatbot/contact/', views.chatbot_contact, name='chatbot_contact'),
     path('admin-panel/chatbot/', views.admin_chatbot, name='admin_chatbot'),
     path('admin-panel/reviews/', views.admin_reviews, name='admin_reviews'),
+    path('admin-panel/settings/', views.admin_settings, name='admin_settings'),
+    path('admin-panel/page-content/', views.admin_page_content, name='admin_page_content'),
+    path('admin-panel/gallery/', views.admin_gallery, name='admin_gallery'),
+    path('admin-panel/brochure/', views.admin_brochure, name='admin_brochure'),
+    path('admin-panel/features/', views.admin_features, name='admin_features'),
+    path('admin-panel/content/<str:kind>/delete/<int:pk>/', views.admin_delete_content, name='admin_delete_content'),
 ]

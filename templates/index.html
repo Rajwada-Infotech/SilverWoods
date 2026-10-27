@@ -468,9 +468,9 @@
                 <h3 class="font-display text-lg font-bold text-brown-800 dark:text-cream-100 mb-6 text-center">{% cms "home" "reviews_form_title" "Share Your Experience" "Review form title" %}</h3>
                 <form id="review-form" class="space-y-4">
                     {% csrf_token %}
-                    <div class="grid sm:grid-cols-2 gap-4">
-                        <input type="text" name="name" placeholder="Your Name" required class="w-full px-4 py-3 rounded-xl bg-cream-50/50 dark:bg-white/[0.03] border border-brown-700/[0.06] dark:border-white/[0.06] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20 text-sm">
-                        <input type="text" name="designation" placeholder="Designation (Optional)" class="w-full px-4 py-3 rounded-xl bg-cream-50/50 dark:bg-white/[0.03] border border-brown-700/[0.06] dark:border-white/[0.06] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20 text-sm">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <input type="text" name="name" placeholder="Your Name" required class="w-full min-w-0 px-4 py-3 rounded-xl bg-cream-50/50 dark:bg-white/[0.03] border border-brown-700/[0.06] dark:border-white/[0.06] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20 text-sm">
+                        <input type="text" name="designation" placeholder="Designation (Optional)" class="w-full min-w-0 px-4 py-3 rounded-xl bg-cream-50/50 dark:bg-white/[0.03] border border-brown-700/[0.06] dark:border-white/[0.06] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20 text-sm">
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="text-brown-400 dark:text-cream-300/30 text-[10px] tracking-[0.15em] uppercase">Rating:</span>
@@ -483,7 +483,7 @@
                         </div>
                         <input type="hidden" name="rating" id="review-rating" value="5">
                     </div>
-                    <textarea name="comment" placeholder="Your Review" rows="3" required class="w-full px-4 py-3 rounded-xl bg-cream-50/50 dark:bg-white/[0.03] border border-brown-700/[0.06] dark:border-white/[0.06] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20 text-sm resize-none"></textarea>
+                    <textarea name="comment" placeholder="Your Review" rows="3" required class="w-full min-w-0 px-4 py-3 rounded-xl bg-cream-50/50 dark:bg-white/[0.03] border border-brown-700/[0.06] dark:border-white/[0.06] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20 text-sm resize-none"></textarea>
                     <button type="submit" class="w-full py-3.5 btn-primary rounded-xl"><i class="fas fa-pen-nib mr-2"></i> SUBMIT REVIEW</button>
                 </form>
                 <div id="review-message" class="hidden mt-4 p-4 rounded-xl text-center text-sm"></div>
@@ -515,24 +515,24 @@
             </div>
         </div>
 
-        <div class="grid lg:grid-cols-2 gap-8 lg:gap-10">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
             <!-- Form -->
-            <div class="section-reveal glass-warm rounded-2xl p-6 md:p-10">
+            <div class="section-reveal glass-warm rounded-2xl p-6 md:p-10 min-w-0">
                 <h3 class="font-display text-xl font-bold text-brown-800 dark:text-cream-100 mb-6">{% cms "home" "contact_form_title" "Schedule a Visit" "Contact form title" %}</h3>
                 <form id="lead-form" class="space-y-4">
                     {% csrf_token %}
-                    <div class="grid sm:grid-cols-2 gap-4">
-                        <input type="text" name="name" placeholder="Full Name *" required class="w-full px-4 py-3.5 rounded-xl bg-cream-50/50 dark:bg-white/[0.03] border border-brown-700/[0.06] dark:border-white/[0.06] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20 text-sm">
-                        <input type="email" name="email" placeholder="Email Address (Optional)" class="w-full px-4 py-3.5 rounded-xl bg-cream-50/50 dark:bg-white/[0.03] border border-brown-700/[0.06] dark:border-white/[0.06] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20 text-sm">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <input type="text" name="name" placeholder="Full Name *" required class="w-full min-w-0 px-4 py-3.5 rounded-xl bg-cream-50/50 dark:bg-white/[0.03] border border-brown-700/[0.06] dark:border-white/[0.06] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20 text-sm">
+                        <input type="email" name="email" placeholder="Email Address (Optional)" class="w-full min-w-0 px-4 py-3.5 rounded-xl bg-cream-50/50 dark:bg-white/[0.03] border border-brown-700/[0.06] dark:border-white/[0.06] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20 text-sm">
                     </div>
-                    <div class="grid sm:grid-cols-2 gap-4">
-                        <input type="tel" name="phone" placeholder="Phone Number *" required class="w-full px-4 py-3.5 rounded-xl bg-cream-50/50 dark:bg-white/[0.03] border border-brown-700/[0.06] dark:border-white/[0.06] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20 text-sm">
-                        <select name="flat_preference" class="w-full px-4 py-3.5 pr-10 rounded-xl bg-cream-50/50 dark:bg-white/[0.03] border border-brown-700/[0.06] dark:border-white/[0.06] text-brown-400 dark:text-cream-300/40 text-sm appearance-none" style="background-image:url('data:image/svg+xml,<%3Fxml version=%271.0%27 encoding=%27UTF-8%27%3F><svg viewBox=%270 0 12 8%27 xmlns=%27http://www.w3.org/2000/svg%27><path d=%27M1 1l5 5 5-5%27 stroke=%27%238b6b4a%27 stroke-width=%271.5%27 fill=%27none%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/></svg>');background-repeat:no-repeat;background-position:right 14px center;background-size:12px">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <input type="tel" name="phone" placeholder="Phone Number *" required class="w-full min-w-0 px-4 py-3.5 rounded-xl bg-cream-50/50 dark:bg-white/[0.03] border border-brown-700/[0.06] dark:border-white/[0.06] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20 text-sm">
+                        <select name="flat_preference" class="w-full min-w-0 truncate px-4 py-3.5 pr-10 rounded-xl bg-cream-50/50 dark:bg-white/[0.03] border border-brown-700/[0.06] dark:border-white/[0.06] text-brown-400 dark:text-cream-300/40 text-sm appearance-none" style="background-image:url('data:image/svg+xml,<%3Fxml version=%271.0%27 encoding=%27UTF-8%27%3F><svg viewBox=%270 0 12 8%27 xmlns=%27http://www.w3.org/2000/svg%27><path d=%27M1 1l5 5 5-5%27 stroke=%27%238b6b4a%27 stroke-width=%271.5%27 fill=%27none%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/></svg>');background-repeat:no-repeat;background-position:right 14px center;background-size:12px">
                             <option value="" class="bg-cream-100 dark:bg-dark-900">Select Villa Type</option>
                             {% for flat in flat_types %}<option value="{{ flat.bhk }} BHK" class="bg-cream-100 dark:bg-dark-900 text-brown-800 dark:text-cream-100">{{ flat.bhk }} BHK - {{ flat.name }}</option>{% endfor %}
                         </select>
                     </div>
-                    <textarea name="message" placeholder="Your Message (Optional)" rows="4" class="w-full px-4 py-3.5 rounded-xl bg-cream-50/50 dark:bg-white/[0.03] border border-brown-700/[0.06] dark:border-white/[0.06] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20 text-sm resize-none"></textarea>
+                    <textarea name="message" placeholder="Your Message (Optional)" rows="4" class="w-full min-w-0 px-4 py-3.5 rounded-xl bg-cream-50/50 dark:bg-white/[0.03] border border-brown-700/[0.06] dark:border-white/[0.06] text-brown-800 dark:text-cream-100 placeholder-brown-300 dark:placeholder-cream-300/20 text-sm resize-none"></textarea>
                     <button type="submit" class="w-full py-4 btn-primary rounded-xl">
                         <i class="fas fa-paper-plane mr-2"></i> Send Enquiry
                     </button>

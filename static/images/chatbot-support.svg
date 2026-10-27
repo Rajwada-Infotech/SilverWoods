@@ -1,34 +1,110 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 136" role="img" aria-label="Customer support">
   <defs>
-    <linearGradient id="silver" x1="0" y1="0" x2="1" y2="1">
+    <!-- Brushed silver rim -->
+    <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#ffffff"/>
-      <stop offset=".35" stop-color="#c9ccd1"/>
-      <stop offset=".6" stop-color="#8d9299"/>
-      <stop offset="1" stop-color="#e6e8eb"/>
+      <stop offset=".22" stop-color="#d9dce1"/>
+      <stop offset=".45" stop-color="#7d838c"/>
+      <stop offset=".62" stop-color="#f2f3f5"/>
+      <stop offset=".82" stop-color="#9aa0a8"/>
+      <stop offset="1" stop-color="#e9ebee"/>
     </linearGradient>
-    <linearGradient id="face" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#f4f5f7"/>
-      <stop offset="1" stop-color="#9da2a9"/>
+    <linearGradient id="rimShade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000" stop-opacity=".35"/>
     </linearGradient>
-    <radialGradient id="inner" cx=".5" cy=".35" r=".75">
-      <stop offset="0" stop-color="#2b2d31"/>
-      <stop offset="1" stop-color="#050506"/>
+    <!-- Gold trim -->
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6e3a1"/>
+      <stop offset=".45" stop-color="#c9a84c"/>
+      <stop offset=".7" stop-color="#8a6a22"/>
+      <stop offset="1" stop-color="#e8c96a"/>
+    </linearGradient>
+    <!-- Deep enamel field -->
+    <radialGradient id="field" cx=".5" cy=".28" r=".85">
+      <stop offset="0" stop-color="#34373c"/>
+      <stop offset=".55" stop-color="#121315"/>
+      <stop offset="1" stop-color="#030304"/>
     </radialGradient>
+    <!-- Chrome figure -->
+    <linearGradient id="chrome" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset=".5" stop-color="#c3c7cd"/>
+      <stop offset="1" stop-color="#6f757d"/>
+    </linearGradient>
+    <linearGradient id="chromeSide" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8c9198"/>
+      <stop offset=".5" stop-color="#f4f5f7"/>
+      <stop offset="1" stop-color="#7a8088"/>
+    </linearGradient>
+    <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="drop" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity=".55"/>
+    </filter>
+    <clipPath id="fieldClip">
+      <path d="M60 15 L99 26 V62 C99 89 82 109 60 119 C38 109 21 89 21 62 V26 Z"/>
+    </clipPath>
   </defs>
-  <!-- Shield -->
-  <path d="M60 4 L110 18 V62 C110 96 88 120 60 132 C32 120 10 96 10 62 V18 Z" fill="url(#silver)"/>
-  <path d="M60 12 L102 24 V62 C102 91 84 112 60 123 C36 112 18 91 18 62 V24 Z" fill="url(#inner)"/>
-  <!-- Shoulders -->
-  <path d="M30 108 C33 90 45 82 60 82 C75 82 87 90 90 108 C82 115 71 119 60 119 C49 119 38 115 30 108 Z" fill="url(#face)"/>
-  <path d="M52 83 L60 96 L68 83" fill="none" stroke="#2b2d31" stroke-width="3" stroke-linejoin="round"/>
-  <!-- Head -->
-  <circle cx="60" cy="60" r="18" fill="url(#face)"/>
-  <!-- Headset band -->
-  <path d="M37 62 C37 44 47 34 60 34 C73 34 83 44 83 62" fill="none" stroke="url(#silver)" stroke-width="5" stroke-linecap="round"/>
-  <!-- Ear cups -->
-  <rect x="31" y="55" width="11" height="17" rx="4" fill="url(#silver)" stroke="#1a1b1e" stroke-width="1.5"/>
-  <rect x="78" y="55" width="11" height="17" rx="4" fill="url(#silver)" stroke="#1a1b1e" stroke-width="1.5"/>
-  <!-- Microphone boom -->
-  <path d="M37 71 C38 80 46 84 55 83" fill="none" stroke="url(#silver)" stroke-width="3.5" stroke-linecap="round"/>
-  <rect x="53" y="79.5" width="9" height="7" rx="3.5" fill="url(#silver)" stroke="#1a1b1e" stroke-width="1.2"/>
+
+  <!-- Shield body -->
+  <g filter="url(#drop)">
+    <path d="M60 3 L112 17.5 V62 C112 97 89 121.5 60 133 C31 121.5 8 97 8 62 V17.5 Z" fill="url(#rim)"/>
+    <path d="M60 3 L112 17.5 V62 C112 97 89 121.5 60 133 C31 121.5 8 97 8 62 V17.5 Z" fill="url(#rimShade)"/>
+  </g>
+  <!-- Bevel highlight -->
+  <path d="M60 6.5 L108.5 20 V62 C108.5 95 87 118 60 129" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1"/>
+  <!-- Gold inner trim -->
+  <path d="M60 11 L103 23 V62 C103 92 84 113.5 60 124 C36 113.5 17 92 17 62 V23 Z" fill="url(#gold)"/>
+  <!-- Enamel field -->
+  <path d="M60 15 L99 26 V62 C99 89 82 109 60 119 C38 109 21 89 21 62 V26 Z" fill="url(#field)"/>
+
+  <g clip-path="url(#fieldClip)">
+    <!-- Soft spotlight behind figure -->
+    <ellipse cx="60" cy="62" rx="30" ry="30" fill="#c9a84c" opacity=".08"/>
+
+    <!-- Shoulders / jacket -->
+    <path d="M27 120 C28 97 42 86 60 86 C78 86 92 97 93 120 Z" fill="url(#chrome)"/>
+    <!-- Lapels and collar -->
+    <path d="M51.5 87 L60 101 L68.5 87" fill="#1a1b1e"/>
+    <path d="M54.5 87.5 L60 97 L65.5 87.5 Z" fill="#f5f6f8"/>
+    <path d="M58.6 96 L60 99.5 L61.4 96 L60 94.5 Z" fill="url(#gold)"/>
+    <path d="M44 92 C48 99 52 104 55 110" fill="none" stroke="#5c6168" stroke-width="1.2" stroke-linecap="round"/>
+    <path d="M76 92 C72 99 68 104 65 110" fill="none" stroke="#5c6168" stroke-width="1.2" stroke-linecap="round"/>
+
+    <!-- Neck -->
+    <path d="M54 76 H66 V87 C63 89 57 89 54 87 Z" fill="#9ea3aa"/>
+
+    <!-- Head -->
+    <ellipse cx="60" cy="61" rx="15.5" ry="17.5" fill="url(#chrome)"/>
+    <ellipse cx="55" cy="54" rx="7" ry="9" fill="url(#gloss)"/>
+    <!-- Hair -->
+    <path d="M44.6 58 C44 45 51 39.5 60 39.5 C69 39.5 76 45 75.4 58 C72 51 66 48.5 60 49.5 C53 48.5 48 51 44.6 58 Z" fill="#2a2c30"/>
+    <path d="M50 44 C54 41.5 58 41 62 41.5" fill="none" stroke="#5a5e65" stroke-width="1" stroke-linecap="round"/>
+    <!-- Friendly smile -->
+    <path d="M55 68 Q60 72 65 68" fill="none" stroke="#5c6168" stroke-width="1.4" stroke-linecap="round"/>
+
+    <!-- Headset band -->
+    <path d="M40.5 62 C40.5 43 49 34.5 60 34.5 C71 34.5 79.5 43 79.5 62" fill="none" stroke="#1a1b1e" stroke-width="6.5" stroke-linecap="round"/>
+    <path d="M40.5 62 C40.5 43 49 34.5 60 34.5 C71 34.5 79.5 43 79.5 62" fill="none" stroke="url(#gold)" stroke-width="4" stroke-linecap="round"/>
+    <!-- Ear cups -->
+    <rect x="35" y="54" width="10.5" height="18" rx="5" fill="url(#chromeSide)" stroke="#1a1b1e" stroke-width="1.4"/>
+    <rect x="74.5" y="54" width="10.5" height="18" rx="5" fill="url(#chromeSide)" stroke="#1a1b1e" stroke-width="1.4"/>
+    <rect x="37.6" y="57.5" width="5.3" height="11" rx="2.6" fill="url(#gold)"/>
+    <rect x="77.1" y="57.5" width="5.3" height="11" rx="2.6" fill="url(#gold)"/>
+    <!-- Microphone boom -->
+    <path d="M40 71 C41 80 47 84.5 54 84" fill="none" stroke="#1a1b1e" stroke-width="4" stroke-linecap="round"/>
+    <path d="M40 71 C41 80 47 84.5 54 84" fill="none" stroke="url(#chromeSide)" stroke-width="2.2" stroke-linecap="round"/>
+    <rect x="52.5" y="80.8" width="8" height="6.4" rx="3.2" fill="url(#gold)" stroke="#1a1b1e" stroke-width="1"/>
+  </g>
+
+  <!-- Live chat bubble badge -->
+  <g transform="translate(76 15)">
+    <path d="M2 4 C2 1.8 3.8 0 6 0 H26 C28.2 0 30 1.8 30 4 V16 C30 18.2 28.2 20 26 20 H12 L5 26 L6.5 20 H6 C3.8 20 2 18.2 2 16 Z" fill="url(#gold)" stroke="#1a1b1e" stroke-width="1.4" filter="url(#drop)"/>
+    <circle cx="10" cy="10" r="2.1" fill="#1a1b1e"/>
+    <circle cx="16" cy="10" r="2.1" fill="#1a1b1e"/>
+    <circle cx="22" cy="10" r="2.1" fill="#1a1b1e"/>
+  </g>
 </svg>

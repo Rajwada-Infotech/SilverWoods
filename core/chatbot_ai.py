@@ -23,7 +23,9 @@ log = logging.getLogger(__name__)
 
 MAX_QUESTION_LEN = 300
 FAQ_CONFIDENT_SCORE = 2
-AI_TIMEOUT_SECONDS = 10
+# Gemini 3.x replies usually take 1-8 s but can reach ~15 s on a busy free-tier
+# key; give it room before falling back to the FAQ/rule answers.
+AI_TIMEOUT_SECONDS = 25
 AI_COOLDOWN_SECONDS = 600          # pause AI calls after a quota / rate-limit error
 AI_DAILY_CAP = 1000                # all visitors together; stay comfortably inside the free tier
 AI_PER_VISITOR_DAILY = 10          # Gemini calls per visitor per day (cache hits, FAQ and rules are free)
@@ -271,7 +273,7 @@ def _ai_key():
 def _ai_model():
     from decouple import config
     # '-latest' alias keeps working as Google retires model versions; lite is fast and has the largest free quota
-    return config('GEMINI_MODEL', default='gemini-flash-lite-latest')
+    return config('GEMINI_MODEL', default='gemini-3.5-flash-lite')
 
 
 def ai_available():
@@ -385,7 +387,11 @@ def ai_extract(q, faqs, visitor='system'):
     }
     body = json.dumps({
         'contents': [{'role': 'user', 'parts': [{'text': prompt}]}],
-        'generationConfig': {'temperature': 0, 'responseMimeType': 'application/json', 'responseSchema': schema},
+        'generationConfig': {
+            'temperature': 0, 'responseMimeType': 'application/json', 'responseSchema': schema,
+            # classification only: skip long "thinking" to keep replies fast
+            'thinkingConfig': {'thinkingLevel': 'minimal'},
+        },
     }).encode()
     url = f'https://generativelanguage.googleapis.com/v1beta/models/{_ai_model()}:generateContent'
     req = urllib.request.Request(url, data=body, method='POST', headers={

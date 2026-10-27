@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 136" role="img" aria-label="Customer support">
+  <defs>
+    <linearGradient id="silver" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset=".35" stop-color="#c9ccd1"/>
+      <stop offset=".6" stop-color="#8d9299"/>
+      <stop offset="1" stop-color="#e6e8eb"/>
+    </linearGradient>
+    <linearGradient id="face" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f4f5f7"/>
+      <stop offset="1" stop-color="#9da2a9"/>
+    </linearGradient>
+    <radialGradient id="inner" cx=".5" cy=".35" r=".75">
+      <stop offset="0" stop-color="#2b2d31"/>
+      <stop offset="1" stop-color="#050506"/>
+    </radialGradient>
+  </defs>
+  <!-- Shield -->
+  <path d="M60 4 L110 18 V62 C110 96 88 120 60 132 C32 120 10 96 10 62 V18 Z" fill="url(#silver)"/>
+  <path d="M60 12 L102 24 V62 C102 91 84 112 60 123 C36 112 18 91 18 62 V24 Z" fill="url(#inner)"/>
+  <!-- Shoulders -->
+  <path d="M30 108 C33 90 45 82 60 82 C75 82 87 90 90 108 C82 115 71 119 60 119 C49 119 38 115 30 108 Z" fill="url(#face)"/>
+  <path d="M52 83 L60 96 L68 83" fill="none" stroke="#2b2d31" stroke-width="3" stroke-linejoin="round"/>
+  <!-- Head -->
+  <circle cx="60" cy="60" r="18" fill="url(#face)"/>
+  <!-- Headset band -->
+  <path d="M37 62 C37 44 47 34 60 34 C73 34 83 44 83 62" fill="none" stroke="url(#silver)" stroke-width="5" stroke-linecap="round"/>
+  <!-- Ear cups -->
+  <rect x="31" y="55" width="11" height="17" rx="4" fill="url(#silver)" stroke="#1a1b1e" stroke-width="1.5"/>
+  <rect x="78" y="55" width="11" height="17" rx="4" fill="url(#silver)" stroke="#1a1b1e" stroke-width="1.5"/>
+  <!-- Microphone boom -->
+  <path d="M37 71 C38 80 46 84 55 83" fill="none" stroke="url(#silver)" stroke-width="3.5" stroke-linecap="round"/>
+  <rect x="53" y="79.5" width="9" height="7" rx="3.5" fill="url(#silver)" stroke="#1a1b1e" stroke-width="1.2"/>
+</svg>

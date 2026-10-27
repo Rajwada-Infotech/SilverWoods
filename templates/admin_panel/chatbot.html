@@ -87,8 +87,8 @@
                             </form>
                             <!-- Edit -->
                             <button type="button" title="Edit"
-                                    onclick="editQA('{{ qa.pk }}', '{{ qa.question|escapejs }}', '{{ qa.answer|escapejs }}', '{{ qa.keywords|escapejs }}')"
-                                    class="w-8 h-8 rounded-lg flex items-center justify-center text-xs bg-blue-50 dark:bg-blue-500/10 text-blue-500 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors">
+                                    data-pk="{{ qa.pk }}" data-question="{{ qa.question }}" data-answer="{{ qa.answer }}" data-keywords="{{ qa.keywords }}"
+                                    class="js-edit-qa w-8 h-8 rounded-lg flex items-center justify-center text-xs bg-blue-50 dark:bg-blue-500/10 text-blue-500 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors">
                                 <i class="fas fa-pen"></i>
                             </button>
                             <!-- Delete -->
@@ -118,6 +118,11 @@
 </div>
 
 <script>
+document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.js-edit-qa');
+    if (btn) editQA(btn.dataset.pk, btn.dataset.question, btn.dataset.answer, btn.dataset.keywords);
+});
+
 function editQA(pk, question, answer, keywords) {
     document.getElementById('form-title').textContent = 'Edit Q&A';
     document.getElementById('form-action').value = 'edit';

@@ -666,7 +666,9 @@
     /* Inner card — this has the visual styling + overflow:hidden */
     #sw-panel-inner{background:#ffffff;border:1px solid #e8e8e8;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;height:480px;max-height:75vh;box-shadow:0 12px 40px rgba(0,0,0,0.15);}
     /* Floating deer icon — half outside left edge of panel */
+    /* Hidden: the chat button below stays visible and toggles the panel, so one logo is enough */
     .sw-float-deer{
+      display:none !important;
       position:absolute;top:-42px;left:-38px;
       width:76px;height:84px;z-index:5;cursor:pointer;
     }
@@ -680,7 +682,7 @@
     .sw-float-deer img.sw-deer-icon{
       position:relative;z-index:1;width:76px;height:84px;object-fit:contain;
     }
-    .sw-header{padding:0 16px 0 66px;background:#0a0a0a;border-bottom:2px solid #c9a84c;display:flex;flex-direction:row;align-items:center;gap:8px;height:70px;flex-shrink:0;}
+    .sw-header{padding:0 16px 0 20px;background:#0a0a0a;border-bottom:2px solid #c9a84c;display:flex;flex-direction:row;align-items:center;gap:8px;height:70px;flex-shrink:0;}
     .sw-hinfo{flex:1;display:flex;flex-direction:column;gap:4px;}
     .sw-avatar{display:none;}
     .sw-hname{font-size:13px;font-weight:700;letter-spacing:.3px;background:linear-gradient(90deg,#ffffff 0%,#c9a84c 55%,#e0ba5a 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}

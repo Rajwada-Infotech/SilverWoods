@@ -637,7 +637,6 @@
     }
     @keyframes sw-pulse{0%{transform:scale(1);opacity:.35;}50%{transform:scale(1.22);opacity:0;}100%{transform:scale(1);opacity:.35;}}
     #sw-chat-btn img#sw-icon-chat{width:92px;height:92px;object-fit:contain;position:relative;z-index:1;}
-    #sw-chat-btn.open img#sw-icon-chat{display:none;}
     #sw-chat-btn.open .sw-pulse-img{display:none;}
     #sw-chat-btn svg#sw-icon-close{display:none;}
     #sw-close-btn{
@@ -669,7 +668,7 @@
     /* Floating deer icon — half outside left edge of panel */
     .sw-float-deer{
       position:absolute;top:-42px;left:-38px;
-      width:76px;height:84px;pointer-events:none;z-index:5;
+      width:76px;height:84px;z-index:5;cursor:pointer;
     }
     .sw-float-deer .sw-pulse-img{
       position:absolute;top:0;left:0;width:76px;height:84px;
@@ -755,7 +754,7 @@
     <div id="sw-chat-wrap">
         <div id="sw-chat-panel">
             <!-- Deer icon floating half above the panel -->
-            <div class="sw-float-deer">
+            <div class="sw-float-deer" role="button" tabindex="0" aria-label="Close chat" title="Close chat">
                 <img class="sw-pulse-img" src="{% static 'images/chatbot-support.svg' %}" alt="" aria-hidden="true">
                 <img class="sw-deer-icon" src="{% static 'images/chatbot-support.svg' %}" alt="Customer support">
             </div>
@@ -901,8 +900,7 @@
             }
         }
 
-        btn.addEventListener('click',togglePanel);
-        closeBtn.addEventListener('click',function(){
+        function closePanel(){
             isOpen=false;
             document.body.style.overflow='';
             panel.classList.remove('open');
@@ -911,7 +909,15 @@
                 wrap.style.left=''; wrap.style.right='';
                 wrap.style.top=''; wrap.style.bottom='';
             }
-        });
+        }
+
+        btn.addEventListener('click',togglePanel);
+        closeBtn.addEventListener('click',closePanel);
+        var floatLogo=document.querySelector('.sw-float-deer');
+        floatLogo.addEventListener('mousedown',function(e){e.stopPropagation();});
+        floatLogo.addEventListener('touchstart',function(e){e.stopPropagation();},{passive:true});
+        floatLogo.addEventListener('click',function(e){e.stopPropagation();closePanel();});
+        floatLogo.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();closePanel();}});
 
         function scroll(){if(lockScroll) return; setTimeout(function(){if(!lockScroll) body.scrollTop=body.scrollHeight;},50);}
 

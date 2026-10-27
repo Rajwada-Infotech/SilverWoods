@@ -22,12 +22,15 @@ def admin_photo(request):
         return {'admin_photo_url': ''}
 
 
+DEFAULT_SITE_PHONE = '+91 7411781881'
+
+
 def site_phone(request):
     """Phone number for the floating call button shown on every public page."""
     from django.core.cache import cache
     phone = cache.get('site_phone')
     if phone is None:
         from .models import ProjectInfo
-        phone = ProjectInfo.load().phone or ''
+        phone = ProjectInfo.load().phone or DEFAULT_SITE_PHONE
         cache.set('site_phone', phone, 300)
     return {'site_phone': phone}

@@ -116,7 +116,7 @@ Set these environment variables on Railway to enable the AI step (without them t
 | Variable | Value |
 |---|---|
 | `GEMINI_API_KEY` | Free key from https://aistudio.google.com/apikey |
-| `GEMINI_MODEL` | Optional, defaults to `gemini-2.5-flash` |
+| `GEMINI_MODEL` | Optional, defaults to `gemini-flash-lite-latest` (auto-updates as Google retires versions) |
 
 Built-in protection: CSRF on the endpoint, input length/character validation, per-IP rate limit (15/min, 300/day), 8 s AI timeout, automatic 10-minute AI pause on quota/rate-limit errors, and a daily AI call cap.
 

@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 
 MAX_QUESTION_LEN = 300
 FAQ_CONFIDENT_SCORE = 2
-AI_TIMEOUT_SECONDS = 8
+AI_TIMEOUT_SECONDS = 10
 AI_COOLDOWN_SECONDS = 600          # pause AI calls after a quota / rate-limit error
 AI_DAILY_CAP = 1000                # stay comfortably inside the free tier
 
@@ -30,6 +30,7 @@ INTENTS = (
     'plot_status', 'faq', 'contact', 'greeting', 'unknown',
 )
 LANGS = ('en', 'bn', 'hinglish')
+SORTS = ('price_asc', 'price_desc', 'area_desc', 'area_asc')
 
 PLOT_STATUS_LABELS = {
     'en': {'available': 'Available', 'sold': 'Sold', 'reserved': 'Reserved', 'not_for_sale': 'Not for sale'},
@@ -41,6 +42,7 @@ PLOT_STATUS_LABELS = {
 TEXT = {
     'en': {
         'sorry': "Sorry, I don't have information about this. Please contact us for further assistance.",
+        'best': {'price_asc': 'Most affordable villa:', 'price_desc': 'Most premium villa:', 'area_desc': 'Largest villa:', 'area_asc': 'Most compact villa:'},
         'all_types': 'Here are the current villa types and prices:',
         'one_type': 'Here are the details for {name}:',
         'type_missing': "Sorry, I couldn't find {name} in our current villa list.",
@@ -57,6 +59,7 @@ TEXT = {
     },
     'bn': {
         'sorry': 'দুঃখিত, এই বিষয়ে আমার কাছে তথ্য নেই। আরও সাহায্যের জন্য অনুগ্রহ করে আমাদের সাথে যোগাযোগ করুন।',
+        'best': {'price_asc': 'সবচেয়ে কম দামের ভিলা:', 'price_desc': 'সবচেয়ে প্রিমিয়াম ভিলা:', 'area_desc': 'সবচেয়ে বড় ভিলা:', 'area_asc': 'সবচেয়ে ছোট ভিলা:'},
         'all_types': 'বর্তমান ভিলার ধরন ও দাম:',
         'one_type': '{name}-এর বিবরণ:',
         'type_missing': 'দুঃখিত, আমাদের বর্তমান তালিকায় {name} পাওয়া যায়নি।',
@@ -73,6 +76,7 @@ TEXT = {
     },
     'hinglish': {
         'sorry': "Sorry, iske baare mein mere paas information nahi hai. Please aur help ke liye humse contact karein.",
+        'best': {'price_asc': 'Sabse affordable villa:', 'price_desc': 'Sabse premium villa:', 'area_desc': 'Sabse bada villa:', 'area_asc': 'Sabse compact villa:'},
         'all_types': 'Abhi ke villa types aur prices:',
         'one_type': '{name} ki details:',
         'type_missing': 'Sorry, {name} humari current list mein nahi mila.',
@@ -161,11 +165,24 @@ def _type_number(name):
 
 # ── FAQ (existing keyword system) ──────────────────────────────────────
 
+# Filler words that made unrelated questions match FAQs ("what is the weather in ...")
+STOPWORDS = {
+    'the', 'and', 'for', 'are', 'was', 'what', 'which', 'who', 'how', 'can', 'you', 'your', 'about',
+    'there', 'this', 'that', 'with', 'from', 'have', 'has', 'any', 'today', 'please', 'tell', 'give',
+    'kya', 'hai', 'hain', 'kaun', 'kaunsa', 'mujhe', 'aap', 'koi', 'ki', 'ka', 'ke', 'mein',
+    'ki', 'ache', 'achhe', 'amar', 'tomader', 'kon', 'kotha', 'ekta', 'ami',
+}
+
+
+def _tokens(q):
+    return [w for w in re.findall(r'\w+', q.lower()) if len(w) >= 3 and w not in STOPWORDS]
+
+
 def faq_scores(q):
-    words = [w for w in q.lower().split() if len(w) >= 2]
+    words = _tokens(q)
     scored = []
     for qa in ChatbotQA.objects.filter(is_active=True):
-        kws = qa.keyword_list()
+        kws = [kw for kw in qa.keyword_list() if len(kw) >= 3]
         score = sum(1 for w in words if any(w in kw or kw in w for kw in kws))
         if q.lower().strip(' ?') == qa.question.lower().strip(' ?'):
             score += 10
@@ -209,7 +226,7 @@ BN_DIGITS = str.maketrans('০১২৩৪৫৬৭৮৯', '0123456789')
 def parse_money(text):
     """'1.2 crore' / '120 lakh' / '1,15,00,000' -> rupees (Decimal) or None."""
     t = text.lower().replace(',', '').translate(BN_DIGITS)
-    crore = re.search(_NUM + r'\s*(?:crore|cr\b|কোটি)', t)
+    crore = re.search(_NUM + r'\s*(?:crore|cr\b|kotir?\b|koti\b|কোটি)', t)
     lakh = re.search(_NUM + r'\s*(?:lakhs?|lacs?|l\b|লাখ|লক্ষ)', t)
     if crore or lakh:
         total = Decimal(0)
@@ -233,7 +250,7 @@ def rule_intent(q):
     if m:
         return {'intent': 'villa_pricing', 'villa_type': int(next(g for g in m.groups() if g))}
     money = parse_money(t)
-    if money and re.search(r'budget|under|within|below|less|er moddhe|ke andar|tak|মধ্যে|বাজেট|ভিতর', t):
+    if money and re.search(r'budget|under|within|below|less|moddhe|moto|ke andar|tak|মধ্যে|বাজেট|ভিতর', t):
         return {'intent': 'budget_search', 'max_price': money}
     if re.search(r'^(hi|hello|hey|namaste|namaskar|নমস্কার|হ্যালো)\b', t):
         return {'intent': 'greeting'}
@@ -249,7 +266,8 @@ def _ai_key():
 
 def _ai_model():
     from decouple import config
-    return config('GEMINI_MODEL', default='gemini-2.5-flash')
+    # '-latest' alias keeps working as Google retires model versions; lite is fast and has the largest free quota
+    return config('GEMINI_MODEL', default='gemini-flash-lite-latest')
 
 
 def ai_available():
@@ -274,12 +292,19 @@ def ai_extract(q, faqs):
     faq_list = '\n'.join(f'{qa.id}: {qa.question}' for qa in faqs)
     prompt = (
         "You classify questions for a real-estate chatbot (Silverwoods villas, Kolkata). "
-        "The user may write in English, Bengali or Hinglish. Do NOT answer the question; only extract fields.\n"
+        "The user may write in English, Bengali (also Bengali typed in English letters, e.g. 'tomader office kothay') "
+        "or Hinglish. Use lang=bn for any Bengali, including Bengali in English letters. "
+        "Do NOT answer the question; only extract fields.\n"
         "Intents: villa_pricing (price/details of all villa types or one type), budget_search (villas under a budget), "
         "area_search (villas by built-up size), plot_availability (how many plots/villas available), "
         "plot_status (status of one plot or villa number), faq (matches one FAQ below), contact (phone/address/visit), "
         "greeting, unknown (anything else, including requests for personal data about other people).\n"
         "max_price must be in rupees (1 crore = 10000000, 1 lakh = 100000). min_area is in sq.ft.\n"
+        "sort: for 'cheapest/lowest price' use price_asc, 'most expensive/premium' price_desc, "
+        "'biggest/largest/most spacious' area_desc, 'smallest/compact' area_asc (with intent villa_pricing).\n"
+        "Examples: 'সবচেয়ে বড় ভিলা কোনটা?' -> villa_pricing, sort=area_desc, lang=bn. "
+        "'sabse sasta ghar kaunsa hai' -> villa_pricing, sort=price_asc, lang=hinglish. "
+        "'amar budget 1 kotir moto' -> budget_search, max_price=10000000, lang=bn.\n"
         f"FAQ list (id: question):\n{faq_list}\n\nUser question: {q}"
     )
     schema = {
@@ -291,6 +316,7 @@ def ai_extract(q, faqs):
             'villa_no': {'type': 'INTEGER', 'nullable': True},
             'max_price': {'type': 'NUMBER', 'nullable': True},
             'min_area': {'type': 'NUMBER', 'nullable': True},
+            'sort': {'type': 'STRING', 'enum': list(SORTS), 'nullable': True},
             'faq_id': {'type': 'INTEGER', 'nullable': True},
         },
         'required': ['intent', 'lang'],
@@ -344,6 +370,7 @@ def validate_ai_output(data, faq_ids):
     out['min_area'] = as_dec(data.get('min_area'), 100, 100_000)
     faq_id = as_int(data.get('faq_id'), 1, 10**9)
     out['faq_id'] = faq_id if faq_id in faq_ids else None
+    out['sort'] = data.get('sort') if data.get('sort') in SORTS else None
     if out['intent'] == 'faq' and not out['faq_id']:
         out['intent'] = 'unknown'
     return out
@@ -385,6 +412,11 @@ def build_answer(info, lang):
             if not match:
                 return L['type_missing'].format(name=f'Villa Type {wanted}'), False
             return L['one_type'].format(name=escape(match[0]['name'])) + '<br>' + _type_line(match[0], L), True
+        sort = info.get('sort')
+        if sort:
+            key = (lambda t: t['price']) if sort.startswith('price') else (lambda t: t['buildup_value'] or 0)
+            ranked = sorted(types, key=key, reverse=sort.endswith('desc'))
+            return L['best'][sort] + '<br>' + _type_line(ranked[0], L), True
         return L['all_types'] + '<br>' + '<br>'.join(_type_line(t, L) for t in types), True
 
     if intent == 'budget_search' and info.get('max_price'):

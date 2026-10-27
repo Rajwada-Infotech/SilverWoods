@@ -1056,6 +1056,7 @@
                 t.remove();
                 var lines=['<strong style="color:#c9a84c">Get in touch with us:</strong><br>'];
                 if(c.phone) lines.push('📞 <a href="tel:'+c.phone+'">'+c.phone+'</a>');
+                if(c.whatsapp) lines.push('💬 <a href="https://wa.me/'+String(c.whatsapp).replace(/\D/g,'')+'" target="_blank" rel="noopener">'+c.whatsapp+' (WhatsApp)</a>');
                 if(c.email) lines.push('✉️ <a href="mailto:'+c.email+'">'+c.email+'</a>');
                 if(c.address) lines.push('📍 '+c.address);
                 if(c.website) lines.push('🌐 <a href="'+c.website+'" target="_blank">Visit Website</a>');
@@ -1113,13 +1114,51 @@
             if(old) old.remove();
             addMsg(q,'sw-user-msg');
             input.value='';
-            var t=typing();
-            setTimeout(function(){
-                t.remove();
-                addMsg('I didn\'t find an exact match for that. Please pick from the suggestions below, or contact us directly!','sw-bot-msg');
-                showDefaultSuggestions();
-            },700);
+            askSmart(q);
         });
+
+        /* Smart answer: FAQ + live database, understood in English / Bengali / Hinglish */
+        function csrfToken(){
+            var el=document.querySelector('input[name=csrfmiddlewaretoken]');
+            if(el) return el.value;
+            var m=document.cookie.match(/(?:^|; )csrftoken=([^;]+)/);
+            return m?decodeURIComponent(m[1]):'';
+        }
+        function askSmart(q){
+            awaitingMore=false;
+            var t=typing();
+            fetch('/api/chatbot/ask/',{
+                method:'POST',
+                headers:{'Content-Type':'application/json','X-CSRFToken':csrfToken()},
+                credentials:'same-origin',
+                body:JSON.stringify({q:q})
+            })
+            .then(function(r){return r.json().then(function(d){return {ok:r.ok,data:d};});})
+            .then(function(res){
+                t.remove();
+                var d=res.data||{};
+                if(!res.ok){
+                    addMsg(d.error||'Sorry, something went wrong. Please try again.','sw-bot-msg');
+                    return;
+                }
+                addMsg(String(d.answer||'').replace(/\n/g,'<br>'),'sw-bot-msg');
+                if(d.follow_up && d.follow_up.length){
+                    setTimeout(function(){ showFollowUp(d.follow_up); },300);
+                } else if(d.show_contact){
+                    setTimeout(function(){
+                        showContact();
+                        if(d.suggest && d.suggest.length) setTimeout(function(){ showSuggestions(d.suggest); },500);
+                    },300);
+                } else {
+                    setTimeout(askMore,400);
+                }
+            })
+            .catch(function(){
+                t.remove();
+                addMsg('Sorry, I couldn\'t connect right now. Please pick a topic below or contact us directly.','sw-bot-msg');
+                showDefaultSuggestions();
+            });
+        }
 
         input.addEventListener('keydown',function(e){
             if(e.key==='Enter') send.click();

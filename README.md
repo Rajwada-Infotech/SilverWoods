@@ -102,6 +102,26 @@ Accessible at `/admin-panel/login/` using the superuser credentials created abov
 
 ---
 
+## Smart Chatbot (Service Assistant)
+
+The chatbot answers from the database only. Order of resolution:
+
+1. **Specific details** — plot/villa numbers, villa types and budgets (lakh/crore, Bengali digits) are read directly and answered from live data.
+2. **FAQ keywords** — the Q&A list managed in *Admin → Chatbot* (placeholders `{{PRICING_TABLE}}` and `{{AVAILABLE_PLOTS}}` still work).
+3. **Google Gemini (free tier)** — only *classifies* other questions (English, Bengali, Hinglish) into a whitelisted intent; the answer is still built from the database. The AI never sees leads, owner names or notes and cannot invent prices.
+4. **Fallback** — best keyword match, otherwise a polite "no information" reply with the contact card.
+
+Set these environment variables on Railway to enable the AI step (without them the chatbot still works using steps 1, 2 and 4):
+
+| Variable | Value |
+|---|---|
+| `GEMINI_API_KEY` | Free key from https://aistudio.google.com/apikey |
+| `GEMINI_MODEL` | Optional, defaults to `gemini-2.5-flash` |
+
+Built-in protection: CSRF on the endpoint, input length/character validation, per-IP rate limit (15/min, 300/day), 8 s AI timeout, automatic 10-minute AI pause on quota/rate-limit errors, and a daily AI call cap.
+
+---
+
 ## Configuration Notes
 
 - Uploaded media files are stored in the `media/` directory and are excluded from version control.

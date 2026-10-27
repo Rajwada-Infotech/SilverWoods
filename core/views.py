@@ -1036,34 +1036,41 @@ def chatbot_search(request):
 
 
 def chatbot_answer(request, qa_id):
+    from .chatbot_ai import render_faq_answer, faq_follow_up
     qa = get_object_or_404(ChatbotQA, pk=qa_id, is_active=True)
-    answer = qa.answer
-    if '{{PRICING_TABLE}}' in answer:
-        types = FlatType.objects.filter(is_available=True).order_by('order')
-        rows = []
-        for ft in types:
-            rows.append(
-                f"• <strong>{ft.name}</strong> ({ft.bhk} BHK) — "
-                f"Buildup: {ft.buildup_area} | Terrace: {ft.terrace_area} | "
-                f"Price: ₹{ft.price:,.0f} (₹{ft.price_per_sqft:,.0f}/sq.ft)"
-            )
-        answer = answer.replace('{{PRICING_TABLE}}', '<br>'.join(rows) if rows else 'Contact us for latest pricing.')
-    if '{{AVAILABLE_PLOTS}}' in answer:
-        available = VillaPlot.objects.filter(status='available').count()
-        total = VillaPlot.objects.count()
-        answer = answer.replace('{{AVAILABLE_PLOTS}}', f'{available} out of {total}')
-    response = {'question': qa.question, 'answer': answer}
-    # After pricing overview, offer villa-type follow-up chips
-    if qa.order == 1:
-        villa_qas = ChatbotQA.objects.filter(order__in=range(101, 107), is_active=True).order_by('order')
-        response['follow_up'] = [{'id': v.id, 'question': v.question} for v in villa_qas]
+    response = {'question': qa.question, 'answer': render_faq_answer(qa)}
+    follow_up = faq_follow_up(qa)
+    if follow_up:
+        response['follow_up'] = follow_up
     return JsonResponse(response)
+
+
+@require_POST
+def chatbot_ask(request):
+    """Smart chatbot: FAQ + rules + Gemini intent, answered only from verified public data."""
+    from .chatbot_ai import answer_question, rate_limited, MAX_QUESTION_LEN
+    if rate_limited(request):
+        return JsonResponse({'error': 'Too many questions. Please wait a minute and try again.'}, status=429)
+    try:
+        payload = json.loads(request.body or b'{}') if request.content_type == 'application/json' else request.POST
+    except ValueError:
+        return JsonResponse({'error': 'Invalid request.'}, status=400)
+    question = payload.get('q', '')
+    if not isinstance(question, str) or len(question) > MAX_QUESTION_LEN * 2:
+        return JsonResponse({'error': 'Please keep your question short.'}, status=400)
+    try:
+        return JsonResponse(answer_question(question))
+    except Exception:
+        import logging
+        logging.getLogger(__name__).exception('chatbot_ask failed')
+        return JsonResponse({'answer': "Sorry, something went wrong. Please contact us for assistance.", 'show_contact': True})
 
 
 def chatbot_contact(request):
     project = ProjectInfo.load()
     return JsonResponse({
         'phone': project.phone,
+        'whatsapp': project.whatsapp,
         'email': project.email,
         'address': f"{project.address}, {project.city}, {project.state} - {project.pincode}".strip(', '),
         'website': project.website,

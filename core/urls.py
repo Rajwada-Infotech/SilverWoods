@@ -37,6 +37,7 @@ urlpatterns = [
     path('api/chatbot/search/', views.chatbot_search, name='chatbot_search'),
     path('api/chatbot/answer/<int:qa_id>/', views.chatbot_answer, name='chatbot_answer'),
     path('api/chatbot/contact/', views.chatbot_contact, name='chatbot_contact'),
+    path('api/chatbot/ask/', views.chatbot_ask, name='chatbot_ask'),
     path('admin-panel/chatbot/', views.admin_chatbot, name='admin_chatbot'),
     path('admin-panel/reviews/', views.admin_reviews, name='admin_reviews'),
     path('admin-panel/settings/', views.admin_settings, name='admin_settings'),
